@@ -1,0 +1,12 @@
+# Runtime (CPU only, no GPU needed). Install with:  pip install -r requirements.txt
+# then download the dialogue NER weights once:     medanon prepare-models
+--extra-index-url https://download.pytorch.org/whl/cpu
+spacy>=3.8,<3.9
+presidio-analyzer>=2.2.360
+pyyaml>=6.0
+psutil>=5.9
+scikit-learn>=1.3
+torch>=2.2
+transformers>=4.51
+en_core_web_lg @ https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.8.0/en_core_web_lg-3.8.0-py3-none-any.whl
+-e .

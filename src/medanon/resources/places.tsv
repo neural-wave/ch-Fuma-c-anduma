@@ -1,0 +1,298 @@
+# name<TAB>type  (state | country | city | region). Gazetteer for lowercase dialogue, where
+# NER is unreliable. Matches are context-gated in code (in/from/to/visiting ...) because many
+# entries are also common words or first names (georgia, jordan, mobile, phoenix ...).
+alabama	state
+alaska	state
+arizona	state
+arkansas	state
+california	state
+colorado	state
+connecticut	state
+delaware	state
+florida	state
+georgia	state
+hawaii	state
+idaho	state
+illinois	state
+indiana	state
+iowa	state
+kansas	state
+kentucky	state
+louisiana	state
+maine	state
+maryland	state
+massachusetts	state
+michigan	state
+minnesota	state
+mississippi	state
+missouri	state
+montana	state
+nebraska	state
+nevada	state
+new hampshire	state
+new jersey	state
+new mexico	state
+new york	state
+north carolina	state
+north dakota	state
+ohio	state
+oklahoma	state
+oregon	state
+pennsylvania	state
+rhode island	state
+south carolina	state
+south dakota	state
+tennessee	state
+texas	state
+utah	state
+vermont	state
+virginia	state
+washington	state
+west virginia	state
+wisconsin	state
+wyoming	state
+puerto rico	state
+afghanistan	country
+albania	country
+algeria	country
+argentina	country
+armenia	country
+australia	country
+austria	country
+bahamas	country
+bangladesh	country
+barbados	country
+belarus	country
+belgium	country
+belize	country
+bolivia	country
+bosnia	country
+brazil	country
+bulgaria	country
+cambodia	country
+cameroon	country
+canada	country
+chile	country
+china	country
+colombia	country
+congo	country
+costa rica	country
+croatia	country
+cuba	country
+cyprus	country
+czech republic	country
+denmark	country
+dominican republic	country
+ecuador	country
+egypt	country
+el salvador	country
+england	country
+estonia	country
+ethiopia	country
+fiji	country
+finland	country
+france	country
+germany	country
+ghana	country
+greece	country
+guatemala	country
+haiti	country
+honduras	country
+hong kong	country
+hungary	country
+iceland	country
+india	country
+indonesia	country
+iran	country
+iraq	country
+ireland	country
+israel	country
+italy	country
+jamaica	country
+japan	country
+jordan	country
+kazakhstan	country
+kenya	country
+korea	country
+south korea	country
+north korea	country
+kuwait	country
+laos	country
+latvia	country
+lebanon	country
+liberia	country
+libya	country
+lithuania	country
+luxembourg	country
+madagascar	country
+malaysia	country
+mali	country
+malta	country
+mexico	country
+moldova	country
+mongolia	country
+morocco	country
+mozambique	country
+myanmar	country
+nepal	country
+netherlands	country
+holland	country
+new zealand	country
+nicaragua	country
+niger	country
+nigeria	country
+norway	country
+pakistan	country
+panama	country
+paraguay	country
+peru	country
+philippines	country
+poland	country
+portugal	country
+qatar	country
+romania	country
+russia	country
+rwanda	country
+saudi arabia	country
+scotland	country
+senegal	country
+serbia	country
+singapore	country
+slovakia	country
+slovenia	country
+somalia	country
+south africa	country
+spain	country
+sri lanka	country
+sudan	country
+sweden	country
+switzerland	country
+syria	country
+taiwan	country
+tanzania	country
+thailand	country
+trinidad	country
+tunisia	country
+turkey	country
+uganda	country
+ukraine	country
+united arab emirates	country
+united kingdom	country
+uruguay	country
+uzbekistan	country
+venezuela	country
+vietnam	country
+wales	country
+yemen	country
+zambia	country
+zimbabwe	country
+africa	region
+asia	region
+europe	region
+south america	region
+central america	region
+caribbean	region
+middle east	region
+new york city	city
+los angeles	city
+chicago	city
+houston	city
+phoenix	city
+philadelphia	city
+san antonio	city
+san diego	city
+dallas	city
+san jose	city
+austin	city
+jacksonville	city
+fort worth	city
+columbus	city
+charlotte	city
+san francisco	city
+indianapolis	city
+seattle	city
+denver	city
+boston	city
+el paso	city
+nashville	city
+detroit	city
+oklahoma city	city
+portland	city
+las vegas	city
+memphis	city
+louisville	city
+baltimore	city
+milwaukee	city
+albuquerque	city
+tucson	city
+fresno	city
+sacramento	city
+kansas city	city
+atlanta	city
+omaha	city
+raleigh	city
+miami	city
+oakland	city
+minneapolis	city
+tulsa	city
+tampa	city
+new orleans	city
+wichita	city
+cleveland	city
+honolulu	city
+st. louis	city
+saint louis	city
+cincinnati	city
+pittsburgh	city
+anchorage	city
+orlando	city
+newark	city
+buffalo	city
+madison	city
+boise	city
+richmond	city
+salt lake city	city
+spokane	city
+des moines	city
+birmingham	city
+rochester	city
+knoxville	city
+providence	city
+hartford	city
+albany	city
+savannah	city
+charleston	city
+myrtle beach	city
+palm springs	city
+santa fe	city
+key west	city
+napa	city
+aspen	city
+vail	city
+lake tahoe	city
+yellowstone	city
+yosemite	city
+grand canyon	city
+disney world	city
+disneyland	city
+london	city
+paris	city
+rome	city
+berlin	city
+madrid	city
+barcelona	city
+dublin	city
+amsterdam	city
+tokyo	city
+beijing	city
+shanghai	city
+toronto	city
+vancouver	city
+montreal	city
+mexico city	city
+cancun	city
+sydney	city
+dubai	city
+mumbai	city
+delhi	city
+manila	city

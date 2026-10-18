@@ -1,0 +1,38 @@
+# medanon configuration. Every key is optional; missing keys fall back to medanon/config.py DEFAULTS.
+fields: [dialogue, note]          # the only fields that are modified (icd10_codes, ids, metadata untouched)
+use_icd_context: true             # ICD-10 descriptions as extra medical evidence (false = bonus "no ICD" setting)
+role_aware_placeholders: true     # [PATIENT_NAME] / [CLINICIAN_NAME] / [RELATIVE_NAME] / [PET_NAME] instead of [PERSON]
+seed: 13                          # makes lab perturbations reproducible
+placeholder_format: "[{}]"        # "<{}>" gives <PATIENT_NAME>, <DATE>, ... (speaker tags stay [doctor] / [patient])
+k_anonymity: {enabled: true, k: 3}  # escalate generalisation for records with a unique quasi-identifier combination
+
+spacy: {enabled: true, model: en_core_web_lg, presidio_patterns: true, truecase_dialogue: true}
+# transformer NER for the lowercase dialogue, run only on turns with an unexplained name-like token
+# (cascade). Weights are fetched once (prepare-models or first run); a missing model stops the run
+# (required: true) instead of silently using another pipeline. --offline forbids any download.
+ml:   {enabled: true, kind: hf, model: dslim/bert-base-NER-uncased, threshold: 0.5, mode: cascade, fields: [dialogue], required: true, allow_download: true}
+# default = maximum privacy: OpenMed PII SuperClinical over both fields (configs/standard.yaml: off, 12x faster)
+extra_detectors:
+  - {kind: hf, model: OpenMed/OpenMed-PII-SuperClinical-Large-434M-v1, label_map: openmed-pii, mode: full,
+     threshold: 0.5, fields: [dialogue, note], allow_download: true}
+
+# action per category: placeholder | generalize | perturb | keep | redact
+policies:
+  PERSON:      {action: placeholder}
+  AGE:         {action: band, exact_below: 18, band_width: 10, top_code: 90, format: "[{band}]"}  # adults in decade bands, 90+; children exact
+  DOB:         {action: generalize, placeholder: "[DOB]", keep_year: true, reference_year: 2026}   # "[DOB] 1985"
+  DATE:        {action: generalize, placeholder: "[DATE]", keep_year: true}  # "[DATE] 2018": day/month removed
+  YEAR:        {action: keep}                            # calendar years: clinical chronology
+  MONTH:       {action: placeholder, placeholder: "[MONTH]"}
+  WEEKDAY:     {action: placeholder, placeholder: "[WEEKDAY]"}
+  HOLIDAY:     {action: placeholder, placeholder: "[HOLIDAY]"}
+  ID:          {action: placeholder, placeholder: "[ID]"}
+  CONTACT:     {action: placeholder, placeholder: "[CONTACT]"}
+  ADDRESS:     {action: placeholder, placeholder: "[ADDRESS]"}
+  LOCATION:    {action: placeholder, placeholder: "[LOCATION]", hierarchy: true}   # country -> world region
+  ORGANIZATION: {action: placeholder, placeholder: "[ORGANIZATION]"}
+  OCCUPATION:  {action: generalize}                      # truck driver -> [OCCUPATION: transport]
+  NATIONALITY: {action: placeholder, placeholder: "[NATIONALITY]"}
+  ETHNICITY:   {action: keep}                            # clinically relevant; suppressed only by k-anonymity
+  LAB_VALUE:   {action: generalize, max_relative: 0.03}  # category interval (HbA1c 8.3 -> [8-9]); perturb = bounded noise
+  RELATIVE_DATE: {action: keep}                          # "two weeks ago", "last summer": kept for the clinical timeline

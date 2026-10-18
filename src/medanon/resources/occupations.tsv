@@ -1,0 +1,153 @@
+# occupation term<TAB>coarse category (used for generalisation: specific job -> category).
+# Categories keep the clinically useful signal (physical demand / exposure type) while removing
+# the specific, rarer occupation that acts as a quasi-identifier.
+nurse	healthcare
+physician	healthcare
+doctor	healthcare
+surgeon	healthcare
+dentist	healthcare
+pharmacist	healthcare
+paramedic	healthcare
+emt	healthcare
+therapist	healthcare
+caregiver	healthcare
+medical assistant	healthcare
+home health aide	healthcare
+cna	healthcare
+veterinarian	healthcare
+teacher	education
+professor	education
+principal	education
+tutor	education
+librarian	education
+teacher's aide	education
+coach	education
+daycare worker	education
+construction worker	manual labor
+construction	manual labor
+carpenter	manual labor
+electrician	manual labor
+plumber	manual labor
+welder	manual labor
+mechanic	manual labor
+roofer	manual labor
+painter	manual labor
+mason	manual labor
+bricklayer	manual labor
+landscaper	manual labor
+gardener	manual labor
+laborer	manual labor
+machinist	manual labor
+factory worker	manual labor
+warehouse worker	manual labor
+mover	manual labor
+lineman	manual labor
+miner	manual labor
+coal miner	manual labor
+logger	manual labor
+janitor	manual labor
+custodian	manual labor
+housekeeper	manual labor
+cleaner	manual labor
+handyman	manual labor
+contractor	manual labor
+assembler	manual labor
+forklift operator	manual labor
+farmer	agriculture
+rancher	agriculture
+farmhand	agriculture
+fisherman	agriculture
+truck driver	transport
+driver	transport
+bus driver	transport
+delivery driver	transport
+pilot	transport
+flight attendant	transport
+mail carrier	transport
+mailman	transport
+postal worker	transport
+courier	transport
+uber driver	transport
+cab driver	transport
+accountant	office
+lawyer	office
+attorney	office
+paralegal	office
+engineer	office
+software engineer	office
+programmer	office
+developer	office
+analyst	office
+consultant	office
+manager	office
+secretary	office
+receptionist	office
+administrator	office
+clerk	office
+banker	office
+banker	office
+architect	office
+designer	office
+realtor	office
+real estate agent	office
+insurance agent	office
+salesman	office
+saleswoman	office
+sales representative	office
+executive	office
+ceo	office
+entrepreneur	office
+business owner	office
+scientist	office
+researcher	office
+journalist	office
+writer	office
+editor	office
+cashier	service
+waiter	service
+waitress	service
+server	service
+bartender	service
+cook	service
+chef	service
+baker	service
+barista	service
+hairdresser	service
+hairstylist	service
+barber	service
+cosmetologist	service
+retail worker	service
+store manager	service
+customer service representative	service
+dishwasher	service
+security guard	public safety
+police officer	public safety
+officer	public safety
+cop	public safety
+firefighter	public safety
+fireman	public safety
+soldier	public safety
+marine	public safety
+sailor	public safety
+correctional officer	public safety
+detective	public safety
+sheriff	public safety
+musician	arts and sports
+artist	arts and sports
+actor	arts and sports
+actress	arts and sports
+singer	arts and sports
+dancer	arts and sports
+photographer	arts and sports
+athlete	arts and sports
+professional athlete	arts and sports
+football player	arts and sports
+basketball player	arts and sports
+baseball player	arts and sports
+personal trainer	arts and sports
+trainer	arts and sports
+pastor	other
+priest	other
+minister	other
+rabbi	other
+social worker	other

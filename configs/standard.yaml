@@ -1,0 +1,6 @@
+# Standard profile (the default until 2026-10-17): rules + spaCy + uncased-BERT cascade, no OpenMed,
+# bounded lab perturbation. ~12x faster than the default (1.3 s/encounter on CPU); held-out adversarial
+# recall 0.786 vs 0.886. Use: medanon anonymize --config configs/standard.yaml ...
+extra_detectors: []
+policies:
+  LAB_VALUE: {action: perturb, max_relative: 0.03}

@@ -1,0 +1,3 @@
+# Extra zero-shot PII models used only in the detector comparison (scripts/compare_detectors.py)
+gliner>=0.2.20
+gliner2>=1.0

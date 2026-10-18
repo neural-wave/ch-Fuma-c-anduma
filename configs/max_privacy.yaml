@@ -1,0 +1,11 @@
+# Maximum-privacy profile = the default since 2026-10-17 (kept as an explicit alias). OpenMed PII SuperClinical (DeBERTa-v3, 434M) over the
+# whole dialogue and note. Measured on the held-out adversarial set: recall 0.786 -> 0.886 (no precision
+# or clinical-trap loss), mostly occupations and unseen names; ~12x slower on CPU (13-17 s/encounter),
+# ~3 GB RAM. See MODEL_EXPERIMENTS.md. Weights: `medanon prepare-models --ml hf:OpenMed/OpenMed-PII-SuperClinical-Large-434M-v1`.
+extra_detectors:
+  - {kind: hf, model: OpenMed/OpenMed-PII-SuperClinical-Large-434M-v1, label_map: openmed-pii, mode: full,
+     threshold: 0.5, fields: [dialogue, note]}
+# Lab values -> clinical-category interval (e.g. HbA1c 8.3 -> [8-9]). Measured on eval: unique lab-linkage
+# with a 3 %-tolerant attacker 70.6 % (perturbation) -> 11.8 %, ICD-term retention unchanged.
+policies:
+  LAB_VALUE: {action: generalize}

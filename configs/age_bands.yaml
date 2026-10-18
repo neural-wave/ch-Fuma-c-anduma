@@ -1,0 +1,6 @@
+# Release age policy (identical to the built-in default since the 18 Oct 2026 release; kept for explicit use): exact paediatric age 0-17, adult ages in bands ([18-19], [20-29] ...
+# [80-89]), 90+ aggregated; the birth year is removed for adults (otherwise visit year - birth year gives the
+# exact age back) and kept for children. The QI step never widens or suppresses these bands.
+# Use: medanon anonymize --config configs/age_bands.yaml ...
+policies:
+  AGE: {action: band, exact_below: 18, band_width: 10, top_code: 90, format: "[{band}]"}

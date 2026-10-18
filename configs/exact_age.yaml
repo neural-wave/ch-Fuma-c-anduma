@@ -1,0 +1,4 @@
+# LEGACY policy (default until the 18 Oct 2026 release): exact age 0-89, "90+" for 90 or more; adult birth years kept
+# when the DOB policy keeps years. Explicit opt-in only: medanon anonymize --config configs/exact_age.yaml ...
+policies:
+  AGE: {action: exact, top_code: 90}

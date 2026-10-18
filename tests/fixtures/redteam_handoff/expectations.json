@@ -1,0 +1,380 @@
+[
+ {
+  "encounter_id": "SYN-LANDMARK-01",
+  "finding": "V1_landmark_context_leak",
+  "kind": "privacy",
+  "regex": "oregon",
+  "expect": "absent"
+ },
+ {
+  "encounter_id": "SYN-LANDMARK-01",
+  "finding": "V1_landmark_context_leak",
+  "kind": "privacy",
+  "regex": "mount hood",
+  "expect": "absent"
+ },
+ {
+  "encounter_id": "SYN-LANDMARK-01",
+  "finding": "V1_landmark_context_leak",
+  "kind": "privacy",
+  "regex": "timberline",
+  "expect": "absent"
+ },
+ {
+  "encounter_id": "SYN-LANDMARK-01",
+  "finding": "V1_landmark_context_leak",
+  "kind": "clinical",
+  "regex": "hik",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-LANDMARK-01",
+  "finding": "V1_landmark_context_leak",
+  "kind": "clinical",
+  "regex": "chest pain",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-LANDMARK-01",
+  "finding": "V1_landmark_context_leak",
+  "kind": "clinical",
+  "regex": "hypertension",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-AGE-01",
+  "finding": "V2_exact_adult_age",
+  "kind": "privacy",
+  "regex": "\\b47[- ]?year",
+  "expect": "absent"
+ },
+ {
+  "encounter_id": "SYN-AGE-01",
+  "finding": "V2_exact_adult_age",
+  "kind": "clinical",
+  "regex": "20 years",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-AGE-01",
+  "finding": "V2_exact_adult_age",
+  "kind": "clinical",
+  "regex": "20 pack-year",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-AGE-02",
+  "finding": "L1_bare_age_answer",
+  "kind": "privacy",
+  "regex": "\\[patient\\] 54\\b",
+  "expect": "absent"
+ },
+ {
+  "encounter_id": "SYN-AGE-02",
+  "finding": "L1_bare_age_answer",
+  "kind": "clinical",
+  "regex": "headaches",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-DOB-01",
+  "finding": "L2_birth_year_4_and_2_digit",
+  "kind": "privacy",
+  "regex": "1971",
+  "expect": "absent"
+ },
+ {
+  "encounter_id": "SYN-DOB-01",
+  "finding": "L2_birth_year_4_and_2_digit",
+  "kind": "privacy",
+  "regex": "03/03/71",
+  "expect": "absent"
+ },
+ {
+  "encounter_id": "SYN-DOB-01",
+  "finding": "L2_birth_year_4_and_2_digit",
+  "kind": "privacy",
+  "regex": "\\[DOB\\]\\s*'?71\\b",
+  "expect": "absent"
+ },
+ {
+  "encounter_id": "SYN-DOB-01",
+  "finding": "L2_birth_year_4_and_2_digit",
+  "kind": "privacy",
+  "regex": "'68\\b",
+  "expect": "absent"
+ },
+ {
+  "encounter_id": "SYN-DOB-01",
+  "finding": "L2_birth_year_4_and_2_digit",
+  "kind": "clinical",
+  "regex": "hypertension",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-DOB-02",
+  "finding": "L2_birth_year_with_adult_age_stated",
+  "kind": "privacy",
+  "regex": "1974",
+  "expect": "absent"
+ },
+ {
+  "encounter_id": "SYN-DOB-02",
+  "finding": "L2_birth_year_with_adult_age_stated",
+  "kind": "privacy",
+  "regex": "\\b52[- ]?year",
+  "expect": "absent"
+ },
+ {
+  "encounter_id": "SYN-DOB-02",
+  "finding": "L2_birth_year_with_adult_age_stated",
+  "kind": "clinical",
+  "regex": "hypertension",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-BP-02",
+  "finding": "L3_blood_pressure_lowercase_variants",
+  "kind": "clinical",
+  "regex": "bp is 150 over 95",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-BP-02",
+  "finding": "L3_blood_pressure_lowercase_variants",
+  "kind": "clinical",
+  "regex": "bp was 138/86",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-BP-02",
+  "finding": "L3_blood_pressure_lowercase_variants",
+  "kind": "clinical",
+  "regex": "one forty over ninety",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-BP-02",
+  "finding": "L3_blood_pressure_lowercase_variants",
+  "kind": "clinical",
+  "regex": "bp 150/95",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-BP-02",
+  "finding": "L3_blood_pressure_lowercase_variants",
+  "kind": "clinical",
+  "regex": "bp 138/86",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-OVER-03",
+  "finding": "V3_possessive_and_product_overredaction",
+  "kind": "clinical",
+  "regex": "neurovascular's intact",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-OVER-03",
+  "finding": "V3_possessive_and_product_overredaction",
+  "kind": "clinical",
+  "regex": "Neurovascular status intact",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-OVER-03",
+  "finding": "V3_possessive_and_product_overredaction",
+  "kind": "clinical",
+  "regex": "icy hot",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-OVER-03",
+  "finding": "V3_possessive_and_product_overredaction",
+  "kind": "clinical",
+  "regex": "biofreeze on it",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-OVER-03",
+  "finding": "V3_possessive_and_product_overredaction",
+  "kind": "clinical",
+  "regex": "Icy Hot or Biofreeze",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-OVER-04",
+  "finding": "V3_spoken_exam_and_symptom_overredaction",
+  "kind": "clinical",
+  "regex": "heart and lungs",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-OVER-04",
+  "finding": "V3_spoken_exam_and_symptom_overredaction",
+  "kind": "clinical",
+  "regex": "crackles in your lungs",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-OVER-04",
+  "finding": "V3_spoken_exam_and_symptom_overredaction",
+  "kind": "clinical",
+  "regex": "barky cough at night",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-OVER-04",
+  "finding": "V3_spoken_exam_and_symptom_overredaction",
+  "kind": "clinical",
+  "regex": "place a referral",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-OVER-04",
+  "finding": "V3_spoken_exam_and_symptom_overredaction",
+  "kind": "clinical",
+  "regex": "Crackles in the lungs",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-OVER-04",
+  "finding": "V3_spoken_exam_and_symptom_overredaction",
+  "kind": "clinical",
+  "regex": "barky cough\\. Referral",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-BP-01",
+  "finding": "L3_blood_pressure_mislabelled",
+  "kind": "clinical",
+  "regex": "142 over 88",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-BP-01",
+  "finding": "L3_blood_pressure_mislabelled",
+  "kind": "clinical",
+  "regex": "142/88",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-BP-01",
+  "finding": "L3_blood_pressure_mislabelled",
+  "kind": "clinical",
+  "regex": "128/82",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-BP-01",
+  "finding": "L3_blood_pressure_mislabelled",
+  "kind": "clinical",
+  "regex": "\\b72\\b",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-BP-01",
+  "finding": "L3_blood_pressure_mislabelled",
+  "kind": "clinical",
+  "regex": "blood pressure today is \\[(?:ORGANIZATION|LOCATION|PERSON)",
+  "expect": "absent"
+ },
+ {
+  "encounter_id": "SYN-OVER-01",
+  "finding": "V3_clinical_term_overredaction",
+  "kind": "clinical",
+  "regex": "covid",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-OVER-01",
+  "finding": "V3_clinical_term_overredaction",
+  "kind": "clinical",
+  "regex": "heart and lungs",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-OVER-01",
+  "finding": "V3_clinical_term_overredaction",
+  "kind": "clinical",
+  "regex": "lungs are clear",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-OVER-01",
+  "finding": "V3_clinical_term_overredaction",
+  "kind": "clinical",
+  "regex": "neurovascular",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-OVER-01",
+  "finding": "V3_clinical_term_overredaction",
+  "kind": "clinical",
+  "regex": "biofreeze",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-OVER-01",
+  "finding": "V3_clinical_term_overredaction",
+  "kind": "clinical",
+  "regex": "autoimmune labs",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-OVER-02",
+  "finding": "V3_name_swallows_clinical_word",
+  "kind": "privacy",
+  "regex": "\\bfrank\\b",
+  "expect": "absent"
+ },
+ {
+  "encounter_id": "SYN-OVER-02",
+  "finding": "V3_name_swallows_clinical_word",
+  "kind": "clinical",
+  "regex": "your lungs are clear",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-KEEP-01",
+  "finding": "C1_medications_labs_chronology",
+  "kind": "clinical",
+  "regex": "metformin to 1000 mg twice daily",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-KEEP-01",
+  "finding": "C1_medications_labs_chronology",
+  "kind": "clinical",
+  "regex": "lisinopril 20 (?:mg|milligrams)",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-KEEP-01",
+  "finding": "C1_medications_labs_chronology",
+  "kind": "clinical",
+  "regex": "about 10 years ago",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-KEEP-01",
+  "finding": "C1_medications_labs_chronology",
+  "kind": "clinical",
+  "regex": "four days ago",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-KEEP-01",
+  "finding": "C1_medications_labs_chronology",
+  "kind": "clinical",
+  "regex": "ejection fraction (?:was |of )?(?:\\[?\\d)",
+  "expect": "present"
+ },
+ {
+  "encounter_id": "SYN-KEEP-01",
+  "finding": "C1_medications_labs_chronology",
+  "kind": "clinical",
+  "regex": "a1c (?:came back at |)\\[?\\d",
+  "expect": "present"
+ }
+]

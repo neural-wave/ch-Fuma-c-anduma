@@ -1,0 +1,4 @@
+# Tests + rebuilding the lexicons in src/medanon/resources (scripts/build_resources.py)
+pytest>=8
+wordfreq>=3.1
+simple-icd-10-cm>=1.5

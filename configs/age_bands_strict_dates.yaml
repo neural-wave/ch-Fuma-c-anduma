@@ -1,0 +1,5 @@
+# EXPERIMENTAL (not default): age bands + calendar year removed from full dates ("[DATE]"); isolated clinical years
+# ("surgery in 2018") and relative dates are kept. Linkage benefit only where encounter years vary; see reports.
+policies:
+  AGE: {action: band, exact_below: 18, band_width: 10, top_code: 90, format: "[{band}]"}
+  DATE: {action: generalize, placeholder: "[DATE]", keep_year: false}

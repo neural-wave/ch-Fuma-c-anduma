@@ -1,0 +1,56 @@
+"""Focused synthetic cases for quasi-identifiers that the round gold does not annotate: height, weight, BMI,
+family size, occupations, structured IDs. Each case: (category, kind, dialogue, note, icd, gone, kept)
+- kind "protect": every string in `gone` must disappear from the output, every string in `kept` must survive
+- kind "clinical": a dangerous counterexample - everything in `kept` must survive unchanged
+All text is invented."""
+HTN = [{"code": "I10", "description": "Essential (primary) hypertension"}]
+HF = [{"code": "I50.9", "description": "Heart failure, unspecified"}]
+Z68 = [{"code": "E66.9", "description": "Obesity, unspecified"}, {"code": "Z68.31", "description": "Body mass index [BMI] 31.0-31.9, adult"}]
+
+CASES = [
+    ("height", "protect", "[doctor] how tall are you ?\n[patient] i'm five foot seven .\n", "Height 170 cm. She is a 52-year-old woman.\n", HTN,
+     ["five foot seven", "170 cm"], ["cm"]),
+    ("height", "protect", "[patient] I am 1.82 m tall.\n", "Ht: 5'11\". He is a 47-year-old man.\n", HTN, ["1.82", "5'11"], []),
+    ("weight", "protect", "[patient] i weigh about one hundred eighty pounds .\n", "Weight 82.4 kg. He is a 60-year-old man.\n", HTN,
+     ["one hundred eighty", "82.4"], ["kg"]),
+    ("weight", "protect", "[doctor] the scale says 97 kg today .\n", "Wt 214 lbs. She is a 58-year-old woman.\n", HTN, ["97 kg", "214"], []),
+    ("bmi", "protect", "[doctor] your bmi is 31.4 .\n", "BMI 27.8. He is a 45-year-old man.\n", HTN, ["31.4", "27.8"], ["[30-34.9]", "[25-29.9]"]),
+    ("weight", "clinical", "[patient] i lost 10 pounds since spring .\n", "Weight loss of 4 kg over 2 months. Enoxaparin 1 mg/kg twice daily.\n", HTN,
+     [], ["lost 10 pounds", "4 kg", "1 mg/kg"]),
+    ("weight", "clinical", "[doctor] your dry weight is 72 kg .\n", "Dry weight 72 kg. Weight today 75.5 kg. Hemodialysis three times weekly.\n",
+     HF, [], ["72 kg", "75.5 kg"]),
+    ("height", "clinical", "[doctor] the lesion is 2 cm , calf circumference 3 cm greater .\n", "Fundal height 32 cm at 32 weeks.\n", HTN,
+     [], ["2 cm", "3 cm greater", "Fundal height 32 cm"]),
+    ("weight", "clinical", "[doctor] he weighs 18 kg .\n", "He is a 4-year-old boy, weight 18 kg, height 104 cm.\n", HTN, [], ["18 kg", "104 cm"]),
+    ("bmi", "clinical", "[doctor] bmi is 31.4 .\n", "BMI 31.4.\n", Z68, [], ["31.4"]),
+    ("family", "protect", "[patient] i have four children and they help .\n", "She is a mother of five. We have three kids.\n", HTN,
+     ["four children", "mother of five", "three kids"], ["[3+] children", "mother of [3+]"]),
+    ("family", "clinical", "[patient] i have two children .\n", "Gravida 4, para 3, two miscarriages. She has three children with sickle cell disease.\n",
+     HTN, [], ["two children", "Gravida 4, para 3", "two miscarriages", "three children with sickle cell"]),
+    ("family", "clinical", "[patient] i have two questions and three concerns .\n", "My sister has five kids.\n", HTN, [],
+     ["two questions", "three concerns", "five kids"]),
+    ("id", "protect", "[patient] my number is R7-MRN-204411 .\n", "Record QX-PT-7781-02. Account 55-1290.\n", HTN,
+     ["R7-MRN", "204411", "QX-PT", "7781", "55-1290"], []),
+    ("id", "clinical", "[doctor] tTG-IgA 68 , HbA1c 7.2 , ICD-10 E11.9 , covid-19 negative .\n", "Hep B vaccine. CA-125 normal.\n", HTN,
+     [], ["tTG-IgA 68", "HbA1c", "covid-19", "CA-125"]),
+    ("family", "protect", "[patient] At home there are three children.\n", "Household composition: 4 children. Family status: no children.\n",
+     HTN, ["three children", "4 children"], ["[3+] children", "no children"]),
+    ("family", "protect", "[patient] At home there are four siblings.\n", "Household composition: 3 siblings. He has two siblings with cystic fibrosis.\n",
+     HTN, ["four siblings", "3 siblings"], ["[3+] siblings", "two siblings with cystic fibrosis"]),
+    ("family", "clinical", "[doctor] there are two options and three treatment choices .\n", "Number of options: two.\n", HTN, [],
+     ["two options", "three treatment choices"]),
+    ("weight", "protect", "[patient] The clinic last recorded 172 cm and 81 kg. I saw 160 lb on another scale.\n",
+     "Weight 70 kg (reported elsewhere as 154 lb). No pregnancy plans. She is a 41-year-old woman.\n", HTN,
+     ["172 cm", "81 kg", "160 lb", "70 kg", "154 lb"], ["No pregnancy plans"]),
+    ("weight", "clinical", "[doctor] gestational weight gain is 9 kg .\n", "Weight 74 kg. Gestational weight gain 9 kg at 30 weeks.\n",
+     HTN, [], ["74 kg", "9 kg"]),
+    ("id", "clinical", "[doctor] tTG-IgA elevated , DXA T-score -2.6 , positive Dix-Hallpike maneuver .\n",
+     "Free T4 0.9 ng/dL. Family history of thyroid disease. Normal total IgA.\n", HTN, [],
+     ["tTG-IgA", "DXA T-score", "Dix-Hallpike", "ng/dL. Family", "IgA"]),
+    ("eponym", "clinical", "[doctor] right Dix-Hallpike provokes fatigable nystagmus .\n",
+     "PLAN\n\nReview adherence and recheck labs after adjustment. Right Dix-Hallpike provokes nystagmus.\n", HTN, [],
+     ["right Dix-Hallpike provokes", "recheck labs", "Right Dix-Hallpike"]),
+    ("eponym", "protect", "[doctor] hello .\n", "Seen by Dr. Dix-Hallpike today.\n", HTN, ["Dr. Dix-Hallpike"], []),
+    ("occupation", "protect", "[patient] i'm a former city bus mechanic and i work night shifts .\n", "Occupation: harbor pilot, works night shifts.\n",
+     HTN, ["city bus mechanic", "harbor pilot"], ["night shifts", "former"]),
+]

@@ -1,0 +1,13 @@
+# Patient data and anything derived from it must never be committed
+data/*.jsonl
+outputs/
+*.audit.jsonl
+
+# Local caches / environments
+.cache/
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+build/
+dist/
