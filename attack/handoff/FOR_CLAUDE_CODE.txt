@@ -1,0 +1,32 @@
+You are receiving medanon_attacker_handoff.zip: an independent re-identification attacker plus measured
+findings against MedAnon ceff209. Use it to fix MedAnon, not to rebuild the attacker.
+
+1. Read, in order: CLAUDE_HANDOFF.md (10 min), then VULNERABILITIES.json (numbers, probes, candidate fixes).
+   Every number comes from results/*.json or synthetic_regressions/outputs/*.check.json.
+
+2. Reproduce (no LLM, no GPU, ~3 min), from the unzipped folder:
+     python -m venv .venv && .venv/bin/pip install -r attack/requirements.txt
+     .venv/bin/python -m pytest attack/tests -q                       # 92 tests, offline
+     # with your MedAnon checkout's environment:
+     medanon anonymize -i synthetic_regressions/encounters.jsonl -o /tmp/syn.jsonl --config configs/age_bands.yaml --offline
+     python synthetic_regressions/check_regressions.py /tmp/syn.jsonl   # expect privacy 7/12, clinical 39/42 at ceff209
+     python -m attack.audit_masks --original <orig.jsonl> --anonymized <anon.jsonl> --out audit.json   # counts only
+   The LLM attack (attack.run) needs an Ollama endpoint with qwen3.5:35b (~22 GB VRAM), not the 4 GB target
+   GPU; ask the user for the GPU host if you need it. It is not required to act on the findings.
+
+3. Compare with your Splink attacker on the SAME anonymized JSONL: run each attacker unchanged; export mine
+   with `python -m attack.export_predictions <run>/per_record.jsonl -o predictions.jsonl` (attacker-side
+   only, no ground truth). My attacker measures population uniqueness (bits, lambda, risk) and masked-value
+   recovery; it does NOT compute Top-1/Top-5 linkage. Compare per encounter: which quasi-identifiers each
+   attacker uses, and whether high-risk encounters agree.
+
+4. Fix priority (details and regression tests in VULNERABILITIES.json):
+   1) ship configs/age_bands.yaml (V3)   2) clinical-term over-redaction guard (V2)
+   3) adult birth year removed independent of detected age, incl. 2-digit years (V1)
+   4) named landmarks near masked places (V4)   5) manifest code_hash must skip src/medanon/env/ (A1)
+   Lead "BP -> [ORGANIZATION]" did NOT reproduce at ceff209 (0/9 forms, 0/140 records).
+
+5. Accept a MedAnon change only if: check_regressions clinical assertions stay all-pass for what passed
+   before (39/42 at ceff209; the 3 failures are V2) and privacy passes do not decrease; attack.audit_masks
+   on your dev set shows no new exact ages/birth years and clinical_term blocks not higher; your own
+   ICD-10 F1 delta and medical-concept recall checks are unchanged. Never tune on blind validation records.

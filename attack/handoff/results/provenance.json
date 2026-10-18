@@ -1,0 +1,21 @@
+{
+ "medanon_commit": "ceff209 (src/medanon and configs/ byte-identical on branch adversary-reidentification)",
+ "medanon_code_sha256_local": "4ff7199001ecc5de021bfa6aa522a32fcb4a3e6619c4fcc548a858ae76813420",
+ "code_hash_note": "manifest.code_hash() hashes every .py/.txt/.tsv under src/medanon/, including the git-ignored virtualenv src/medanon/env/, so the same commit hashes differently per machine (local 4ff71990... vs the ac834ee0 quoted for ceff209). Not evidence of a code difference.",
+ "config_sha256_by_file": {
+  "note": "load_config(file) without CLI overrides; --offline sets ml.allow_download=false and changes the hash",
+  "built-in defaults (no --config)": "749001b87301d30f",
+  "configs/default.yaml": "303e19f3c26d73e8",
+  "configs/standard.yaml": "137110c6d3e2c8e4",
+  "configs/age_bands.yaml": "3a01516fd33a11a9",
+  "configs/age_bands_strict_dates.yaml": "fb9a949c3d65f457"
+ },
+ "detector_profile": "full production: rules + spaCy en_core_web_lg 3.8.0/Presidio + dslim/bert-base-NER-uncased + OpenMed-PII-SuperClinical-Large-434M-v1, --offline, CPU (Mac)",
+ "synthetic_population": "none: this attacker does not use a synthetic population or auxiliary identity database (see CLAUDE_HANDOFF.md)",
+ "rules_only_experiments": "none",
+ "config_sha256_of_handoff_runs_with_offline": {
+  "built-in defaults": "c6a496ed98431697",
+  "configs/age_bands.yaml": "f148e8907b270c6f",
+  "configs/age_bands_strict_dates.yaml": "96607347745bcc66"
+ }
+}

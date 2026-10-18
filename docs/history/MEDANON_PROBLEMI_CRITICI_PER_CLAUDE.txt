@@ -1,0 +1,110 @@
+MEDANON - REVISIONE CRITICA PER L'AI SVILUPPATRICE
+Snapshot: 17 ottobre 2026, sul codice presente in D:/NEURAL_WAVE/Anonymization_Bosch_NeuralWave.
+Scopo: problemi che possono ridurre il punteggio Bosch o invalidare la consegna.
+Ho letto sorgenti, configurazioni, test, script, risultati locali, README/REPORT, PDF della challenge e linee guida di submission. Nessun dato di paziente e' riportato qui. Le riproduzioni testuali sono interamente sintetiche. I numeri locali NON sono punteggi Bosch. Poiche' il codice e' ancora in modifica, ricontrollare commit e risultati prima della consegna.
+
+LEGENDA: P0 = risolvere prima della submission; P1 = rischio concreto di punteggio; P2 = robustezza o credibilita'. [CONFERMATO] = visto nel codice/risultati o riprodotto; [RISCHIO] = scenario plausibile da verificare. La lista non pretende di dimostrare che ogni elemento rilevato sia un vero dato personale: il controllo Presidio puo' sbagliare.
+
+SINTESI PER PRIORITA'
+1. P0: il default puo' usare silenziosamente una pipeline diversa dai benchmark se i pesi BERT mancano; serve un avvio pulito riproducibile.
+2. P0: identificativi e telefoni dettati cifra per cifra restano in chiaro in un caso sintetico.
+3. P0: il log di audit include testo originale anche quando --audit-include-text e' disattivato; README/REPORT promettono il contrario.
+4. P0: il dataset .jsonl richiesto e' escluso da Git; team, report finale, video e pubblicazione non sono ancora chiusi.
+5. P1: la perturbazione dei laboratori puo' superare molto il 3% dichiarato; l'attacco ai laboratori pubblicato usa solo uguaglianza esatta e sottostima il rischio.
+6. P1: il numero 58,2% -> 6,0% di reidentificazione usa una metrica con un errore logico; anche le altre proxy sono piu' strette della valutazione ufficiale.
+
+P0-01. FALLBACK DEL MODELLO PREDEFINITO E RIPRODUCIBILITA' [CONFERMATO]
+File: configs/default.yaml:12; src/medanon/config.py:17-21; src/medanon/pipeline.py:55-68; src/medanon/cli.py:28-42; scripts/run_experiments.py:44-51; requirements.txt.
+Il default ora abilita dslim/bert-base-NER-uncased sul dialogue, ma i pesi richiedono un comando separato `medanon prepare-models`. Se il caricamento fallisce, `required: false` stampa un warning su stderr e procede con rules + spaCy. Questo vale anche per un `--ml` esplicito, perche' l'override non imposta required. `results.json` e il JSONL prodotto non registrano stato effettivo del modello, versione dei pesi, hash della configurazione o del codice. Il profilo fast ha prestazioni privacy inferiori sui nomi senza indizi: nella comparazione locale il canary di nomi senza cue e' circa 86,5%, contro 100% dichiarato per il default con BERT. Un valutatore che installa soltanto le dipendenze puo' ottenere un output diverso senza accorgersene.
+Azioni: fissare l'ambiente e il metodo per ottenere i pesi; testare installazione ed entry point in ambiente pulito e senza rete in inferenza; per la consegna rendere il modello necessario o registrare esplicitamente fallback e vietare di presentare come default i numeri BERT quando non e' attivo. Annotare versione/hash del modello, configurazione, dipendenze e sorgente in un manifest. Verificare che il setup richiesto sia compatibile con le linee guida (`pip install` semplice, entry point funzionanti subito).
+
+P0-02. NUMERI SENSIBILI DETTATI A PAROLE NON RIMOSSI [CONFERMATO]
+File: src/medanon/rules.py:76-87,266-283; src/medanon/pipeline.py:145-165; src/medanon/evaluation/canary.py:31-45.
+Con `Anonymizer()` e BERT effettivamente caricato, un record sintetico con `[patient] my medical record number is four five six seven eight nine .` e `[patient] my phone number is five five five one two three four five six seven .` conserva entrambe le sequenze numeriche nell'output. Le regex ID/CONTACT trattano cifre e alcuni formati, mentre `_clean_statistical` scarta uno span ML ID/CONTACT che non contiene cifre o `@`. I canary CONTACT attuali usano telefoni numerici; quindi il 100% locale non verifica questo caso.
+Azioni: riconoscere sequenze di cifre pronunciate dopo cue MRN/record/account/phone e varianti ASR, inclusi separatori e gruppi; trasformare l'intero identificativo senza intaccare numeri clinici. Aggiungere test con esempi sintetici pronunciati, senza cue e con cue, e verificare privacy e falsi positivi.
+
+P0-03. AUDIT CHE PUO' CONTENERE TESTO ORIGINALE [CONFERMATO]
+File: src/medanon/pipeline.py:330-335; src/medanon/cli.py:65-69,106-109; README.md:125-132; REPORT.md sezione Explainability.
+`_keep_decision` inserisce sempre `"text": s.text` per i candidati conservati dal filtro clinico. `--audit-include-text` governa solo il campo `original` delle altre decisioni. Nei file di audit correnti ci sono centinaia di decisioni con la chiave `text` (conteggio da snapshot: circa 299 nello split eval, 640 nel dev); se il guard conserva erroneamente PHI, il log replica la stringa originale. Il test che controlla soltanto l'assenza della chiave `original` non lo intercetta. Il README promette che gli identificativi non sono scritti nell'audit senza flag: promessa non garantita.
+Azioni: default senza superfici originali per TUTTE le decisioni, incluse keep; conservare soltanto tipo, offset, motivazione e codice della regola. Test automatico con un identificativo sintetico volutamente classificato keep, e verifica di entrambi i possibili campi testuali. Non allegare/pubblicare gli audit correnti prima di bonifica o rigenerazione.
+
+P0-04. CONSEGNA A RISCHIO [CONFERMATO COME STATO, NON COME ERRORE GIA' AVVENUTO]
+File: .gitignore:2-4; README.md:5,81-83; REPORT.md:3; ../guidelines.md; task/NeuralWaveTask_Anonymization of_patient_data_public.pdf.
+Il PDF richiede il dataset anonimizzato `.jsonl`, repository con codice e README. Le linee guida richiedono report massimo 3 pagine, video massimo 2 minuti, nomi completi del team nel README, pubblicazione nel repo dell'organizzazione, entry point funzionanti in ambiente pulito. Al momento `outputs/` (dove si trova l'eval JSONL) e' escluso da Git; un normale commit non include il deliverable. README e REPORT hanno ancora `Team: TODO`; non ho trovato il video nel progetto; la directory Git locale mostra file non tracciati e nessun commit verificabile. Non assumere che i file presenti localmente siano consegnati.
+Azioni: preparare un pacchetto di submission esplicito, verificare conteggio/ordine/schema del JSONL e che il file sia realmente accessibile ai giudici; aggiungere nomi/ruoli, report finale entro 3 pagine con uso degli agenti/LLM dichiarato, video/link; installare e avviare da checkout pulito; verificare repository remoto e contenuto pubblicato. Non includere dataset originale o audit con superfici sensibili per errore.
+
+P1-01. PRIVACY REALE INFERIORE ALLE METRICHE IN EVIDENZA [CONFERMATO COME GAP DI MISURA]
+File: outputs/results.json; src/medanon/evaluation/metrics.py:153-224; README.md sezione Results.
+Nello split eval corrente il riferimento Presidio considera rimossi 0,8709 di 426 elementi inclusi: PERSON 0,8146 di 205, LOCATION 0,6364 di 22, NRP 0,4 di 5. Circa 55 elementi del rilevatore di riferimento sopravvivono, ma una parte puo' essere falso positivo o contenuto clinico: serve annotazione manuale sicura, non affermare che siano 55 leak certi. `0/62` riguarda solo nomi seed in forme specifiche, non tutti i nomi; il 100,0% dei canary e' arrotondato (PERSON 0,999 su 818), proviene da template scritti dal team e non comprende il caso di P0-02. L'audit Presidio esclude 785 DATE_TIME eval privi di calendar anchor e usa presenza letterale della superficie: non misura generalizzazioni ancora collegabili. Il testo del README che attribuisce i superstiti "mostly" a falsi positivi non e' dimostrato da una verifica gold.
+Azioni: fare una revisione cieca e protetta dei soli casi sopravvissuti, etichettare vero PHI / falso positivo / clinicamente necessario senza stampare o inviare contenuti; aggiungere una matrice per tipo e campo. Usare il singolo mid-term score Bosch disponibile per calibrare le priorita' se non ancora richiesto. Nel report tenere separate proxy locali e punteggi ufficiali.
+
+P1-02. PERTURBAZIONE LABORATORI: LIMITE 3% NON RISPETTATO [CONFERMATO]
+File: src/medanon/transform.py:54-72; configs/default.yaml:31; README.md e REPORT.md sezione Transformations.
+`max_steps = max(1, round(abs(value) * max_rel / step))` forza un passo anche quando un passo supera il 3%. Riproduzione sintetica diretta: TSH 0,1 -> 0,2 (+100%); TSH 0,2 -> 0,3 (+50%); creatinina 0,7 -> 0,8 (+14,3%), a una cifra decimale e con seed di prova. Il codice controlla soltanto le soglie statiche presenti in LABS e l'intervallo preimpostato; non dimostra che il significato clinico o la predizione ICD restino invariati in ogni contesto, unita' o trend longitudinale. Le spiegazioni parlano di mantenimento clinico troppo forte.
+Azioni: non generare candidati oltre la variazione relativa configurata; se il valore non puo' muoversi alla precisione data, scegliere consapevolmente keep, generalizzazione clinica o soppressione, poi misurare la perdita di privacy. Aggiungere test su valori piccoli, limiti di soglia, unita', zero e serie longitudinali. Correggere README/REPORT e spiegazioni.
+
+P1-03. ATTACCO AI LABORATORI TROPPO DEBOLE PER IL BONUS PRIVACY [CONFERMATO]
+File: src/medanon/evaluation/attacks.py:95-126; outputs/results.json -> attacks.eval.lab_linkage.
+L'attacco pubblicato richiede uguaglianza esatta di `(analita, valore)`, mentre la trasformazione cambia apposta i valori di poco. Sullo stesso eval, il codice riporta collegamento univoco corretto 2/17 = 11,8%. Una prova read-only con allineamento per encounter_id e tolleranza su ogni valore noto trova invece: con 3% 6/17 univoci corretti (35,3%), con 5% 8/17 (47,1%); la presenza del vero record tra i candidati sale da 4/17 con match esatto a 12/17 e 14/17. Questo e' un attacco alternativo semplice, non un benchmark Bosch, ma mostra che la conclusione "lab linkage quasi neutralizzato" non regge.
+Azioni: aggiungere match con tolleranza/precisione del referto e condizioni sul numero di analiti; riportare true-in-candidates, correct-unique, false-unique e no-match; considerare intervalli clinici e correlazioni tra valori. Se la perturbazione deterministica usa seed pubblico e encounter_id pubblicato, testare anche un attaccante che rigenera i possibili output: non assumere che sia segreta.
+
+P1-04. BUG NELLA METRICA DI LINKAGE 58,2% -> 6,0% [CONFERMATO]
+File: src/medanon/evaluation/attacks.py:39-93; README.md e REPORT.md tabelle risultati.
+`1 / max(1, len(candidati))` assegna probabilita' 1 anche quando i candidati sono ZERO. `unique_reidentification_rate` conta `p == 1` senza verificare che il candidato sia il record bersaglio. Inoltre, se una location appare in qualunque testo pubblicato, `candidates_anonymised` imposta `out = [p]` e interrompe il ciclo, senza controllare identita' del target o gli altri filtri. Percio' il valore 58,2% -> 6,0% non misura correttamente "identificazioni univoche corrette"; puo' contare errori o assenza di candidati.
+Azioni: conservare gli indici/ID dei candidati, calcolare separatamente vero target incluso, correct unique, wrong unique, zero candidates e dimensione dei set; togliere il `break` o modellare la location come vincolo coerente. Ricalcolare il numero prima di mostrarlo ai giudici.
+
+P1-05. k=3 NON GARANTISCE ANONIMATO FORMALMENTE [CONFERMATO NEL CODICE]
+File: src/medanon/pipeline.py:287-327; src/medanon/transform.py:99-103; README.md sezione k-anonymity.
+La firma considera solo una fascia di eta' rilevata, sesso inferito dai pronomi di tutta la nota/dialogue, categorie di lavoro ed etnia. Luoghi rimasti, date/tempi, laboratori, malattie rare, relazioni e testo libero restano fuori. La procedura sale al massimo al livello 2 e non verifica che, DOPO l'ultimo livello, ogni classe abbia almeno tre record. La condizione `any(sig[:1] + sig[2:])` ignora il sesso da solo. `Anonymizer.anonymize()` e la modalita' streaming saltano del tutto questa fase. In dataset piccoli o con casi unici non esiste una garanzia matematica di k-anonimato.
+Azioni: rinominare il risultato "generalizzazione euristica dei quasi-identificatori" oppure implementare controllo finale sui QI realmente pubblicati con soppressione/raggruppamento fino a k; documentare esplicitamente il perimetro e il comportamento in streaming. Evitare l'espressione "k-anonymous" nelle spiegazioni se la garanzia non e' provata.
+
+P1-06. MISURE DI MEDICAL UTILITY OTTIMISTICHE E PARZIALMENTE CIRCOLARI [CONFERMATO]
+File: src/medanon/evaluation/metrics.py:45-134; src/medanon/medical.py; outputs/results.json.
+Il concept extractor locale usa lo stesso lessico medico che contribuisce a decidere cosa mantenere: una recall 0,9945 misura soprattutto coerenza col proprio guard. La lista locale di "lost concepts" include cognomi comuni e bigrammi spurii, segno che la proxy non rappresenta puramente concetti clinici. `icd_term_retention` cerca parole isolate, con boundary solo a sinistra, quindi non cattura negazione, temporalita', dose, unita', ordine degli eventi o perdita semantica. Il proxy ICD e' TF-IDF/logistic regression su sole 140 note di train, con 38 codici ammessi (frequenza >=2), F1 originale 0,3836; il delta 0,000 non prova invarianza per gli altri codici o per il classificatore Bosch. Il 99,9% di trap preservation implica almeno una perdita sul sintetico.
+Azioni: affiancare annotazione umana cieca di un campione e task clinici piu' sensibili (negazione, temporizzazione, valori/soglie, abbreviazioni, relazioni familiari); usare diagnostica per ICD rari e per campo; non presentare 100% termini ICD come 100% di utilita' clinica ufficiale.
+
+P1-07. NOMI OMONIMI E PROPAGAZIONE POSSONO UNIRE PERSONE DIVERSE [RISCHIO MOTIVATO DAL CODICE]
+File: src/medanon/entities.py:55-71,75-114,125+; src/medanon/pipeline.py:108-120,235-268.
+`EntityRegistry._find` unisce se un insieme di token e' sottoinsieme dell'altro; una menzione di solo nome o cognome puo' collegare due individui che condividono quel token. L'inferenza del ruolo usa voti euristici e assegna un debole voto PATIENT a ogni menzione in note; inoltre tutte le entita' PATIENT usano lo stesso placeholder `[PATIENT_NAME]` anche se fossero persone distinte. Una sostituzione incoerente puo' far perdere relazioni cliniche o lasciare varianti non propagate. Non ho verificato un leak su dati reali attribuibile a questo punto.
+Azioni: test sintetici con due persone omonime parziali (paziente/parente/medico) e nomi abbreviati; impedire merge su singolo token ambiguo senza contesto di ruolo o forma completa; numerare entita' distinte dove serve.
+
+P1-08. SPAN SOVRAPPOSTI POSSONO CANCELLARE CONTENUTO CLINICO [RISCHIO MOTIVATO DAL CODICE]
+File: src/medanon/spans.py:55-93; src/medanon/pipeline.py:90-122.
+Il resolver sceglie la label migliore ma allarga la sostituzione all'unione di tutti gli span sovrapposti. Il filtro clinico si applica ai candidati prima della risoluzione; un candidato conservato puo' comunque trovarsi dentro lo span finale allargato di un altro detector. Il sintetico mostra una trap medica danneggiata, ma non e' dimostrato che questa sia la causa specifica. Un overlap tra nome, luogo, farmaco o diagnosi e' un rischio per la componente medical utility.
+Azioni: test differenziale sugli overlap con casi sintetici di PHI adiacente a termini clinici; evitare l'unione indiscriminata quando cambia la label o quando include token protetti; registrare un motivo verificabile per ogni carattere cancellato.
+
+P2-01. INPUT LUNGHI / CASCADE BERT [RISCHIO, LIMITE STATICO CONFERMATO]
+File: src/medanon/ner.py:127-140,193-205; src/medanon/pipeline.py:125-143.
+`_pack(regions, max_chars=1000)` raggruppa regioni ma NON spezza una singola riga piu' lunga di 1000 caratteri. Nel corpus locale ci sono numerose righe dialogue oltre tale limite (massimo osservato oltre 3000 caratteri). La run corrente e' completata, dunque non c'e' un crash dimostrato, ma su input nascosti una regione puo' superare il limite di token del modello, causare troncamento o perdere PHI verso la fine. A differenza del percorso full-text, qui non vengono usati i chunk di `_chunks`.
+Azioni: suddividere ogni regione per token con overlap e rimappare gli offset; aggiungere test su turno molto lungo con PHI all'inizio e in coda.
+
+P2-02. ROBUSTEZZA A STILI NON USA/INGLESI [RISCHIO]
+File: src/medanon/lexicon.py:250+; src/medanon/rules.py; src/medanon/pipeline.py:125-182; src/medanon/evaluation/canary.py.
+Lessici nomi/luoghi US-centrici, regex perlopiu' ASCII e filtro ML che richiede supporto lessicale possono perdere nomi rari, forme Unicode o luoghi non presenti nel gazetteer. La challenge parla di dataset nascosto con stessa struttura, non di stesso vocabolario. Canary OOV attuali usano una lista piccola e template ripetuti: un 100% non estende la garanzia a queste varianti.
+Azioni: test sintetici con diacritici, cognomi composti, codici postali/formati di telefono differenti, ASR con punteggiatura assente, parole che sembrano comuni; misurare per categoria e per campo.
+
+P2-03. POLICY TEMPORALE E DEMOGRAFICA PUO' RIDURRE UTILITA' O PRIVACY [RISCHIO]
+File: configs/default.yaml:16-33; src/medanon/transform.py:38-52; src/medanon/rules.py:210-262.
+Sostituire anno, mese, giorno della settimana e festivita' puo' cancellare cronologia rilevante; fasce di eta' come 15-19 e 60-69 attraversano limiti clinici frequenti. Viceversa, `ETHNICITY: keep`, relative dates e laboratori non coperti dalla lista dei 17 analiti restano nel testo e possono contribuire al collegamento. Le soglie cliniche usate sono statiche e non legate a unita', sesso, eta' o serie di misure. La scelta va verificata contro metrica ufficiale; non e' una violazione certa.
+Azioni: ablation per categoria su privacy/utility, con particolare attenzione a categorie Bosch e casi temporali ICD-sensibili; non fare modifiche di policy a ridosso della consegna senza ricalcolare risultati.
+
+P2-04. MISURE DI EFFICIENZA E INTEGRITA' INCOMPLETE [CONFERMATO]
+File: src/medanon/cli.py:76-111; scripts/run_experiments.py:99-103; src/medanon/evaluation/metrics.py:24-42; README.md Results.
+`gpu_used: False` e' costante, non una misura; manca il peak VRAM. `peak_memory_mb` CLI misura il processo padre dopo l'esecuzione e con `--workers` ignora i processi figli, ognuno con modelli caricati; il valore README di circa 1,65 GB viene dalla comparazione in sottoprocesso, mentre `outputs/results.json` dell'intero esperimento riporta circa 3,43 GB: scope diversi da chiarire. Il limite nel PDF e' 4 GB VRAM, non 4 GB RAM. `integrity()` usa un dizionario per encounter_id e quindi non rileva necessariamente duplicati o righe extra nel JSONL. Il run attuale ha 67/67 record e campi invariati, ma la validazione di consegna dovrebbe essere piu' forte.
+Azioni: misurare RSS aggregato dei worker e VRAM se si usa GPU, documentare hardware/threads e distinguere carico del solo anonymizer dall'intera suite; validare conteggio, ID unici, ordine, chiavi, tipi e encoding del deliverable.
+
+P2-05. DOCUMENTI E TRACCIABILITA' [CONFERMATO]
+File: CODEBASE_EXPLAINED.md, README.md, REPORT.md, scripts/run_experiments.py.
+`CODEBASE_EXPLAINED.md` deriva da una fase precedente e contiene almeno un punto non piu' attuale (l'audit indica conteggi precedenti); README dice che `python scripts/run_experiments.py` riproduce "every number", ma lo script non registra stato ML/hash e alcuni numeri provengono da `compare_detectors.py`, non dalla singola run. I risultati sono locali e possono cambiare mentre Claude aggiorna i sorgenti. `REPORT.md` va impaginato davvero entro tre pagine e deve descrivere l'uso di Claude Code/LLM come richiesto dalle linee guida.
+Azioni: congelare una versione, rigenerare output e metriche con manifest, sincronizzare README/REPORT/CODEBASE_EXPLAINED, riportare per ogni numero la run e la definizione. Non confondere 100,0% arrotondato con assenza assoluta di errori.
+
+VERIFICHE ESEGUITE
+- `D:/NEURAL_WAVE/.venv/Scripts/python.exe -m pytest -q`: 51 test passati, 1 warning; la suite non copre tutti i casi indicati.
+- `python -m pytest -q` con l'interprete globale Windows fallisce in import (`ModuleNotFoundError: medanon`), perche' l'ambiente globale non ha il pacchetto installato. Questo non dimostra un bug del progetto; ribadisce che l'ambiente/entry point di submission deve essere documentato e provato da zero.
+- Le riproduzioni di ID pronunciati e lab usano solo frasi/valori sintetici. L'attacco lab tollerante ha usato solo aggregati e allineamento per ID, senza riportare testo clinico.
+
+ORDINE OPERATIVO CONSIGLIATO
+A. Prima di spedire: chiudere P0-01/02/03/04, rigenerare dataset e audit dopo le correzioni, e controllare artefatti realmente caricati nel repo/link.
+B. Poi correggere P1-04 e P1-03, ricalcolare gli attacchi, e aggiornare ogni claim pubblico; risolvere P1-02 per evitare alterazioni cliniche e dichiarazioni false.
+C. Usare il feedback Bosch, se disponibile, per decidere la policy finale; ricontrollare P1-01/05/06 e le regressioni privacy-utility sul dataset nascosto plausibile.
+D. Eseguire un'ultima run da checkout pulito, congelare configurazione/versioni/output/risultati, verificare che nessun dato originale o audit con testo originale sia stato pubblicato.

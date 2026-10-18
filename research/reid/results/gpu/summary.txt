@@ -1,0 +1,10 @@
+default dev1 rc=0 wall=78.442287053
+default dev2 rc=0 wall=77.787542556
+default test1 rc=0 wall=77.973516667
+age_bands dev1 rc=0 wall=78.376657772
+age_bands dev2 rc=0 wall=76.987935714
+age_bands test1 rc=0 wall=76.630492689
+age_bands_strict_dates dev1 rc=0 wall=78.965573134
+age_bands_strict_dates dev2 rc=0 wall=76.870797369
+age_bands_strict_dates test1 rc=0 wall=75.527789945
+DONE

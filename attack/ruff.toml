@@ -1,0 +1,16 @@
+# Lint settings for the attack package (dev only: pip install ruff; ruff check attack).
+line-length = 120
+target-version = "py310"
+
+[lint]
+select = ["E", "F", "W", "B", "UP"]
+
+[lint.per-file-ignores]
+# Prompt text and frequency tables are long string literals by nature.
+"extract.py" = ["E501"]
+"recover.py" = ["E501"]
+"tables.py" = ["E501"]
+"handoff/synthetic_regressions/make_fixtures.py" = ["E501"]
+"handoff/make_vulnerabilities.py" = ["E501"]  # finding descriptions are prose
+"paper/*.py" = ["E501"]  # annotation tables
+"tests/*.py" = ["E501"]  # fixture literals

@@ -1,0 +1,714 @@
+{
+ "scope": "MedAnon ceff209, full detectors (rules+spaCy/Presidio+BERT+OpenMed), --offline. 'train140' = the 140 Bosch training encounters; synthetic probes = attack/handoff/synthetic_regressions (invented text).",
+ "medanon_commit": "ceff209",
+ "severity_scale": "high = ~6 bits (one-year cohort) or more per record; medium = a few bits or clinical content lost; low = provenance/reporting",
+ "not_measured": [
+  "Top-1/Top-5 linkage, linkage success, coverage, precision, wrong attributions and absent-target false matches: this attacker estimates population uniqueness and recovers masked values; it has no auxiliary identity database or synthetic population. Use the Splink attacker for those."
+ ],
+ "vulnerabilities": [
+  {
+   "id": "V1",
+   "title": "Adult birth year survives age_bands when no adult age is stated in the record",
+   "category": "quasi-identifier residue (birth year)",
+   "classification": "incorrect transformation",
+   "severity": "high per instance; prevalence 0/140 observed under age_bands",
+   "confidence": "high (mechanism)",
+   "auxiliary_information": "Visit year (encounter year is public for this dataset or inferable) and a population table of birth cohorts. No auxiliary identity database needed.",
+   "mechanism": "A birth year is a one-year birth cohort (~6.3 bits, the same as an exact age). With the visit year it gives the exact age back, which is exactly what age_bands exists to prevent. configs/age_bands.yaml says the adult birth year is removed; it is only removed when an adult AGE is also detected in the record.",
+   "frequency": {
+    "train140_visible_birth_year_4digit": {
+     "default": "20/140",
+     "age_bands": "3/140",
+     "age_bands_strict_dates": "3/140"
+    },
+    "train140_visible_birth_year_2digit": {
+     "default": "2/140",
+     "age_bands": "1/140",
+     "age_bands_strict_dates": "1/140"
+    },
+    "note": "Records whose anonymized text shows a 4-/2-digit year next to DOB/born/[DOB]. Under age_bands all 4 remaining hits (D2N099, D2N100, D2N183, D2N185) are children (kept by design): adult birth-year residue is 0/140. In these transcripts the age is always stated next to the DOB, so the bug only triggers on records without a stated age."
+   },
+   "synthetic_repro": {
+    "probe": "SYN-DOB-01 (no age stated) vs SYN-DOB-02 (52-year-old stated)",
+    "results": {
+     "SYN-DOB-01": {
+      "default": {
+       "privacy:absent:/1971/": "FAIL",
+       "privacy:absent:/03/03/71/": "pass",
+       "privacy:absent:/\\[DOB\\]\\s*'?71\\b/": "FAIL",
+       "privacy:absent:/'68\\b/": "FAIL",
+       "clinical:present:/hypertension/": "pass"
+      },
+      "age_bands": {
+       "privacy:absent:/1971/": "FAIL",
+       "privacy:absent:/03/03/71/": "pass",
+       "privacy:absent:/\\[DOB\\]\\s*'?71\\b/": "FAIL",
+       "privacy:absent:/'68\\b/": "FAIL",
+       "clinical:present:/hypertension/": "pass"
+      },
+      "age_bands_strict_dates": {
+       "privacy:absent:/1971/": "FAIL",
+       "privacy:absent:/03/03/71/": "pass",
+       "privacy:absent:/\\[DOB\\]\\s*'?71\\b/": "FAIL",
+       "privacy:absent:/'68\\b/": "FAIL",
+       "clinical:present:/hypertension/": "pass"
+      }
+     },
+     "SYN-DOB-02": {
+      "default": {
+       "privacy:absent:/1974/": "FAIL",
+       "privacy:absent:/\\b52[- ]?year/": "FAIL",
+       "clinical:present:/hypertension/": "pass"
+      },
+      "age_bands": {
+       "privacy:absent:/1974/": "pass",
+       "privacy:absent:/\\b52[- ]?year/": "pass",
+       "clinical:present:/hypertension/": "pass"
+      },
+      "age_bands_strict_dates": {
+       "privacy:absent:/1974/": "pass",
+       "privacy:absent:/\\b52[- ]?year/": "pass",
+       "clinical:present:/hypertension/": "pass"
+      }
+     }
+    },
+    "actual_output_age_bands": {
+     "SYN-DOB-01": "[doctor] can you confirm your date of birth ?\n[patient] [DOB] 1971 .\n[doctor] thanks . and your husband ?\n[patient] he was born in '68 .\n---NOTE---\nHISTORY OF PRESENT ILLNESS\nPatient (DOB [DOB] 71) presents for hypertension follow-up.",
+     "SYN-DOB-02": "[doctor] so this is a [50-59]-year-old male . date of birth is [DOB] ?\n[patient] yes .\n---NOTE---\nHISTORY OF PRESENT ILLNESS\nThe patient is a [50-59]-year-old male, DOB [DOB], here for hypertension."
+    }
+   },
+   "expected_behavior": "Under age_bands, '[DOB]' with no year whenever reference_year - birth_year >= 18, independent of whether an age was detected; two-digit years ('71', 03/03/71) resolved to 19xx/20xx first. Paediatric birth years (age < 18) kept.",
+   "likely_component": "src/medanon/transform.py (DOB policy: adult decision coupled to detected AGE); DOB 2-digit year parsing",
+   "clinical_consequence_of_fix": "None for adults (the age band carries the clinical information). Keep paediatric years.",
+   "regression_tests": [
+    "SYN-DOB-01 privacy assertions must pass under age_bands",
+    "SYN-DOB-02 stays passing",
+    "a child ('date of birth june 2nd 2019') keeps its year under age_bands",
+    "durations/clinical years ('surgery in 2018', '20 pack-years') unchanged"
+   ],
+   "recommendation": "fix before submission if cheap (it silently defeats age_bands); rank after V3 and V2"
+  },
+  {
+   "id": "V2",
+   "title": "Clinical words masked as identifiers (over-redaction)",
+   "category": "clinical integrity",
+   "classification": "incorrect transformation (false-positive detection)",
+   "severity": "medium (clinical), none (privacy)",
+   "confidence": "high",
+   "auxiliary_information": "n/a (utility loss, not a privacy leak)",
+   "mechanism": "NER labels exam/anatomy words, symptoms, OTC products and order words as PERSON/LOCATION/EMPLOYER/ORGANIZATION/OCCUPATION: 'lungs'->[PERSON], 'neurovascular'->[LOCATION], 'barky cough'->[EMPLOYER], 'Biofreeze'/'referral'->[ORGANIZATION], 'heart doctor'/'kidney doctors'->[OCCUPATION]. The masked words are not identifying, so masking them only loses clinical content (exam findings, croup symptom).",
+   "frequency": {
+    "train140_records_with_overredaction": {
+     "default": "13/140",
+     "age_bands": "13/140",
+     "age_bands_strict_dates": "13/140"
+    },
+    "train140_blocks_by_category_default": {
+     "identifier": 608,
+     "name_like": 347,
+     "date_time": 119,
+     "clinical_term": 17,
+     "other": 4
+    },
+    "terms_default_policy": {
+     "lungs->[PERSON*]": "5 records",
+     "neurovascular->[LOCATION]": "3 records",
+     "barky cough->[EMPLOYER]": "1 record (3x)",
+     "Biofreeze->[ORGANIZATION]": "1",
+     "referral->[ORGANIZATION]": "1",
+     "specialty->[OCCUPATION]": "2"
+    }
+   },
+   "synthetic_repro": {
+    "probes": "SYN-OVER-01/03 reproduce (Biofreeze in 'use some X on the neck'; 'neurovascular's intact'; 'Neurovascular status intact'); SYN-OVER-02/04 do NOT reproduce (lungs, barky cough, referral are context-dependent: seen only in real transcripts)",
+    "results": {
+     "SYN-OVER-01": {
+      "default": {
+       "clinical:present:/covid/": "pass",
+       "clinical:present:/heart and lungs/": "pass",
+       "clinical:present:/lungs are clear/": "pass",
+       "clinical:present:/neurovascular/": "pass",
+       "clinical:present:/biofreeze/": "FAIL",
+       "clinical:present:/autoimmune labs/": "pass"
+      },
+      "age_bands": {
+       "clinical:present:/covid/": "pass",
+       "clinical:present:/heart and lungs/": "pass",
+       "clinical:present:/lungs are clear/": "pass",
+       "clinical:present:/neurovascular/": "pass",
+       "clinical:present:/biofreeze/": "FAIL",
+       "clinical:present:/autoimmune labs/": "pass"
+      },
+      "age_bands_strict_dates": {
+       "clinical:present:/covid/": "pass",
+       "clinical:present:/heart and lungs/": "pass",
+       "clinical:present:/lungs are clear/": "pass",
+       "clinical:present:/neurovascular/": "pass",
+       "clinical:present:/biofreeze/": "FAIL",
+       "clinical:present:/autoimmune labs/": "pass"
+      }
+     },
+     "SYN-OVER-03": {
+      "default": {
+       "clinical:present:/neurovascular's intact/": "FAIL",
+       "clinical:present:/Neurovascular status intact/": "FAIL",
+       "clinical:present:/icy hot/": "pass",
+       "clinical:present:/biofreeze on it/": "pass",
+       "clinical:present:/Icy Hot or Biofreeze/": "pass"
+      },
+      "age_bands": {
+       "clinical:present:/neurovascular's intact/": "FAIL",
+       "clinical:present:/Neurovascular status intact/": "FAIL",
+       "clinical:present:/icy hot/": "pass",
+       "clinical:present:/biofreeze on it/": "pass",
+       "clinical:present:/Icy Hot or Biofreeze/": "pass"
+      },
+      "age_bands_strict_dates": {
+       "clinical:present:/neurovascular's intact/": "FAIL",
+       "clinical:present:/Neurovascular status intact/": "FAIL",
+       "clinical:present:/icy hot/": "pass",
+       "clinical:present:/biofreeze on it/": "pass",
+       "clinical:present:/Icy Hot or Biofreeze/": "pass"
+      }
+     },
+     "SYN-OVER-04": {
+      "default": {
+       "clinical:present:/heart and lungs/": "pass",
+       "clinical:present:/crackles in your lungs/": "pass",
+       "clinical:present:/barky cough at night/": "pass",
+       "clinical:present:/place a referral/": "pass",
+       "clinical:present:/Crackles in the lungs/": "pass",
+       "clinical:present:/barky cough\\. Referral/": "pass"
+      },
+      "age_bands": {
+       "clinical:present:/heart and lungs/": "pass",
+       "clinical:present:/crackles in your lungs/": "pass",
+       "clinical:present:/barky cough at night/": "pass",
+       "clinical:present:/place a referral/": "pass",
+       "clinical:present:/Crackles in the lungs/": "pass",
+       "clinical:present:/barky cough\\. Referral/": "pass"
+      },
+      "age_bands_strict_dates": {
+       "clinical:present:/heart and lungs/": "pass",
+       "clinical:present:/crackles in your lungs/": "pass",
+       "clinical:present:/barky cough at night/": "pass",
+       "clinical:present:/place a referral/": "pass",
+       "clinical:present:/Crackles in the lungs/": "pass",
+       "clinical:present:/barky cough\\. Referral/": "pass"
+      }
+     }
+    },
+    "actual_output_age_bands": {
+     "SYN-OVER-03": "[doctor] your grips are equal . [LOCATION]'s intact . try some icy hot or biofreeze on it .\n[patient] okay .\n---NOTE---\nPHYSICAL EXAMINATION\nGrips equal. [LOCATION] status intact.\n\nPLAN\nTopical Icy Hot or Biofreeze."
+    }
+   },
+   "expected_behavior": "Clinical vocabulary is never a PERSON/LOCATION/ORGANIZATION/EMPLOYER/OCCUPATION span.",
+   "likely_component": "post-NER filter (medical.py / lexicon guard) applied to ML-detector spans (BERT/OpenMed label maps)",
+   "clinical_consequence_of_fix": "Positive: restores exam findings and symptoms. Risk: a real name that is also an anatomy word; keep names in name position ('okay frank , your lungs...').",
+   "regression_tests": [
+    "SYN-OVER-01..04 clinical assertions all pass",
+    "SYN-OVER-02: 'frank' still masked",
+    "attack.audit_masks on a labelled set: clinical_term blocks -> 0"
+   ],
+   "recommendation": "fix before submission (protects Bosch medical-concept recall)"
+  },
+  {
+   "id": "V3",
+   "title": "Exact adult age retained under the default policy",
+   "category": "quasi-identifier residue (age)",
+   "classification": "intended policy retention (default)",
+   "severity": "high under default, resolved by age_bands",
+   "confidence": "high",
+   "auxiliary_information": "Population age distribution (census).",
+   "mechanism": "Exact age = one-year cohort, ~6.3 bits: the largest single quasi-identifier in all 8 records attacked with the LLM (both runs). A 10-year band costs ~3 bits.",
+   "frequency": {
+    "train140_exact_adult_age_visible": {
+     "default": "109/140",
+     "age_bands": "0/140",
+     "age_bands_strict_dates": "0/140"
+    },
+    "train140_mean_max_age_bits": {
+     "default": 5.25,
+     "age_bands": 2.75,
+     "age_bands_strict_dates": 2.75
+    }
+   },
+   "synthetic_repro": {
+    "probe": "SYN-AGE-01",
+    "results": {
+     "default": {
+      "privacy:absent:/\\b47[- ]?year/": "FAIL",
+      "clinical:present:/20 years/": "pass",
+      "clinical:present:/20 pack-year/": "pass"
+     },
+     "age_bands": {
+      "privacy:absent:/\\b47[- ]?year/": "pass",
+      "clinical:present:/20 years/": "pass",
+      "clinical:present:/20 pack-year/": "pass"
+     },
+     "age_bands_strict_dates": {
+      "privacy:absent:/\\b47[- ]?year/": "pass",
+      "clinical:present:/20 years/": "pass",
+      "clinical:present:/20 pack-year/": "pass"
+     }
+    }
+   },
+   "expected_behavior": "Use configs/age_bands.yaml (already the recommended configuration).",
+   "likely_component": "configuration choice",
+   "clinical_consequence_of_fix": "Decade bands lose age-specific thresholds (screening 45 vs 50, dosing); paediatric ages exact.",
+   "regression_tests": [
+    "SYN-AGE-01 under age_bands",
+    "'smoked for 20 years' and '20 pack-year' unchanged"
+   ],
+   "recommendation": "ship age_bands.yaml (then V1 becomes the main age leak)"
+  },
+  {
+   "id": "V4",
+   "title": "Named landmark next to a masked place gives the place back",
+   "category": "contextual linkage / attribute recovery",
+   "classification": "detection miss",
+   "severity": "medium per instance, rare",
+   "confidence": "high (mechanism), low (prevalence)",
+   "auxiliary_information": "General world knowledge (an LLM): 'mount baker' -> Washington.",
+   "mechanism": "The state and a lodge are masked but 'Mount Hood' / 'Mount Baker' stays; the LLM recovered the masked state with high confidence (eval D2N001, older MedAnon build).",
+   "frequency": {
+    "llm_recovery": "1 of 1 recoverable masked place recovered (eval D2N001, old build); 1/7 scorable guesses overall",
+    "train140_landmark_within_120_chars_of_masked_place": "0/140 (default; heuristic scan, one false positive excluded)"
+   },
+   "synthetic_repro": {
+    "probe": "SYN-LANDMARK-01",
+    "results": {
+     "default": {
+      "privacy:absent:/oregon/": "pass",
+      "privacy:absent:/mount hood/": "FAIL",
+      "privacy:absent:/timberline/": "pass",
+      "clinical:present:/hik/": "pass",
+      "clinical:present:/chest pain/": "pass",
+      "clinical:present:/hypertension/": "pass"
+     },
+     "age_bands": {
+      "privacy:absent:/oregon/": "pass",
+      "privacy:absent:/mount hood/": "FAIL",
+      "privacy:absent:/timberline/": "pass",
+      "clinical:present:/hik/": "pass",
+      "clinical:present:/chest pain/": "pass",
+      "clinical:present:/hypertension/": "pass"
+     },
+     "age_bands_strict_dates": {
+      "privacy:absent:/oregon/": "pass",
+      "privacy:absent:/mount hood/": "FAIL",
+      "privacy:absent:/timberline/": "pass",
+      "clinical:present:/hik/": "pass",
+      "clinical:present:/chest pain/": "pass",
+      "clinical:present:/hypertension/": "pass"
+     }
+    },
+    "actual_output_age_bands": "[doctor] hi [PATIENT_NAME] , how was the trip ?\n[patient] great . i went to [US_STATE] last weekend to hike around mount hood , near the [LOCATION] .\n[doctor] good . any chest pain on the climb ?\n[patient] no .\n---NOTE---\nHISTORY OF PRESENT ILLNESS\n[PATIENT_NAME] is a [50-59]-year-old male with hypertension. He recently hiked near Mount Hood in [US_STATE] without chest pain."
+   },
+   "expected_behavior": "Named natural landmarks (Mount/Mt X, Lake X, X National Park, X River) masked as [LOCATION], at least in sentences that already contain a masked place.",
+   "likely_component": "LOCATION detection (spaCy FAC/LOC labels or a landmark rule)",
+   "clinical_consequence_of_fix": "None expected; keep eponyms and scores ('Lake Louise score') as negative tests.",
+   "regression_tests": [
+    "SYN-LANDMARK-01 privacy assertions",
+    "negative: 'mount the brace', 'lake louise score' unchanged"
+   ],
+   "recommendation": "fix if time allows (low prevalence); otherwise document"
+  },
+  {
+   "id": "V5",
+   "title": "Bare numeric answer to 'how old are you?' kept",
+   "category": "quasi-identifier residue (age)",
+   "classification": "detection miss",
+   "severity": "high per instance, rare",
+   "confidence": "high (synthetic), prevalence low",
+   "auxiliary_information": "None beyond the age table.",
+   "mechanism": "Lead L1 from the other attacker. '[doctor] how old are you now ? [patient] 54 .' keeps 54 under every policy.",
+   "frequency": {
+    "train140_bare_age_answer_after_patient_age_question": {
+     "default": "0/140",
+     "age_bands": "0/140",
+     "age_bands_strict_dates": "0/140"
+    }
+   },
+   "synthetic_repro": {
+    "probe": "SYN-AGE-02",
+    "results": {
+     "default": {
+      "privacy:absent:/\\[patient\\] 54\\b/": "FAIL",
+      "clinical:present:/headaches/": "pass"
+     },
+     "age_bands": {
+      "privacy:absent:/\\[patient\\] 54\\b/": "FAIL",
+      "clinical:present:/headaches/": "pass"
+     },
+     "age_bands_strict_dates": {
+      "privacy:absent:/\\[patient\\] 54\\b/": "FAIL",
+      "clinical:present:/headaches/": "pass"
+     }
+    }
+   },
+   "expected_behavior": "A bare number in the reply to an age question about the patient is treated as AGE.",
+   "likely_component": "rules: dialogue-turn context for AGE",
+   "clinical_consequence_of_fix": "None (questions about relatives' ages must not trigger: 'how old was your mother' negative test).",
+   "regression_tests": [
+    "SYN-AGE-02",
+    "negative: 'how old was your mother ? mom was 40' is about a relative (policy choice)"
+   ],
+   "recommendation": "cheap; fix if V1/V2 are done"
+  }
+ ],
+ "leads_and_artifacts": [
+  {
+   "id": "L3",
+   "lead": "Blood pressure values replaced with [ORGANIZATION]",
+   "result": "not reproduced at ceff209: 0 BP masks in 9 synthetic forms (SYN-BP-01/02, 3 policies) and 0 measurement_bp replacement blocks in train140 under any policy",
+   "results": {
+    "SYN-BP-01": {
+     "default": {
+      "clinical:present:/142 over 88/": "pass",
+      "clinical:present:/142/88/": "pass",
+      "clinical:present:/128/82/": "pass",
+      "clinical:present:/\\b72\\b/": "pass",
+      "clinical:absent:/blood pressure today is \\[(?:ORGANIZATION|LOCATION|PERSON)/": "pass"
+     },
+     "age_bands": {
+      "clinical:present:/142 over 88/": "pass",
+      "clinical:present:/142/88/": "pass",
+      "clinical:present:/128/82/": "pass",
+      "clinical:present:/\\b72\\b/": "pass",
+      "clinical:absent:/blood pressure today is \\[(?:ORGANIZATION|LOCATION|PERSON)/": "pass"
+     },
+     "age_bands_strict_dates": {
+      "clinical:present:/142 over 88/": "pass",
+      "clinical:present:/142/88/": "pass",
+      "clinical:present:/128/82/": "pass",
+      "clinical:present:/\\b72\\b/": "pass",
+      "clinical:absent:/blood pressure today is \\[(?:ORGANIZATION|LOCATION|PERSON)/": "pass"
+     }
+    },
+    "SYN-BP-02": {
+     "default": {
+      "clinical:present:/bp is 150 over 95/": "pass",
+      "clinical:present:/bp was 138/86/": "pass",
+      "clinical:present:/one forty over ninety/": "pass",
+      "clinical:present:/bp 150/95/": "pass",
+      "clinical:present:/bp 138/86/": "pass"
+     },
+     "age_bands": {
+      "clinical:present:/bp is 150 over 95/": "pass",
+      "clinical:present:/bp was 138/86/": "pass",
+      "clinical:present:/one forty over ninety/": "pass",
+      "clinical:present:/bp 150/95/": "pass",
+      "clinical:present:/bp 138/86/": "pass"
+     },
+     "age_bands_strict_dates": {
+      "clinical:present:/bp is 150 over 95/": "pass",
+      "clinical:present:/bp was 138/86/": "pass",
+      "clinical:present:/one forty over ninety/": "pass",
+      "clinical:present:/bp 150/95/": "pass",
+      "clinical:present:/bp 138/86/": "pass"
+     }
+    }
+   }
+  },
+  {
+   "id": "L4",
+   "lead": "Over-redaction of clinically important values and dates",
+   "result": "partly intended policy: LAB_VALUE generalize turns 'ejection fraction 45%' into '[40-50]%' and 'A1c 8.2' into '[8-9]' (SYN-KEEP-01). Medications, doses and relative chronology are kept. My attacker never prices lab values, so it has no evidence for or against lab generalization; note EF [40-50] straddles the HFrEF (<=40) / HFmrEF boundary.",
+   "results": {
+    "SYN-KEEP-01": {
+     "default": {
+      "clinical:present:/metformin to 1000 mg twice daily/": "pass",
+      "clinical:present:/lisinopril 20 (?:mg|milligrams)/": "pass",
+      "clinical:present:/about 10 years ago/": "pass",
+      "clinical:present:/four days ago/": "pass",
+      "clinical:present:/ejection fraction (?:was |of )?(?:\\[?\\d)/": "pass",
+      "clinical:present:/a1c (?:came back at |)\\[?\\d/": "pass"
+     },
+     "age_bands": {
+      "clinical:present:/metformin to 1000 mg twice daily/": "pass",
+      "clinical:present:/lisinopril 20 (?:mg|milligrams)/": "pass",
+      "clinical:present:/about 10 years ago/": "pass",
+      "clinical:present:/four days ago/": "pass",
+      "clinical:present:/ejection fraction (?:was |of )?(?:\\[?\\d)/": "pass",
+      "clinical:present:/a1c (?:came back at |)\\[?\\d/": "pass"
+     },
+     "age_bands_strict_dates": {
+      "clinical:present:/metformin to 1000 mg twice daily/": "pass",
+      "clinical:present:/lisinopril 20 (?:mg|milligrams)/": "pass",
+      "clinical:present:/about 10 years ago/": "pass",
+      "clinical:present:/four days ago/": "pass",
+      "clinical:present:/ejection fraction (?:was |of )?(?:\\[?\\d)/": "pass",
+      "clinical:present:/a1c (?:came back at |)\\[?\\d/": "pass"
+     }
+    }
+   }
+  },
+  {
+   "id": "A1",
+   "lead": "Reproducibility: manifest code_sha256 differs between machines for the same commit",
+   "result": "manifest.code_hash() hashes src/medanon/env/ (a git-ignored virtualenv inside the package). Same ceff209 source hashes to 4ff71990... here vs ac834ee0 elsewhere. Exclude env/ (or hash git-tracked files only).",
+   "classification": "evaluation artifact",
+   "severity": "low",
+   "recommendation": "trivial fix before submission"
+  }
+ ],
+ "policy_comparison_train140": {
+  "default": {
+   "n_records": 140,
+   "records_with_overredaction": "13/140",
+   "exact_adult_age_visible": "109/140",
+   "bare_age_answer_after_age_question": "0/140",
+   "birth_year_4digit_visible": "20/140",
+   "birth_year_2digit_visible": "2/140",
+   "mean_age_bits_max": 5.245138542957298,
+   "full_date_with_visible_year": "21/140",
+   "medanon_run": {
+    "config": "built-in defaults",
+    "config_sha256": "c6a496ed98431697010ff96fd3039bd375956e9290dfc1eb1f47ecf7aac3bd97",
+    "code_sha256": "4ff7199001ecc5de021bfa6aa522a32fcb4a3e6619c4fcc548a858ae76813420",
+    "seconds_per_record": 2.541,
+    "workers": 4
+   }
+  },
+  "age_bands": {
+   "n_records": 140,
+   "records_with_overredaction": "13/140",
+   "exact_adult_age_visible": "0/140",
+   "bare_age_answer_after_age_question": "0/140",
+   "birth_year_4digit_visible": "3/140",
+   "birth_year_2digit_visible": "1/140",
+   "mean_age_bits_max": 2.753764887059441,
+   "full_date_with_visible_year": "21/140",
+   "medanon_run": {
+    "config": "configs/age_bands.yaml",
+    "config_sha256": "f148e8907b270c6f769165f8e897987e6bd33ebb772217561a029dc58e93bff0",
+    "code_sha256": "4ff7199001ecc5de021bfa6aa522a32fcb4a3e6619c4fcc548a858ae76813420",
+    "seconds_per_record": 2.457,
+    "workers": 4
+   }
+  },
+  "age_bands_strict_dates": {
+   "n_records": 140,
+   "records_with_overredaction": "13/140",
+   "exact_adult_age_visible": "0/140",
+   "bare_age_answer_after_age_question": "0/140",
+   "birth_year_4digit_visible": "3/140",
+   "birth_year_2digit_visible": "1/140",
+   "mean_age_bits_max": 2.753764887059441,
+   "full_date_with_visible_year": "0/140",
+   "medanon_run": {
+    "config": "configs/age_bands_strict_dates.yaml",
+    "config_sha256": "96607347745bcc668fb429fa571c99ed5972b14309f3c101889a73a7687187b1",
+    "code_sha256": "4ff7199001ecc5de021bfa6aa522a32fcb4a3e6619c4fcc548a858ae76813420",
+    "seconds_per_record": 2.322,
+    "workers": 4
+   }
+  }
+ },
+ "synthetic_probe_pass_rates": {
+  "default": {
+   "privacy_pass": "4/12",
+   "clinical_pass": "39/42"
+  },
+  "age_bands": {
+   "privacy_pass": "7/12",
+   "clinical_pass": "39/42"
+  },
+  "age_bands_strict_dates": {
+   "privacy_pass": "7/12",
+   "clinical_pass": "39/42"
+  }
+ },
+ "llm_attack_runs": {
+  "eval_D2N001-D2N005": {
+   "anonymized_file": "Bosch eval output produced 2026-10-17T20:00 by an OLDER MedAnon build (code_sha256 12cb9984..., config_sha256 d85e6375... matches no config at ceff209); NOT ceff209",
+   "medanon_policy": "unknown older config (exact adult ages retained)",
+   "attacker_meta": {
+    "model": "qwen3.5:35b",
+    "backend": "ollama",
+    "extract_prompt": "extract-v4",
+    "recover_prompt": "recover-v3",
+    "elapsed_s": 0.1,
+    "llm": {
+     "llm_calls": 0,
+     "cache_hits": 15,
+     "retries": 0
+    }
+   },
+   "anonymized": {
+    "mean_risk": 0.0002965284354715343,
+    "mean_bits": 12.927822474854912,
+    "median_bits": 13.951400366499431,
+    "p90_bits": 16.891097262690838,
+    "pct_likely_unique": 0.0,
+    "hallucination_rate": 0.10714285714285714,
+    "mean_masking_density": 0.8597040937608815,
+    "n_records": 5,
+    "n_failed": 0,
+    "top_leaking_attributes": {
+     "age": 31.517149273702024,
+     "other_facts": 23.253496664211536,
+     "sex": 5.0,
+     "occupation": 4.8684664363609915
+    }
+   },
+   "original": {
+    "mean_risk": 0.01189724963233943,
+    "mean_bits": 14.013014496578759,
+    "median_bits": 13.951400366499431,
+    "p90_bits": 20.14667332786238,
+    "pct_likely_unique": 0.0,
+    "hallucination_rate": 0.13793103448275862,
+    "mean_masking_density": 0.0,
+    "n_records": 5,
+    "n_failed": 0,
+    "top_leaking_attributes": {
+     "age": 31.517149273702024,
+     "other_facts": 23.253496664211536,
+     "state_or_region": 5.425960108619239,
+     "sex": 5.0,
+     "occupation": 4.8684664363609915
+    }
+   },
+   "privacy_gain": 0.9750758835331569,
+   "bits_removed": 1.0851920217238469,
+   "warnings": [],
+   "recovery": {
+    "overall": {
+     "n_guesses": 10,
+     "n_scorable": 7,
+     "n_correct": 1,
+     "recovery_rate": 0.14285714285714285
+    },
+    "excluding_names": {
+     "n_guesses": 5,
+     "n_scorable": 2,
+     "n_correct": 1,
+     "recovery_rate": 0.5
+    },
+    "by_type": {
+     "name": {
+      "n_guesses": 5,
+      "n_scorable": 5,
+      "n_correct": 0,
+      "recovery_rate": 0.0
+     },
+     "state_or_region": {
+      "n_guesses": 1,
+      "n_scorable": 1,
+      "n_correct": 1,
+      "recovery_rate": 1.0
+     },
+     "city": {
+      "n_guesses": 1,
+      "n_scorable": 1,
+      "n_correct": 0,
+      "recovery_rate": 0.0
+     },
+     "year": {
+      "n_guesses": 3,
+      "n_scorable": 0,
+      "n_correct": 0,
+      "recovery_rate": null
+     }
+    }
+   }
+  },
+  "train_D2N127-D2N129": {
+   "anonymized_file": "MedAnon ceff209 (local code_sha256 4ff71990...), built-in defaults (no --config; config_sha256 749001b8...), full detectors (rules+spaCy/Presidio+BERT+OpenMed)",
+   "medanon_policy": "default: exact adult ages, DOB keeps year",
+   "attacker_meta": {
+    "model": "qwen3.5:35b",
+    "backend": "ollama",
+    "extract_prompt": "extract-v4",
+    "recover_prompt": "recover-v3",
+    "elapsed_s": 37.1,
+    "llm": {
+     "llm_calls": 9,
+     "cache_hits": 0,
+     "retries": 0
+    }
+   },
+   "anonymized": {
+    "mean_risk": 0.00019037376566794842,
+    "mean_bits": 15.017222564336187,
+    "median_bits": 14.065175039797843,
+    "p90_bits": 16.650164667559437,
+    "pct_likely_unique": 0.0,
+    "hallucination_rate": 0.0,
+    "mean_masking_density": 0.8157106925202925,
+    "n_records": 3,
+    "n_failed": 0,
+    "top_leaking_attributes": {
+     "age": 18.901685560541665,
+     "other_facts": 16.609640474436812,
+     "occupation": 6.540341658030082,
+     "sex": 3.0,
+     "absolute_date": 0.0
+    }
+   },
+   "original": {
+    "mean_risk": 0.001952209752310567,
+    "mean_bits": 16.21221006457657,
+    "median_bits": 14.065175039797843,
+    "p90_bits": 19.518134668136362,
+    "pct_likely_unique": 0.0,
+    "hallucination_rate": 0.0,
+    "mean_masking_density": 0.0,
+    "n_records": 3,
+    "n_failed": 0,
+    "top_leaking_attributes": {
+     "age": 18.901685560541665,
+     "other_facts": 16.609640474436812,
+     "occupation": 6.540341658030082,
+     "absolute_date": 3.584962500721156,
+     "sex": 3.0
+    }
+   },
+   "privacy_gain": 0.9024829348164926,
+   "bits_removed": 1.1949875002403836,
+   "warnings": [],
+   "recovery": {
+    "overall": {
+     "n_guesses": 6,
+     "n_scorable": 5,
+     "n_correct": 0,
+     "recovery_rate": 0.0
+    },
+    "excluding_names": {
+     "n_guesses": 3,
+     "n_scorable": 2,
+     "n_correct": 0,
+     "recovery_rate": 0.0
+    },
+    "by_type": {
+     "name": {
+      "n_guesses": 3,
+      "n_scorable": 3,
+      "n_correct": 0,
+      "recovery_rate": 0.0
+     },
+     "city": {
+      "n_guesses": 1,
+      "n_scorable": 1,
+      "n_correct": 0,
+      "recovery_rate": 0.0
+     },
+     "year": {
+      "n_guesses": 1,
+      "n_scorable": 0,
+      "n_correct": 0,
+      "recovery_rate": null
+     },
+     "employer_or_facility": {
+      "n_guesses": 1,
+      "n_scorable": 1,
+      "n_correct": 0,
+      "recovery_rate": 0.0
+     }
+    }
+   }
+  }
+ }
+}

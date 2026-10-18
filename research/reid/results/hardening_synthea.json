@@ -1,0 +1,782 @@
+{
+ "dev1": {
+  "base": {
+   "policy_dir": "age_bands",
+   "structure": {
+    "records_in": 300,
+    "records_out": 300,
+    "same_order_ids": true,
+    "non_text_fields_identical": true,
+    "section_headers_kept": "2793/2806"
+   },
+   "clinical_and_residual": {
+    "clinical:anthro_bmi_not_needed": {
+     "kept": 6,
+     "n": 125,
+     "rate": 0.048
+    },
+    "clinical:anthro_height_needed": {
+     "kept": 34,
+     "n": 39,
+     "rate": 0.8718
+    },
+    "clinical:anthro_height_not_needed": {
+     "kept": 2,
+     "n": 81,
+     "rate": 0.0247
+    },
+    "clinical:anthro_weight_needed": {
+     "kept": 67,
+     "n": 74,
+     "rate": 0.9054
+    },
+    "clinical:anthro_weight_not_needed": {
+     "kept": 4,
+     "n": 94,
+     "rate": 0.0426
+    },
+    "clinical:diagnosis": {
+     "kept": 1568,
+     "n": 1568,
+     "rate": 1.0
+    },
+    "clinical:duration": {
+     "kept": 558,
+     "n": 558,
+     "rate": 1.0
+    },
+    "clinical:event_date": {
+     "kept": 93,
+     "n": 93,
+     "rate": 1.0
+    },
+    "clinical:event_year": {
+     "kept": 716,
+     "n": 718,
+     "rate": 0.9972
+    },
+    "clinical:lab": {
+     "kept": 6,
+     "n": 305,
+     "rate": 0.0197
+    },
+    "clinical:medication": {
+     "kept": 1259,
+     "n": 1259,
+     "rate": 1.0
+    },
+    "clinical:peds_age": {
+     "kept": 51,
+     "n": 60,
+     "rate": 0.85
+    },
+    "clinical:vital": {
+     "kept": 44,
+     "n": 92,
+     "rate": 0.4783
+    },
+    "lab_category_kept": {
+     "kept": 305,
+     "n": 305,
+     "rate": 1.0
+    },
+    "residual:birth_year_string": {
+     "kept": 27,
+     "n": 82,
+     "rate": 0.3293
+    },
+    "residual:city": {
+     "kept": 5,
+     "n": 104,
+     "rate": 0.0481
+    },
+    "residual:exact_age_adult": {
+     "kept": 0,
+     "n": 206,
+     "rate": 0.0
+    },
+    "residual:exact_age_child": {
+     "kept": 51,
+     "n": 51,
+     "rate": 1.0
+    },
+    "residual:first_name": {
+     "kept": 4,
+     "n": 162,
+     "rate": 0.0247
+    },
+    "residual:full_birth_date": {
+     "kept": 0,
+     "n": 116,
+     "rate": 0.0
+    },
+    "residual:last_name": {
+     "kept": 3,
+     "n": 261,
+     "rate": 0.0115
+    },
+    "residual:occupation_title": {
+     "kept": 2,
+     "n": 161,
+     "rate": 0.0124
+    },
+    "structure": {
+     "records": 300,
+     "icd_identical": 300,
+     "keys_identical": 300,
+     "speaker_turns_identical": 300,
+     "note_lines_identical": 300
+    }
+   }
+  },
+  "cand": {
+   "policy_dir": "cand_age_bands",
+   "structure": {
+    "records_in": 300,
+    "records_out": 300,
+    "same_order_ids": true,
+    "non_text_fields_identical": true,
+    "section_headers_kept": "2806/2806"
+   },
+   "clinical_and_residual": {
+    "clinical:anthro_bmi_not_needed": {
+     "kept": 6,
+     "n": 125,
+     "rate": 0.048
+    },
+    "clinical:anthro_height_needed": {
+     "kept": 34,
+     "n": 39,
+     "rate": 0.8718
+    },
+    "clinical:anthro_height_not_needed": {
+     "kept": 2,
+     "n": 81,
+     "rate": 0.0247
+    },
+    "clinical:anthro_weight_needed": {
+     "kept": 67,
+     "n": 74,
+     "rate": 0.9054
+    },
+    "clinical:anthro_weight_not_needed": {
+     "kept": 4,
+     "n": 94,
+     "rate": 0.0426
+    },
+    "clinical:diagnosis": {
+     "kept": 1568,
+     "n": 1568,
+     "rate": 1.0
+    },
+    "clinical:duration": {
+     "kept": 558,
+     "n": 558,
+     "rate": 1.0
+    },
+    "clinical:event_date": {
+     "kept": 93,
+     "n": 93,
+     "rate": 1.0
+    },
+    "clinical:event_year": {
+     "kept": 716,
+     "n": 718,
+     "rate": 0.9972
+    },
+    "clinical:lab": {
+     "kept": 6,
+     "n": 305,
+     "rate": 0.0197
+    },
+    "clinical:medication": {
+     "kept": 1259,
+     "n": 1259,
+     "rate": 1.0
+    },
+    "clinical:peds_age": {
+     "kept": 51,
+     "n": 60,
+     "rate": 0.85
+    },
+    "clinical:vital": {
+     "kept": 92,
+     "n": 92,
+     "rate": 1.0
+    },
+    "lab_category_kept": {
+     "kept": 305,
+     "n": 305,
+     "rate": 1.0
+    },
+    "residual:birth_year_string": {
+     "kept": 19,
+     "n": 82,
+     "rate": 0.2317
+    },
+    "residual:city": {
+     "kept": 3,
+     "n": 104,
+     "rate": 0.0288
+    },
+    "residual:exact_age_adult": {
+     "kept": 0,
+     "n": 206,
+     "rate": 0.0
+    },
+    "residual:exact_age_child": {
+     "kept": 51,
+     "n": 51,
+     "rate": 1.0
+    },
+    "residual:first_name": {
+     "kept": 4,
+     "n": 162,
+     "rate": 0.0247
+    },
+    "residual:full_birth_date": {
+     "kept": 0,
+     "n": 116,
+     "rate": 0.0
+    },
+    "residual:last_name": {
+     "kept": 3,
+     "n": 261,
+     "rate": 0.0115
+    },
+    "residual:occupation_title": {
+     "kept": 2,
+     "n": 161,
+     "rate": 0.0124
+    },
+    "structure": {
+     "records": 300,
+     "icd_identical": 300,
+     "keys_identical": 300,
+     "speaker_turns_identical": 300,
+     "note_lines_identical": 300
+    }
+   }
+  }
+ },
+ "dev2": {
+  "base": {
+   "policy_dir": "age_bands",
+   "structure": {
+    "records_in": 300,
+    "records_out": 300,
+    "same_order_ids": true,
+    "non_text_fields_identical": true,
+    "section_headers_kept": "2717/2737"
+   },
+   "clinical_and_residual": {
+    "clinical:anthro_bmi_not_needed": {
+     "kept": 1,
+     "n": 115,
+     "rate": 0.0087
+    },
+    "clinical:anthro_height_needed": {
+     "kept": 33,
+     "n": 39,
+     "rate": 0.8462
+    },
+    "clinical:anthro_height_not_needed": {
+     "kept": 0,
+     "n": 74,
+     "rate": 0.0
+    },
+    "clinical:anthro_weight_needed": {
+     "kept": 62,
+     "n": 71,
+     "rate": 0.8732
+    },
+    "clinical:anthro_weight_not_needed": {
+     "kept": 0,
+     "n": 88,
+     "rate": 0.0
+    },
+    "clinical:diagnosis": {
+     "kept": 1414,
+     "n": 1414,
+     "rate": 1.0
+    },
+    "clinical:duration": {
+     "kept": 526,
+     "n": 526,
+     "rate": 1.0
+    },
+    "clinical:event_date": {
+     "kept": 89,
+     "n": 89,
+     "rate": 1.0
+    },
+    "clinical:event_year": {
+     "kept": 650,
+     "n": 650,
+     "rate": 1.0
+    },
+    "clinical:lab": {
+     "kept": 7,
+     "n": 241,
+     "rate": 0.029
+    },
+    "clinical:medication": {
+     "kept": 1010,
+     "n": 1010,
+     "rate": 1.0
+    },
+    "clinical:peds_age": {
+     "kept": 54,
+     "n": 63,
+     "rate": 0.8571
+    },
+    "clinical:vital": {
+     "kept": 48,
+     "n": 91,
+     "rate": 0.5275
+    },
+    "lab_category_kept": {
+     "kept": 241,
+     "n": 241,
+     "rate": 1.0
+    },
+    "residual:birth_year_string": {
+     "kept": 26,
+     "n": 94,
+     "rate": 0.2766
+    },
+    "residual:city": {
+     "kept": 8,
+     "n": 103,
+     "rate": 0.0777
+    },
+    "residual:exact_age_adult": {
+     "kept": 0,
+     "n": 199,
+     "rate": 0.0
+    },
+    "residual:exact_age_child": {
+     "kept": 54,
+     "n": 54,
+     "rate": 1.0
+    },
+    "residual:first_name": {
+     "kept": 2,
+     "n": 156,
+     "rate": 0.0128
+    },
+    "residual:full_birth_date": {
+     "kept": 0,
+     "n": 127,
+     "rate": 0.0
+    },
+    "residual:last_name": {
+     "kept": 3,
+     "n": 251,
+     "rate": 0.012
+    },
+    "residual:occupation_title": {
+     "kept": 2,
+     "n": 152,
+     "rate": 0.0132
+    },
+    "structure": {
+     "records": 300,
+     "icd_identical": 300,
+     "keys_identical": 300,
+     "speaker_turns_identical": 300,
+     "note_lines_identical": 300
+    }
+   }
+  },
+  "cand": {
+   "policy_dir": "cand_age_bands",
+   "structure": {
+    "records_in": 300,
+    "records_out": 300,
+    "same_order_ids": true,
+    "non_text_fields_identical": true,
+    "section_headers_kept": "2737/2737"
+   },
+   "clinical_and_residual": {
+    "clinical:anthro_bmi_not_needed": {
+     "kept": 1,
+     "n": 115,
+     "rate": 0.0087
+    },
+    "clinical:anthro_height_needed": {
+     "kept": 33,
+     "n": 39,
+     "rate": 0.8462
+    },
+    "clinical:anthro_height_not_needed": {
+     "kept": 0,
+     "n": 74,
+     "rate": 0.0
+    },
+    "clinical:anthro_weight_needed": {
+     "kept": 62,
+     "n": 71,
+     "rate": 0.8732
+    },
+    "clinical:anthro_weight_not_needed": {
+     "kept": 0,
+     "n": 88,
+     "rate": 0.0
+    },
+    "clinical:diagnosis": {
+     "kept": 1414,
+     "n": 1414,
+     "rate": 1.0
+    },
+    "clinical:duration": {
+     "kept": 526,
+     "n": 526,
+     "rate": 1.0
+    },
+    "clinical:event_date": {
+     "kept": 89,
+     "n": 89,
+     "rate": 1.0
+    },
+    "clinical:event_year": {
+     "kept": 650,
+     "n": 650,
+     "rate": 1.0
+    },
+    "clinical:lab": {
+     "kept": 7,
+     "n": 241,
+     "rate": 0.029
+    },
+    "clinical:medication": {
+     "kept": 1010,
+     "n": 1010,
+     "rate": 1.0
+    },
+    "clinical:peds_age": {
+     "kept": 54,
+     "n": 63,
+     "rate": 0.8571
+    },
+    "clinical:vital": {
+     "kept": 91,
+     "n": 91,
+     "rate": 1.0
+    },
+    "lab_category_kept": {
+     "kept": 241,
+     "n": 241,
+     "rate": 1.0
+    },
+    "residual:birth_year_string": {
+     "kept": 19,
+     "n": 94,
+     "rate": 0.2021
+    },
+    "residual:city": {
+     "kept": 4,
+     "n": 103,
+     "rate": 0.0388
+    },
+    "residual:exact_age_adult": {
+     "kept": 0,
+     "n": 199,
+     "rate": 0.0
+    },
+    "residual:exact_age_child": {
+     "kept": 54,
+     "n": 54,
+     "rate": 1.0
+    },
+    "residual:first_name": {
+     "kept": 2,
+     "n": 156,
+     "rate": 0.0128
+    },
+    "residual:full_birth_date": {
+     "kept": 0,
+     "n": 127,
+     "rate": 0.0
+    },
+    "residual:last_name": {
+     "kept": 3,
+     "n": 251,
+     "rate": 0.012
+    },
+    "residual:occupation_title": {
+     "kept": 2,
+     "n": 152,
+     "rate": 0.0132
+    },
+    "structure": {
+     "records": 300,
+     "icd_identical": 300,
+     "keys_identical": 300,
+     "speaker_turns_identical": 300,
+     "note_lines_identical": 300
+    }
+   }
+  }
+ },
+ "long1": {
+  "base": {
+   "policy_dir": "age_bands",
+   "structure": {
+    "records_in": 60,
+    "records_out": 60,
+    "same_order_ids": true,
+    "non_text_fields_identical": true,
+    "section_headers_kept": "1145/1163"
+   },
+   "clinical_and_residual": {
+    "clinical:anthro_bmi_not_needed": {
+     "kept": 1,
+     "n": 103,
+     "rate": 0.0097
+    },
+    "clinical:anthro_height_needed": {
+     "kept": 6,
+     "n": 6,
+     "rate": 1.0
+    },
+    "clinical:anthro_height_not_needed": {
+     "kept": 1,
+     "n": 44,
+     "rate": 0.0227
+    },
+    "clinical:anthro_weight_needed": {
+     "kept": 12,
+     "n": 12,
+     "rate": 1.0
+    },
+    "clinical:anthro_weight_not_needed": {
+     "kept": 2,
+     "n": 53,
+     "rate": 0.0377
+    },
+    "clinical:diagnosis": {
+     "kept": 1187,
+     "n": 1187,
+     "rate": 1.0
+    },
+    "clinical:duration": {
+     "kept": 343,
+     "n": 343,
+     "rate": 1.0
+    },
+    "clinical:event_date": {
+     "kept": 67,
+     "n": 68,
+     "rate": 0.9853
+    },
+    "clinical:event_year": {
+     "kept": 599,
+     "n": 608,
+     "rate": 0.9852
+    },
+    "clinical:lab": {
+     "kept": 5,
+     "n": 282,
+     "rate": 0.0177
+    },
+    "clinical:medication": {
+     "kept": 866,
+     "n": 866,
+     "rate": 1.0
+    },
+    "clinical:peds_age": {
+     "kept": 8,
+     "n": 9,
+     "rate": 0.8889
+    },
+    "clinical:vital": {
+     "kept": 18,
+     "n": 47,
+     "rate": 0.383
+    },
+    "lab_category_kept": {
+     "kept": 244,
+     "n": 282,
+     "rate": 0.8652
+    },
+    "residual:birth_year_string": {
+     "kept": 4,
+     "n": 40,
+     "rate": 0.1
+    },
+    "residual:city": {
+     "kept": 2,
+     "n": 42,
+     "rate": 0.0476
+    },
+    "residual:exact_age_adult": {
+     "kept": 0,
+     "n": 10,
+     "rate": 0.0
+    },
+    "residual:exact_age_child": {
+     "kept": 1,
+     "n": 1,
+     "rate": 1.0
+    },
+    "residual:first_name": {
+     "kept": 2,
+     "n": 52,
+     "rate": 0.0385
+    },
+    "residual:full_birth_date": {
+     "kept": 0,
+     "n": 64,
+     "rate": 0.0
+    },
+    "residual:last_name": {
+     "kept": 0,
+     "n": 60,
+     "rate": 0.0
+    },
+    "residual:occupation_title": {
+     "kept": 0,
+     "n": 55,
+     "rate": 0.0
+    },
+    "structure": {
+     "records": 60,
+     "icd_identical": 60,
+     "keys_identical": 60,
+     "speaker_turns_identical": 60,
+     "note_lines_identical": 60
+    }
+   }
+  },
+  "cand": {
+   "policy_dir": "cand_age_bands",
+   "structure": {
+    "records_in": 60,
+    "records_out": 60,
+    "same_order_ids": true,
+    "non_text_fields_identical": true,
+    "section_headers_kept": "1163/1163"
+   },
+   "clinical_and_residual": {
+    "clinical:anthro_bmi_not_needed": {
+     "kept": 1,
+     "n": 103,
+     "rate": 0.0097
+    },
+    "clinical:anthro_height_needed": {
+     "kept": 6,
+     "n": 6,
+     "rate": 1.0
+    },
+    "clinical:anthro_height_not_needed": {
+     "kept": 1,
+     "n": 44,
+     "rate": 0.0227
+    },
+    "clinical:anthro_weight_needed": {
+     "kept": 12,
+     "n": 12,
+     "rate": 1.0
+    },
+    "clinical:anthro_weight_not_needed": {
+     "kept": 2,
+     "n": 53,
+     "rate": 0.0377
+    },
+    "clinical:diagnosis": {
+     "kept": 1187,
+     "n": 1187,
+     "rate": 1.0
+    },
+    "clinical:duration": {
+     "kept": 343,
+     "n": 343,
+     "rate": 1.0
+    },
+    "clinical:event_date": {
+     "kept": 67,
+     "n": 68,
+     "rate": 0.9853
+    },
+    "clinical:event_year": {
+     "kept": 599,
+     "n": 608,
+     "rate": 0.9852
+    },
+    "clinical:lab": {
+     "kept": 5,
+     "n": 282,
+     "rate": 0.0177
+    },
+    "clinical:medication": {
+     "kept": 866,
+     "n": 866,
+     "rate": 1.0
+    },
+    "clinical:peds_age": {
+     "kept": 8,
+     "n": 9,
+     "rate": 0.8889
+    },
+    "clinical:vital": {
+     "kept": 47,
+     "n": 47,
+     "rate": 1.0
+    },
+    "lab_category_kept": {
+     "kept": 244,
+     "n": 282,
+     "rate": 0.8652
+    },
+    "residual:birth_year_string": {
+     "kept": 2,
+     "n": 40,
+     "rate": 0.05
+    },
+    "residual:city": {
+     "kept": 1,
+     "n": 42,
+     "rate": 0.0238
+    },
+    "residual:exact_age_adult": {
+     "kept": 0,
+     "n": 10,
+     "rate": 0.0
+    },
+    "residual:exact_age_child": {
+     "kept": 1,
+     "n": 1,
+     "rate": 1.0
+    },
+    "residual:first_name": {
+     "kept": 2,
+     "n": 52,
+     "rate": 0.0385
+    },
+    "residual:full_birth_date": {
+     "kept": 0,
+     "n": 64,
+     "rate": 0.0
+    },
+    "residual:last_name": {
+     "kept": 0,
+     "n": 60,
+     "rate": 0.0
+    },
+    "residual:occupation_title": {
+     "kept": 0,
+     "n": 55,
+     "rate": 0.0
+    },
+    "structure": {
+     "records": 60,
+     "icd_identical": 60,
+     "keys_identical": 60,
+     "speaker_turns_identical": 60,
+     "note_lines_identical": 60
+    }
+   }
+  }
+ }
+}

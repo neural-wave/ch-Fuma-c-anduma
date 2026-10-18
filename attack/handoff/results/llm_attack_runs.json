@@ -1,0 +1,194 @@
+{
+ "note": "Real LLM attack runs (qwen3.5:35b, extract-v4/recover-v3). Inputs are Bosch-provided encounters, so only aggregate metrics are included; per-record outputs with evidence quotes stay local.",
+ "runs": {
+  "eval_D2N001-D2N005": {
+   "anonymized_file": "Bosch eval output produced 2026-10-17T20:00 by an OLDER MedAnon build (code_sha256 12cb9984..., config_sha256 d85e6375... matches no config at ceff209); NOT ceff209",
+   "medanon_policy": "unknown older config (exact adult ages retained)",
+   "attacker_meta": {
+    "model": "qwen3.5:35b",
+    "backend": "ollama",
+    "extract_prompt": "extract-v4",
+    "recover_prompt": "recover-v3",
+    "elapsed_s": 0.1,
+    "llm": {
+     "llm_calls": 0,
+     "cache_hits": 15,
+     "retries": 0
+    }
+   },
+   "anonymized": {
+    "mean_risk": 0.0002965284354715343,
+    "mean_bits": 12.927822474854912,
+    "median_bits": 13.951400366499431,
+    "p90_bits": 16.891097262690838,
+    "pct_likely_unique": 0.0,
+    "hallucination_rate": 0.10714285714285714,
+    "mean_masking_density": 0.8597040937608815,
+    "n_records": 5,
+    "n_failed": 0,
+    "top_leaking_attributes": {
+     "age": 31.517149273702024,
+     "other_facts": 23.253496664211536,
+     "sex": 5.0,
+     "occupation": 4.8684664363609915
+    }
+   },
+   "original": {
+    "mean_risk": 0.01189724963233943,
+    "mean_bits": 14.013014496578759,
+    "median_bits": 13.951400366499431,
+    "p90_bits": 20.14667332786238,
+    "pct_likely_unique": 0.0,
+    "hallucination_rate": 0.13793103448275862,
+    "mean_masking_density": 0.0,
+    "n_records": 5,
+    "n_failed": 0,
+    "top_leaking_attributes": {
+     "age": 31.517149273702024,
+     "other_facts": 23.253496664211536,
+     "state_or_region": 5.425960108619239,
+     "sex": 5.0,
+     "occupation": 4.8684664363609915
+    }
+   },
+   "privacy_gain": 0.9750758835331569,
+   "bits_removed": 1.0851920217238469,
+   "warnings": [],
+   "recovery": {
+    "overall": {
+     "n_guesses": 10,
+     "n_scorable": 7,
+     "n_correct": 1,
+     "recovery_rate": 0.14285714285714285
+    },
+    "excluding_names": {
+     "n_guesses": 5,
+     "n_scorable": 2,
+     "n_correct": 1,
+     "recovery_rate": 0.5
+    },
+    "by_type": {
+     "name": {
+      "n_guesses": 5,
+      "n_scorable": 5,
+      "n_correct": 0,
+      "recovery_rate": 0.0
+     },
+     "state_or_region": {
+      "n_guesses": 1,
+      "n_scorable": 1,
+      "n_correct": 1,
+      "recovery_rate": 1.0
+     },
+     "city": {
+      "n_guesses": 1,
+      "n_scorable": 1,
+      "n_correct": 0,
+      "recovery_rate": 0.0
+     },
+     "year": {
+      "n_guesses": 3,
+      "n_scorable": 0,
+      "n_correct": 0,
+      "recovery_rate": null
+     }
+    }
+   }
+  },
+  "train_D2N127-D2N129": {
+   "anonymized_file": "MedAnon ceff209 (local code_sha256 4ff71990...), built-in defaults (no --config; config_sha256 749001b8...), full detectors (rules+spaCy/Presidio+BERT+OpenMed)",
+   "medanon_policy": "default: exact adult ages, DOB keeps year",
+   "attacker_meta": {
+    "model": "qwen3.5:35b",
+    "backend": "ollama",
+    "extract_prompt": "extract-v4",
+    "recover_prompt": "recover-v3",
+    "elapsed_s": 37.1,
+    "llm": {
+     "llm_calls": 9,
+     "cache_hits": 0,
+     "retries": 0
+    }
+   },
+   "anonymized": {
+    "mean_risk": 0.00019037376566794842,
+    "mean_bits": 15.017222564336187,
+    "median_bits": 14.065175039797843,
+    "p90_bits": 16.650164667559437,
+    "pct_likely_unique": 0.0,
+    "hallucination_rate": 0.0,
+    "mean_masking_density": 0.8157106925202925,
+    "n_records": 3,
+    "n_failed": 0,
+    "top_leaking_attributes": {
+     "age": 18.901685560541665,
+     "other_facts": 16.609640474436812,
+     "occupation": 6.540341658030082,
+     "sex": 3.0,
+     "absolute_date": 0.0
+    }
+   },
+   "original": {
+    "mean_risk": 0.001952209752310567,
+    "mean_bits": 16.21221006457657,
+    "median_bits": 14.065175039797843,
+    "p90_bits": 19.518134668136362,
+    "pct_likely_unique": 0.0,
+    "hallucination_rate": 0.0,
+    "mean_masking_density": 0.0,
+    "n_records": 3,
+    "n_failed": 0,
+    "top_leaking_attributes": {
+     "age": 18.901685560541665,
+     "other_facts": 16.609640474436812,
+     "occupation": 6.540341658030082,
+     "absolute_date": 3.584962500721156,
+     "sex": 3.0
+    }
+   },
+   "privacy_gain": 0.9024829348164926,
+   "bits_removed": 1.1949875002403836,
+   "warnings": [],
+   "recovery": {
+    "overall": {
+     "n_guesses": 6,
+     "n_scorable": 5,
+     "n_correct": 0,
+     "recovery_rate": 0.0
+    },
+    "excluding_names": {
+     "n_guesses": 3,
+     "n_scorable": 2,
+     "n_correct": 0,
+     "recovery_rate": 0.0
+    },
+    "by_type": {
+     "name": {
+      "n_guesses": 3,
+      "n_scorable": 3,
+      "n_correct": 0,
+      "recovery_rate": 0.0
+     },
+     "city": {
+      "n_guesses": 1,
+      "n_scorable": 1,
+      "n_correct": 0,
+      "recovery_rate": 0.0
+     },
+     "year": {
+      "n_guesses": 1,
+      "n_scorable": 0,
+      "n_correct": 0,
+      "recovery_rate": null
+     },
+     "employer_or_facility": {
+      "n_guesses": 1,
+      "n_scorable": 1,
+      "n_correct": 0,
+      "recovery_rate": 0.0
+     }
+    }
+   }
+  }
+ }
+}

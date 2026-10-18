@@ -1,0 +1,32 @@
+{
+ "seed": 17,
+ "source": "data/patient_doctor_encounters.jsonl",
+ "stratified_by": "dataset",
+ "encounter_ids": [
+  "D2N069",
+  "D2N080",
+  "D2N091",
+  "D2N098",
+  "D2N100",
+  "D2N109",
+  "D2N117",
+  "D2N126",
+  "D2N127",
+  "D2N130",
+  "D2N133",
+  "D2N148",
+  "D2N150",
+  "D2N151",
+  "D2N159",
+  "D2N162",
+  "D2N166",
+  "D2N168",
+  "D2N175",
+  "D2N180",
+  "D2N183",
+  "D2N184",
+  "D2N197",
+  "D2N200",
+  "D2N206"
+ ]
+}

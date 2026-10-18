@@ -1,0 +1,22 @@
+{
+ "n_attributes": 152,
+ "labels": {
+  "valid": 120,
+  "trivial": 9,
+  "icd_floor": 1,
+  "medical": 15,
+  "duplicate": 6,
+  "uncertain": 1
+ },
+ "precision": 0.7894736842105263,
+ "bits_by_label": {
+  "valid": 506.5,
+  "trivial": 35.6,
+  "icd_floor": 6.6,
+  "medical": 93.5,
+  "duplicate": 21.1,
+  "uncertain": 3.3
+ },
+ "share_of_bits_from_invalid": 0.24028370203560256,
+ "valid_but_mispriced": 26
+}

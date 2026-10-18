@@ -9,5 +9,24 @@ outputs/
 __pycache__/
 *.egg-info/
 .pytest_cache/
+.ruff_cache/
 build/
 dist/
+
+# Re-identification attack: LLM cache and run outputs
+attack/cache/
+attack/results/
+
+# macOS metadata
+.DS_Store
+
+# Per-record attacker results keyed by real encounter IDs: local only
+attack/paper/results/per_record.csv
+
+# LaTeX build files of the jury report
+report/*.aux
+report/*.log
+report/*.out
+report/*.fdb_latexmk
+report/*.fls
+report/*.synctex.gz

@@ -1,0 +1,20 @@
+{
+ "n_attributes": 32,
+ "labels": {
+  "valid": 26,
+  "duplicate": 1,
+  "uncertain": 1,
+  "trivial": 2,
+  "medical": 2
+ },
+ "precision": 0.8125,
+ "bits_by_label": {
+  "valid": 101.5,
+  "duplicate": 6.6,
+  "uncertain": 4.1,
+  "trivial": 19.9,
+  "medical": 13.3
+ },
+ "share_of_bits_from_invalid": 0.3022125424100337,
+ "valid_but_mispriced": 8
+}

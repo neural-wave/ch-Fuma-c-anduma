@@ -1,0 +1,1876 @@
+MEDANON — GUIDA TECNICA COMPLETA E PASSAGGIO DI CONSEGNE PER UN'ALTRA AI
+Aggiornamento verificato: 18 ottobre 2026, branch round4-dev, HEAD ceff209.
+Repository esaminato: D:\NEURAL_WAVE\Anonymization_Bosch_NeuralWave
+
+LEGGERE PRIMA LA SEZIONE 21 IN FONDO AL FILE. Le sezioni 0-20 sono la
+fotografia tecnica del 17/10/2026 ~21:40, al commit 07ef094, e rimangono
+come storia del progetto. La sezione 21 descrive i commit successivi,
+corregge le conclusioni superate e prevale in caso di contrasto.
+Il vecchio code hash 39755f6242d3... riguarda soltanto quella fotografia:
+non è l'hash del codice attuale o del futuro output da consegnare.
+
+Questo testo contiene solo esempi inventati e risultati aggregati. Non contiene dialoghi,
+note cliniche o identificativi personali tratti dai dataset forniti.
+
+INDICE
+  0. Come leggere il dossier e limiti temporali della fotografia
+  1. Riassunto del progetto in 30 righe
+  2. Challenge Bosch: problema, vincoli e consegna
+  3. Dati: schema, split, provenienza e significato di training
+  4. Mappa completa dei file
+  5. Architettura dal JSONL all'output
+  6. Configurazione e profili effettivi
+  7. Rilevamento dei candidati sensibili
+  8. Filtri clinici, risoluzione dei conflitti e collegamento tra campi
+  9. Trasformazioni e policy, etichetta per etichetta
+ 10. Passaggio sul dataset e quasi identificatori
+ 11. CLI, audit, manifest, riproducibilità e sicurezza dei dati
+ 12. Esperimenti e scelta dei modelli
+ 13. Valutazione: che cosa misura ogni metrica
+ 14. Risultati verificabili e attribuzione alla giusta versione
+ 15. Attacchi privacy e loro limiti
+ 16. Test, regressioni e stato delle verifiche
+ 17. Problemi aperti e rischi per la challenge
+ 18. Lavoro prioritario e criteri di completamento
+ 19. Come spiegarlo ai giudici senza sovravendere i risultati
+ 20. Prompt operativo per l'AI che subentra
+ 21. Aggiornamento Round 4-6 e revisione avversaria (18 ottobre 2026)
+
+===============================================================================
+0. COME LEGGERE IL DOSSIER E LIMITI TEMPORALI DELLA FOTOGRAFIA
+===============================================================================
+
+Le affermazioni hanno quattro livelli di evidenza:
+  [CODICE] comportamento letto direttamente nel sorgente dello stato descritto;
+  [ARTEFATTO] cifra letta da un file di output già presente, con il suo manifest;
+  [DOCUMENTO] cifra o decisione raccontata da README/REPORT/MODEL_EXPERIMENTS;
+  [INFERENZA] conseguenza tecnica ragionevole, che richiede ancora una misura.
+Quando una cifra viene da un artefatto vecchio non è una misura del codice odierno.
+
+Claude sta continuando a lavorare. Durante questa analisi il repository
+è passato da main-sync 096ff01 al branch round23-candidate 07ef094.
+Il commit nuovo include i fix su lexicon.py, medical.py, pipeline.py,
+rules.py, spans.py, transform.py e clinical_terms.txt, oltre a
+configs/age_bands.yaml, scripts/score_gold.py,
+tests/test_round23_regressions.py e reports/ROUND23_EVALUATION.md.
+Al controllo conclusivo git status mostrava soltanto questo TXT nuovo
+non tracciato; non c'erano modifiche di codice non committate.
+In particolare:
+  - il branch llm-first è in un'altra worktree, D:\NEURAL_WAVE\llm_first_wt;
+    non fa parte della pipeline MedAnon attiva;
+  - dev e policy-review puntano a 64180dc; release è uno snapshot precedente.
+
+Non considerare questo dossier un sostituto di git status, manifest e test eseguiti
+immediatamente prima della consegna. Il codice in worktree potrebbe cambiare mentre
+un'altra AI legge il documento. Il precedente CODEBASE_EXPLAINED.md e parte di
+MODEL_EXPERIMENTS.md/OVERNIGHT_REPORT.md descrivono stati precedenti: per i fatti
+operativi prevalgono il codice e il manifest dell'esecuzione che si sta valutando.
+
+Una verifica iniziale utile è:
+  git status --short
+  git log -1 --format="%h %ci %s"
+  git diff --stat
+  medanon validate --original data/eval_patient_doctor_encounters.jsonl \
+                   --anonymized <output_finale>.jsonl
+
+ATTENZIONE: il file di esempio con cinque input/output reali in
+outputs/temporary_test/CINQUE_ESEMPI_REAL_INPUT_OUTPUT.txt è locale e può contenere
+testo clinico originale. Questo dossier non lo riproduce. Non incollarlo in chat,
+report pubblici o strumenti remoti senza autorizzazione e revisione.
+
+===============================================================================
+1. RIASSUNTO DEL PROGETTO IN 30 RIGHE
+===============================================================================
+
+MedAnon è una pipeline Python di anonimizzazione di incontri clinici in inglese.
+Ogni riga di input è un oggetto JSON con dialogo medico-paziente, nota del medico,
+codici ICD-10 e metadati. La pipeline modifica soltanto dialogue e note.
+Il problema non è solo trovare nomi: deve rimuovere informazioni identificanti senza
+cancellare sintomi, diagnosi, farmaci, dosi, risultati, negazioni e cronologia utile.
+
+La soluzione è ibrida e basata su span: più rilevatori propongono intervalli di
+caratteri; regole di contesto, lessici e MedicalGuard controllano le proposte;
+EntityRegistry unifica le persone e propaga nomi tra nota e dialogo; un resolver
+sceglie intervalli non sovrapposti; Transformer decide per etichetta se conservare,
+generalizzare, sostituire con placeholder, perturbare o cancellare. Il risultato
+resta nello schema originale ed è accompagnato da audit e manifest.
+
+Configurazione predefinita odierna: regole + spaCy en_core_web_lg/Presidio +
+dslim/bert-base-NER-uncased in cascata sul dialogo + OpenMed PII SuperClinical
+su dialogo e nota. Tutti locali, CPU di default. GLiNER/GLiNER2 e un piccolo LLM
+sono disponibili o sperimentati, ma non sono nella configurazione predefinita.
+
+Policy predefinita odierna: nomi e identificativi diretti diventano placeholder;
+età del paziente da 0 a 89 anni resta esatta, da 90 in su diventa 90+; DOB e
+date perdono giorno e mese ma conservano l'anno quando noto, salvo la DOB che
+rivela un paziente almeno novantenne; anni di calendario e date relative restano;
+occupazioni diventano categorie; città e stati diventano tipi generici, paesi
+regioni del mondo; valori di alcuni esami diventano intervalli clinici.
+
+Il passaggio k=3 cerca di ridurre unicità sui quasi identificatori dichiarati
+ma non garantisce k-anonimato formale e, per scelta esplicita, non allarga
+l'età esatta. Diagnosi, codice ICD, date, testo libero e laboratorio restano fuori
+dall'insieme QI controllato. Il numero di record sotto k può quindi essere > 0.
+
+Non risulta un fine-tuning locale dei rilevatori PHI. “Training” nel progetto
+significa soprattutto: modelli già preaddestrati scaricati localmente; lessici
+compilati da fonti esterne; regole/threshold tarati in sviluppo; un classificatore
+TF-IDF/logistic regression addestrato sui 140 incontri dev SOLO per la proxy di
+utilità ICD-10. Quel classificatore non esegue anonimizzazione.
+
+I numeri più citati (recall 0,886 con OpenMed su sintetico avversariale;
+linkage 58,2% -> 3,0%; F1 ICD 0,384 -> 0,384) provengono da esperimenti
+specifici e non sono punteggi ufficiali Bosch né una prova della policy corrente.
+Il commit 07ef094 aggiunge un confronto su 40 incontri sintetici di
+SVILUPPO: fix e age_bands migliorano alcune proxy, ma quei casi sono già
+stati esaminati per trovare i bug. Non sono un test Bosch indipendente.
+
+===============================================================================
+2. CHALLENGE BOSCH: PROBLEMA, VINCOLI E CONSEGNA
+===============================================================================
+
+Fonte locale primaria: task/NeuralWaveTask_Anonymization of_patient_data_public.pdf.
+Fonte organizzativa: D:\NEURAL_WAVE\guidelines.md.
+
+Il PDF indica quattro criteri di pari peso: protezione della privacy, utilità
+dell'informazione medica, originalità e scalabilità. La valutazione ufficiale usa
+un dataset non pubblico con struttura analoga. Per privacy menziona la quota di
+informazioni private rimosse; per utilità, F1 nella predizione dei codici ICD-10
+e recall dei concetti medici. I dettagli del valutatore ufficiale non sono nel
+repository: tutte le misure locali sono proxy, con possibili divergenze.
+
+Vincoli: inferenza on-prem, nessun modello cloud, VRAM GPU massima 4 GB. Durante
+lo sviluppo si possono usare risorse diverse. dialogue e note sono i campi
+anonimizzabili; code e description di icd10_codes vanno preservati. Il PDF dice
+anche di conservare le informazioni rilevanti per ICD, salvo che la loro
+anonimizzazione sia necessaria per la privacy. I bonus opzionali comprendono
+attacchi avversari, spiegazioni, efficienza, uso senza ICD visibili in inferenza
+e robustezza a formati di input diversi.
+
+La consegna richiede JSONL anonimizzato e repository con sorgente/README. Le
+linee guida generali richiedono inoltre report massimo tre pagine, video massimo
+due minuti, nomi completi del team nel README e prova in ambiente pulito.
+Indicano pubblicazione entro le 11:00 di domenica 18 ottobre 2026. Il report
+attuale contiene ancora TODO sui nomi; video e pubblicazione sono attività
+umane, da non dichiarare completate sulla sola base del codice.
+
+Il PDF cita una possibile valutazione intermedia da parte Bosch. Nel repository
+non c'è evidenza di un risultato ufficiale ricevuto; non inventarlo.
+
+===============================================================================
+3. DATI: SCHEMA, SPLIT, PROVENIENZA E SIGNIFICATO DI TRAINING
+===============================================================================
+
+File locali di input:
+  data/patient_doctor_encounters.jsonl       140 righe, split di sviluppo;
+  data/eval_patient_doctor_encounters.jsonl   67 righe, split locale di valutazione.
+
+Conteggio effettuato leggendo solo JSON e statistiche aggregate, senza stamparne
+il testo. Nello split dev i valori di dataset sono aci=77, virtassist=35,
+virtscribe=28; nell'eval aci=35, virtassist=20, virtscribe=12. Tutte le righe
+hanno le chiavi encounter_id, dataset, dialogue, note, icd10_codes. Lunghezze
+medie: dev ~6517 caratteri di dialogo e ~2705 di nota; eval ~6444 e ~2649.
+I codici ICD distinti osservati sono 146 in dev e 112 in eval. Questo non dice
+quanti casi siano clinicamente unici; dice solo che il label space è ampio
+rispetto alle 140 righe di training del proxy.
+
+Esempio puramente inventato dello schema:
+  {"encounter_id":"SYN_DEMO_001","dataset":"demo",
+   "dialogue":"[doctor] Buongiorno...\n[patient] ...",
+   "note":"Esempio clinico inventato.",
+   "icd10_codes":[{"code":"Z00.0","description":"Example description"}]}
+L'implementazione e le regole sono per testi inglesi; l'italiano nell'esempio
+serve solo a mostrare lo schema JSONL, non è un input supportato o testato.
+
+Gli incontri forniti dal task sono usati a runtime come testo da anonimizzare.
+Le descrizioni ICD dello stesso incontro sono anche indizi clinici per evitare
+falsi positivi del MedicalGuard. Non c'è una fase che addestra BERT/OpenMed sui
+140 incontri. Se “dati di creazione del modello” viene chiesto ai giudici,
+distinguere quattro cose:
+  (a) dati di pretraining/fine-tuning dei checkpoint esterni: NON addestrati qui;
+      i dettagli completi dipendono dalle rispettive model card;
+  (b) dataset Bosch locale: sviluppo, audit, test, selezione delle policy;
+  (c) risorse lessicali: generate una volta da Census, SSA/mirror nomi,
+      FDA NDC, ICD-10-CM, wordfreq, più liste curate;
+  (d) modello di utilità TF-IDF + regressione logistica: addestrato sul dev
+      originale e applicato all'eval originale/anonimizzato per misurare delta F1.
+
+Il campione reale di 25 incontri in configs/validation_subset.json è scelto per
+ID con stratificazione approssimativa per dataset. Serve al confronto dei
+rilevatori, ma non possiede annotazioni gold. Lo script annotation.py può
+preparare task ciechi Label Studio; non si osserva un file di annotazioni umane
+completate nel repository. Evitare di chiamarlo test clinico validato.
+
+La generazione sintetica in evaluation/synthetic.py usa template, lessici di
+nomi/città/diagnosi, stili ACI, discharge e cased e marca esattamente gli span
+PHI e le “trappole” cliniche. evaluation/adversarial.py genera due banche
+dev/test con nomi e phrasings dichiarati disgiunti; include grafie rare,
+parole comuni usate come nomi, cognomi eponimi, cifre pronunciate, turni lunghi,
+occupazioni senza cue. Sono dati inventati dal team, non un gold Bosch.
+
+Un canary è un identificativo sintetico inserito in un vero contesto dev;
+misura se il sistema rimuove l'elemento inserito, non se trova tutti gli
+identificativi originari. Se un canary è quasi sempre rimosso, la recall sugli
+identificativi reali ignoti non è automaticamente uguale.
+
+===============================================================================
+4. MAPPA COMPLETA DEI FILE
+===============================================================================
+
+RADICE E CONFIGURAZIONI
+  README.md: guida d'uso, risultati e limiti; alcune cifre storiche.
+  REPORT.md: materiale per il report, non ancora report finale di tre pagine.
+  MODEL_EXPERIMENTS.md: confronto controllato di modelli, con conclusione
+    originale ormai storica sull'opt-in OpenMed; il default è stato cambiato.
+  reports/ROUND23_EVALUATION.md: nuovo resoconto su 40 incontri
+    sintetici di sviluppo dei round 2 e 3, con gold annotato
+    dall'autore e confronto baseline/fix/age_bands.
+  reports/round23_metrics.json: risultati numerici e protocollo del
+    confronto round 2–3; non sono metriche Bosch ufficiali.
+  OVERNIGHT_REPORT.md: cronologia dei fix e artefatti antecedenti alla policy
+    attuale; non è uno stato di esecuzione corrente.
+  CODEBASE_EXPLAINED.md: vecchia analisi; contiene critiche e configurazioni
+    risalenti a un codice diverso.
+  MEDANON_DOSSIER_COMPLETO_PER_AI.txt: precedente dossier; utile come storia,
+    ma non sostituisce questa fotografia aggiornata.
+  ARCHITETTURA_MEDANON.png: schema visivo già presente.
+  pyproject.toml: package Python, dipendenze, entrypoint console medanon.
+  requirements.txt: installazione runtime CPU, compresa spaCy large e torch.
+  requirements-ml.txt: GLiNER/GLiNER2 sperimentali.
+  requirements-dev.txt: sviluppo/test.
+  configs/default.yaml: descrive la policy odierna; load_config() ha già gli
+    stessi default incorporati in config.py, quindi senza --config si usa DEFAULTS.
+  configs/standard.yaml: disattiva OpenMed e perturba i valori di laboratorio.
+  configs/fast.yaml: disattiva entrambi i transformer; resta spaCy/Presidio.
+  configs/max_privacy.yaml: alias esplicito dell'impostazione OpenMed + intervalli lab.
+  configs/age_bands.yaml: nuovo nel commit 07ef094;
+    policy candidata: età pediatriche esatte, adulti a fasce decennali.
+  configs/validation_subset.json: soli ID del campione di 25 incontri.
+
+PACCHETTO src/medanon
+  __init__.py: esporta Anonymizer e load_config.
+  config.py: DEFAULTS, deep merge con YAML e override; l'override di una lista
+    rimpiazza l'intera lista, quello di un dizionario fonde per chiave.
+  cli.py: lettura/scrittura JSONL, opzioni, streaming, lavoratori paralleli,
+    comandi anonymize/validate/evaluate/bench/canary/prepare-models/demo.
+  pipeline.py: orchestratore: detect, filtri, propagazione, render,
+    anonymize_dataset, QI e statistiche.
+  rules.py: espressioni regolari, euristiche e lessici per categorie PHI.
+  ner.py: spaCy/Presidio, truecasing, wrapper dei transformer HF/GLiNER.
+  llm.py: detector LLM locale sperimentale, strutturato, non default.
+  medical.py: MedicalGuard e contesto ICD dell'incontro.
+  lexicon.py: caricamento risorse, punteggi parola/nome/medicina,
+    tokenizzazione e numeri parlati.
+  entities.py: clustering di persone, ruoli, placeholder e propagazione.
+  spans.py: dataclass Span, priorità e risoluzione degli overlap.
+  transform.py: policy e funzioni effettive di sostituzione/generalizzazione.
+  manifest.py: hash di codice/config/modelli/file e peak memory.
+  resources/*: liste spedite con il package, senza rete durante l'inferenza.
+
+PACCHETTO src/medanon/evaluation
+  synthetic.py: generatore sintetico ACI/discharge/cased e scorer storico.
+  adversarial.py: banca avversariale dev/test disgiunta e gold span/trap.
+  scoring.py: scorer gold con intervalli Wilson e recall raw/policy-compliant.
+  bench.py: esegue benchmark sintetico tramite CLI.
+  canary.py: iniezione di identificativi inventati in contesto reale dev.
+  metrics.py: integrità, utility locale, audit privacy, proxy ICD,
+    validazione rigorosa del deliverable.
+  attacks.py: linkage, laboratori, unicità QI, inversione perturbazione,
+    recupero dei nomi residui; NON un ranker con archivio ausiliario esterno.
+  diagnostics.py: diagnostica delle sostituzioni, con tentativo di mascherare
+    le superfici identificanti quando stampa.
+
+SCRIPT
+  run_experiments.py: suite lunga che produce risultati aggregati e output
+    dev/eval; è costosa, non va lanciata come smoke test.
+  model_experiments.py: confronti baseline/Healthcare-Brain/OpenMed/Qwen in
+    processi separati con gold avversariale e campione reale di 25.
+  compare_detectors.py: confronto iniziale GLiNER, GLiNER2, BERT.
+  annotation.py: export/score per annotazione umana locale Label Studio.
+  build_resources.py: costruzione offline-ready dei lessici; il BUILD usa rete.
+  privacy_check_docs.py: controllo preventivo contro divulgazioni nei file
+    da pubblicare, basato sui nomi-seed del corpus locale.
+  audit_survivors.py, review_run.py, compare_run25.py, ml_diff.py:
+    strumenti di ispezione e confronto; alcuni possono creare file locali con
+    superfici originali, da trattare come dati sensibili.
+  policy_probe.py: esempi inventati per età, DOB, anni, placeholder.
+  score_gold.py: nuovo nel commit 07ef094; valuta un run contro annotazioni gold
+    esterne in JSONL. Può stampare testo originale SOLO con --show N e solo
+    quando il gold è interamente sintetico.
+
+TEST
+  conftest.py: fixture Anonymizer predefinito, quindi i test possono caricare
+    i modelli pesanti. test_units.py: unità base.
+  test_pipeline.py: casi integrati e CLI.
+  test_review_fixes.py, test_clinical_boundaries.py: fix della review iniziale.
+  test_policy.py: policy 17/10 età esatta/anni/DOB e score raw vs compliant.
+  test_run25_regressions.py: regressioni dopo 25 incontri sintetici rivisti.
+  test_round23_regressions.py: nuovo nel commit 07ef094, round successivi e policy
+    candidata age_bands, con controesempi clinici.
+
+ARTEFATTI outputs/ (ignorati da Git)
+  results.json e output JSONL: run precedente con età a fasce, no OpenMed.
+  experiments/*.json: confronti di modello, vedi sezione 12.
+  submission/*: snapshot precedente da NON trattare automaticamente come
+    deliverable del codice attuale.
+  review/* e temporary_test/*: file locali potenzialmente contenenti testo
+    originale e dunque non destinati a pubblicazione.
+
+===============================================================================
+5. ARCHITETTURA DAL JSONL ALL'OUTPUT
+===============================================================================
+
+Schema mentale:
+
+  JSONL -> load_config -> Anonymizer (risorse, modelli) -> detect(record)
+        -> proposte RuleDetector + spaCy/Presidio + BERT + OpenMed
+        -> soglie, pulizia statistica, MedicalGuard
+        -> EntityRegistry, propagazione, resolve_overlaps
+        -> [su dataset: livelli QI] -> render/Transformer
+        -> output JSONL + audit delle decisioni + manifest.
+
+5.1. Input e caricamento. cli.py legge il JSONL UTF-8; ogni riga valida diventa
+un dizionario. Anonymizer viene creato una volta, caricando lessici, regole,
+guardia clinica, trasformatore e modelli configurati. Le risorse lessicali
+sono cache a livello di processo. I detector obbligatori che non si caricano
+fermano l'esecuzione; in modalità --offline il download dei pesi è vietato.
+Senza --offline i pesi mancanti possono essere scaricati alla prima esecuzione,
+quindi un ambiente di valutazione senza rete va preparato in anticipo.
+
+5.2. Campi. detect() considera solo i campi elencati in cfg[fields] e di tipo
+stringa; di default dialogue e note. Il contesto clinico è costruito dalle
+descrizioni in icd10_codes quando use_icd_context=True. La nota, essendo
+spesso maiuscolata correttamente, fornisce un case_map per interpretare il
+dialogo minuscolo; la mappa preserva lunghezza e offset.
+
+5.3. Proposte. Per ogni campo, RuleDetector produce span esatti; spaCy/Presidio
+aggiunge persone/luoghi/organizzazioni e identificativi strutturati; BERT è
+chiamato solo su righe incerte del dialogo; OpenMed predefinito è chiamato
+su tutto il dialogo e tutta la nota. Ogni proposta è un oggetto Span con
+field, start/end, label canonica, source, score, testo, meta e reasons.
+La geometria degli intervalli è half-open [start,end): start incluso, end
+escluso. Questo permette di applicare sostituzioni senza ambiguità.
+
+5.4. Filtri. I tag strutturali [doctor], [patient], [patient_guest] vengono
+esclusi. I candidati statistici sotto la soglia minima non passano. La
+pulizia elimina unità di misura, intestazioni, parole comuni scambiate per
+nomi, organizzazioni/luoghi con scarso supporto, nazionalità usate come
+lingua/cibo; espande gli span tronchi alla parola intera; limita i falsi
+positivi del transformer mediante evidenza lessicale. MedicalGuard può
+salvare un candidato PERSON/ORG/LOCATION/NATIONALITY se usato clinicamente.
+Questi keep entrano nell'audit come MEDICAL_CONTEXT con reason_code.
+
+5.5. Contesto intra-incontro. EntityRegistry prende i PERSON rimasti,
+raggruppa le forme compatibili, inferisce paziente/clinico/parente/animale,
+propaga le menzioni sicure tra nota e dialogo. La pipeline propaga anche
+luoghi, organizzazioni e occupazioni riconosciuti in un campo verso altri
+punti dello stesso incontro. Non c'è un registro persistente che colleghi
+persone di incontri diversi; i placeholder sono coerenti solo nel record.
+
+5.6. Intervalli finali. resolve_overlaps raggruppa span che si intersecano,
+sceglie etichetta prevalente per forza della regola sintattica, priorità,
+lunghezza e score. Allarga lo span alla loro unione per non lasciare pezzi
+di identificativo, ma prova a non inglobare parole mediche forti. Se uno
+span attraversa un newline, viene spezzato per non cancellare la struttura
+dei turni. Dopo questo passaggio gli span finali non si sovrappongono.
+
+5.7. Rendering. Se l'input è un dataset, anonymize_dataset rileva prima
+tutti gli incontri e calcola eventuali livelli QI. render() copia il record,
+scorre gli span per campo, prende le parti originali non coperte e inserisce
+la sostituzione restituita da Transformer.apply(). Un'azione keep lascia
+il segmento invariato. Gli altri campi non vengono modificati. Alla fine
+la pipeline comprime placeholder ripetuti adiacenti e produce l'elenco delle
+decisioni con coordinate riferite SEMPRE al testo originale.
+
+5.8. Output. L'output JSONL mantiene count/ordine/chiavi e i campi non testo.
+L'audit JSONL contiene una riga per decisione, con etichetta, azione,
+replacement, detector, confidence e spiegazione. Il manifest JSON include
+hash di codice, configurazione, modelli e file, ambiente, run e tempi. La
+validazione confronta output e input su struttura e campi non testo.
+
+Esempio inventato di una singola decisione: frase “Dr. Elian Voss reviewed
+HbA1c 8.3% in 2021”. Il titolo + nome produce PERSON e va a
+[CLINICIAN_NAME]; il valore A1c diventa un intervallo [8-9] nella policy
+predefinita; l'anno 2021 resta, perché YEAR=keep. I numeri e i nomi sono
+inventati per questo documento e non sono estratti dal dataset fornito.
+
+===============================================================================
+6. CONFIGURAZIONE E PROFILI EFFETTIVI
+===============================================================================
+
+config.py è la fonte dei default incorporati; configs/default.yaml li
+documenta e permette un file esplicito. load_config(path, overrides) copia i
+default, applica il YAML e poi gli override. I dizionari vengono fusi
+ricorsivamente; liste e scalari vengono sostituiti. Dunque standard.yaml,
+che contiene solo extra_detectors=[] e LAB_VALUE=perturb, eredita età
+esatta, anni conservati, spaCy e BERT. Non è una fotografia del vecchio
+standard storico: il nome del profilo è rimasto mentre la policy comune è
+cambiata. Per confronti scientifici serve salvare la configurazione completa,
+non dedurla dal solo filename.
+
+Default senza --config:
+  fields=[dialogue,note]; use_icd_context=True;
+  role_aware_placeholders=True; k_anonymity.enabled=True, k=3;
+  spaCy en_core_web_lg attivo, truecase_dialogue=True, pattern Presidio=True;
+  dslim/bert-base-NER-uncased attivo in mode=cascade sul dialogue,
+    threshold 0.5, required=True;
+  extra detector OpenMed/OpenMed-PII-SuperClinical-Large-434M-v1 in mode=full
+    su dialogue e note, threshold 0.5;
+  CPU per default; download consentito alla prima preparazione salvo --offline;
+  politiche per etichetta come nella sezione 9.
+
+Profilo standard.yaml: disabilita OpenMed, mantiene BERT cascade, passa i lab
+da intervallo clinico a perturbazione fino al 3%. La velocità storica
+~1,3 s/incontro viene da un eseguibile di una versione antecedente e non
+quantifica l'intero profilo corrente con le ultime modifiche.
+
+Profilo fast.yaml: BERT disattivato, extra_detectors=[]; restano regole e
+spaCy/Presidio. Questo è il profilo senza transformer. L'annotazione nel file
+parla di ~0,4 s/incontro e ~1,2 GB da benchmark precedente: non è un limite
+garantito su ogni macchina.
+
+Profilo max_privacy.yaml: rende esplicito OpenMed full e lab per intervalli;
+dal 17/10 questi sono già i default. È quindi un alias pratico, soggetto
+però a eventuali differenze se i default Python cambiano e il YAML no.
+
+Profilo age_bands.yaml, committato ma NON predefinito: cambia solo AGE a action=band,
+exact_below=18, width=10, top_code=90. L'adulto di 47 anni diverrebbe
+[40-49]; quello di 18 [18-19]; le età pediatriche sotto 18 resterebbero
+esatte; 93 diventerebbe 90+. Con questa policy, _overrides() rimuove l'anno
+di nascita per adulti per evitare che anno della visita meno anno di nascita
+ricostruisca l'età esatta. È una CANDIDATA, non il default. Al momento della
+fotografia c'è un confronto sui 40 incontri sintetici di sviluppo dei
+round 2–3 in reports/ROUND23_EVALUATION.md. Non è una valutazione
+indipendente su pazienti reali né sull'eval nascosto Bosch.
+
+Opzioni CLI significative:
+  --config PATH: legge YAML;
+  --no-icd: disattiva il contesto delle descrizioni ICD nel MedicalGuard,
+    ma icd10_codes resta intatto nell'output;
+  --no-ml: disattiva BERT e detector extra, non spaCy;
+  --ml kind:model: cambia il rilevatore ML principale, ma non azzera gli
+    extra già configurati; per un confronto pulito usare YAML/override;
+  --offline: proibisce download dei modelli per ML ed extra;
+  --device cpu|cuda|auto: device richiesto ai transformer; su CPU default;
+  --no-k-anonymity: disattiva passaggio sull'intero dataset e, con un worker,
+    attiva il percorso streaming record per record;
+  --workers N: parallelizza la fase detect con ProcessPoolExecutor; ogni
+    processo carica i propri modelli, quindi RAM totale può crescere molto;
+  --audit-include-text: inserisce superfici originali nell'audit, quindi
+    l'audit così prodotto è sensibile e non va pubblicato.
+
+Le chiavi di configurazione più importanti sono policies per label,
+min_score, extra_detectors, ml, spacy, fields, use_icd_context,
+k_anonymity, placeholder_format, role_aware_placeholders. Non emerge una
+validazione formale dello schema YAML: un typo può quindi essere ignorato
+o avere effetti non evidenti. Fissare il manifest è essenziale.
+
+===============================================================================
+7. RILEVAMENTO DEI CANDIDATI SENSIBILI
+===============================================================================
+
+7.1. RuleDetector (rules.py)
+Le regole sono ad alta precisione e progettate per due stili: dialogo ASR
+minuscolo con tag speaker e nota clinica maiuscolata. detect() concatena i
+rilevatori per età, date, ID/contatti, nomi, luoghi, istituzioni, lavori,
+laboratorio ed etnia. Non modifica il testo: produce proposte Span.
+
+Età. AGE_PATTERNS intercetta “47-year-old”, “47 y/o”, “age 47”, alcune
+frasi copulative (“she is 47”) e AGE_ANSWER_RE risposte a “how old are you”.
+words_to_number interpreta numeri in parole. Valori impossibili/non in 1..120
+sono scartati; un filtro FAMILY_ONSET_RE conserva gli anni di esordio dei
+parenti in anamnesi familiare. Il commit 07ef094 estende
+questo filtro a “relative”, “family members”, “twin”, ecc. Il filtro è
+euristico: la distinzione paziente/parente non è una comprensione completa
+delle relazioni nella frase.
+
+Date. DATE_RE copre forme numeriche, ISO, mese-giorno, giorno-mese e mese-
+anno; DOB_RE riconosce una data dopo un cue di nascita e DOB_ANSWER_RE la
+risposta nel turno successivo. BORN_IN_RE gestisce “born in 1985”. YEAR_RE
+prende anni di calendario, ma controlla cue di stanza/codice/PIN affinché
+“room 2014” non sia pubblicato come anno. La modifica recente classifica
+“born 03/14/1979” come DOB anche senza “on”. Le regole evitano scambiare
+un intervallo di dolore “2-7/10”, un intervallo lab o una dose per una
+data. Mesi, giorni della settimana, festività e riferimenti relativi
+ricevono etichette separate, perché la policy li tratta diversamente.
+
+Identificativi. Si cercano MRN, conto, tessera, SSN, PIN, numeri lunghi,
+telefono, email, URL, CAP e indirizzi stradali. SPOKEN_ID_RE riconosce
+cifre dettate in parole dopo un cue, e UNCUED_DIGITS_RE copre sequenze
+di almeno sette cifre pronunciate. La regola è importante per dialoghi
+trascritti da ASR, dove “five five five...” non appare come numero.
+Il PIN a quattro cifre è un controesempio alla policy YEAR=keep.
+
+Nomi. _names() usa titoli (Mr./Dr.), relazioni (“my wife X”), saluti e
+vocativi, auto-presentazioni, campi strutturati “Patient: X”, apertura di
+dictation e bigrammi nome+cognome. Usa name_ok() con tre gradi di rigore:
+title, lenient e strict. La probabilità name_ratio() deriva da frequenze
+di nome/cognome e frequenze di parole comuni; i nomi che sono anche parole
+richiedono contesto forte. Un nome dopo titolo o in campo Patient può
+vincere su un lessico clinico. I nomi nuovi, grafie non latine e trascrizioni
+fortemente errate restano difficili.
+
+Luoghi. _places() usa un gazetteer e cue come in/from/near/visiting.
+In nota maiuscolata esige iniziale maiuscola. Evita qualche falso positivo
+come un luogo omonimo di cibo o malattia. La copertura dipende dalla lista
+places.tsv e da spaCy/OpenMed per luoghi fuori lista.
+
+Istituzioni. _institutions() riconosce “X Hospital/Clinic/Practice”, scuole,
+università, datori di lavoro dopo “works at/for” e nomi di attività dopo
+“called X”. L'ultima modifica aggiunge “practice” e “medical group” e
+distingue “Wells score” da una struttura chiamata “Quillmere Family Practice”.
+L'output può essere ORGANIZATION o LOCATION a seconda del tipo di testa.
+
+Occupazioni. Un lessico assegna categorie grossolane e i cue “works as a”,
+“job as” ecc. permettono anche professioni non nel lessico. Un titolo
+senza cue è affidato soprattutto a OpenMed: è la categoria dove il modello
+ha dato il guadagno più evidente nel benchmark sintetico. L'ultima pulizia
+esclude ruoli dello staff del dialogo, intestazioni all-caps e parole
+cliniche; una professione vera può comunque essere persa o spuria.
+
+Laboratori. La lista LABS contiene 17 analiti/pattern (A1c, glucosio,
+LDL/HDL, colesterolo, trigliceridi, creatinina, eGFR, TSH, PSA, EF,
+emoglobina, potassio, sodio, vitamina D, INR, BNP). Per ciascuno ci
+sono soglie e range plausibile. _labs() trova numeri vicini all'analita,
+anche valori detti in parole e variazioni “da 9.6 a 8.3”; evita alcuni
+range già pubblicati (“EF 55-60%”) e unità temporali/dosi. Non è un parser
+universale di referti. Altri esami e forme non riconosciute rimangono tali.
+
+7.2. spaCy e Presidio (ner.py)
+SpacyPresidioDetector crea l'engine spaCy en_core_web_lg tramite Presidio.
+Prende PERSON, GPE/LOC/FAC, ORG, NORP e li mappa alle categorie MedAnon.
+Ignora gli output spaCy numerici, DATE/TIME, CARDINAL ecc. perché regole
+dedicate danno il contesto clinico necessario. Su dialogo minuscolo crea
+una vista truecased con indizi dalla nota e dal lessico, della stessa
+lunghezza dell'originale: gli offset risultanti restano validi. Presidio
+aggiunge pattern per contatti e ID, tra cui email, telefono, URL, IP,
+SSN, carta, IBAN, licenza. I pattern usano l'engine sul testo in vista,
+ma la superficie archiviata è quella originale. Il “reference detector”
+nelle metriche è invece un Presidio vanilla separato, non questo oggetto.
+
+7.3. Transformer NER (ner.py: MLDetector)
+Per modelli HF usa pipeline token-classification con aggregazione first.
+Mappa label esterne in PERSON, LOCATION, ORGANIZATION, OCCUPATION, ID,
+CONTACT, ADDRESS. Ha mappe specifiche per Healthcare-Brain e OpenMed;
+gli output age/date dei modelli non sostituiscono le regole. I chunk sono
+al massimo ~1000 caratteri; turni lunghi vengono tagliati in finestre
+sovrapposte per non perdere entità ai bordi. In modalità cascade la
+pipeline richiama il modello solo su righe con token rari/da nome non
+già spiegati; _pack può includere del contesto fra righe selezionate.
+
+Il BERT predefinito usa cascade soltanto sul dialogo. OpenMed predefinito
+usa full su entrambi i campi: perciò il suo costo per record è ben più
+alto. Il filtro di accettazione richiede evidenza lessicale anche per
+span prodotti dai modelli, scelta per limitare allucinazioni statistiche
+e falsi positivi clinici. Questo riduce anche recall se un identificativo
+è davvero insolito o somiglia a un farmaco.
+
+GLiNER e GLiNER2 sono implementati come alternative in MLDetector e
+documentati in confronti precedenti; non sono chiamati nel profilo
+predefinito. Sono dipendenze opzionali di requirements-ml.txt.
+
+7.4. LLM locale sperimentale (llm.py)
+LLMDetector chiede a un modello locale, per esempio Qwen3.5-2B in GGUF,
+un JSON di coppie {text,type}. Il modello non riscrive direttamente
+l'incontro. Il parser scarta risposte non valide, tipi non previsti,
+elementi che non si trovano verbatim nel passaggio e MEDICAL. Gli span
+rimasti attraversano gli stessi filtri/MedicalGuard. Il backend llama_cpp
+usa una grammatica JSON; il backend transformers è disponibile ma più
+costoso su CPU. llm.py è una strada di ricerca; manca dalla config default.
+L'esperimento separato nel branch llm-first introduce addirittura il
+package src/llmanon e script propri: non confonderlo con MedAnon corrente.
+
+7.5. Il punteggio “confidence”
+Ogni Span può avere score dal modello, o un numero assegnato da una regola.
+Non sono probabilità calibrate confrontabili tra tutti i detector. La
+pipeline usa min_score per proposte statistiche; gli span da regole e
+Presidio hanno trattamenti diversi. Nell'audit “confidence” è utile come
+traccia della proposta, non una probabilità validata di identificazione.
+
+===============================================================================
+8. FILTRI CLINICI, CONFLITTI E COLLEGAMENTO TRA CAMPI
+===============================================================================
+
+8.1. Lessici e MedicalGuard
+load_lexicon() carica nomi, cognomi, frequenze comuni, farmaci, vocabolario
+ICD, termini clinici, eponimi, occupazioni e luoghi. medical_strength(w)
+restituisce 2 per forte evidenza clinica, 1 per debole, 0 per assente:
+si basa su elenco farmaci/termini, rarità della parola nel vocabolario
+ICD, morfologia (es. -itis, -ectomy), derivazioni e, nell'ultima modifica,
+prefissi e composti. La cache _MED_CACHE è globale al processo. I lessici
+sono compilati da fonti esterne, ma il runtime legge solo file inclusi;
+non effettua chiamate a Census/FDA/ICD durante l'inferenza.
+
+MedicalGuard.prepare(icd_codes) costruisce token/frasi dalle descrizioni
+ICD del record. check(span,text,ctx) lavora soltanto su PERSON,
+ORGANIZATION, LOCATION, NATIONALITY. Può restituire una ragione di keep
+per farmaco, eponimo usato con la testa clinica, test/scala, acronimo
+clinico, intestazione o nome di sistema EHR/assistente. Le regole forti
+di sintassi possono prevalere: “Dr. Bell” deve essere persona anche se
+“Bell's palsy” resta diagnosi. La guardia non decide su AGE, DATE, ID,
+CONTACT, LAB_VALUE: lì prevalgono regole, priorità e policy.
+
+Criticità strutturale: la descrizione ICD in input è una fonte di indizi
+per MedicalGuard e quindi potrebbe proteggere un cognome che coincide
+con una diagnosi se il contesto è ambiguo. Il codice mitiga con strong
+context per titoli e altri cue, ma il rischio di omonimie non può essere
+eliminato da una lista. L'ablazione --no-icd misura il peso di questo
+supporto, non l'effetto di togliere i codici dall'output.
+
+8.2. Pulizia delle proposte ML/statistiche
+pipeline._clean_statistical() evita span tra righe e ai bordi di parole,
+allarga un token tronco alla parola intera, elimina unità di misura
+anche senza numero adiacente, analiti con valori (HbA1c 7.2), parole
+grammaticalmente verbali scambiate per ORG/LOC, professioni dello staff,
+lingue scambiate per nazionalità e tag sparsi. Nel percorso OpenMed,
+PERSON necessita indizio di nome; ORG/LOC un termine distintivo non
+medico; OCCUPATION non può essere solo “doctor” o “nurse” di turno.
+
+Questi filtri sono il compromesso centralissimo del progetto: molta
+recall PHI dei detector non produce necessariamente una sostituzione.
+Un detector può aver trovato un vero identificativo, ma un filtro
+lessicale può scartarlo. Viceversa un detector può proporre un farmaco,
+e il guard impedirà il falso positivo. Le misure di recall devono
+valutare l'OUTPUT finale, non il numero di proposte grezze.
+
+8.3. EntityRegistry
+Un candidato PERSON porta token normalizzati e possibili indizi di ruolo.
+EntityRegistry.add() raggruppa menzioni con token compatibili e vota un
+ruolo: PATIENT, CLINICIAN, FAMILY, PET o PERSON. Titolo “Dr.” vota
+clinico; “my wife” vota parente; nome soggetto della nota vota paziente;
+chi parla nel turno dialogico aiuta a identificare l'addressee. merge_
+overlapping() unisce entità con forme multi-token compatibili; finalize()
+assegna ruoli e placeholder. Solo un'entità per incontro conserva il
+placeholder [PATIENT_NAME]; gli altri PATIENT candidati tornano a ruolo
+alternativo o generico. Due persone con stesso cognome non dovrebbero
+essere fuse automaticamente: il nome parziale ambiguo può restare PERSON.
+
+propagate() cerca ciascuna forma sicura di una persona confermata nei
+due campi; per parole comuni richiede titolo, adiacenza a un altro token
+del nome, vocativo o nota maiuscolata. Una persona chiamata “Will” può
+quindi essere protetta nel posto dove c'è una prova di nome e lasciata
+intatta nel verbo “will”. I placeholder numerati distinguono più
+parenti/clinici. Non sono surrogati realistici: rappresentano il ruolo.
+
+8.4. Propagazione di occupazioni, luoghi e organizzazioni
+La pipeline cerca menzioni dello stesso nome di luogo/ente/lavoro nei
+due campi. Per forme comuni restringe il match a posizioni che sembrano
+nomi di entità. Questo riduce incoerenze fra nota e dialogo, ma resta
+un match di superficie: parafrasi e alias non vengono unificati in
+modo generale. Una professione può essere associata a un familiare
+anziché al paziente e la generalizzazione non conserva sempre chi
+ricopre il ruolo.
+
+8.5. Overlap e protezione clinica
+spans.resolve_overlaps() raggruppa span che toccano la stessa regione.
+In caso di conflitto prevale prima una regola marcata strong di origine
+rule, poi la PRIORITY della label (DOB/ID/CONTACT più alte di AGE,
+PERSON ecc.), poi lunghezza e score. L'intervallo finale è l'unione
+dei candidati del gruppo, purché una parte medica protetta non venga
+inglobata da uno span più debole con etichetta diversa. Gli intervalli
+così ottenuti sono poi separati su newline. Questo è un comportamento
+potenzialmente rischioso su casi non testati: un'unione troppo ampia
+può cancellare testo clinico; una rifilatura troppo aggressiva può
+lasciare un pezzo identificante. I test di regressione coprono esempi
+specifici, non dimostrano assenza generale di collisioni.
+
+===============================================================================
+9. TRASFORMAZIONI E POLICY, ETICHETTA PER ETICHETTA
+===============================================================================
+
+Transformer.apply(span,text,encounter_id,person_placeholder,overrides)
+restituisce (replacement, action, explanation). Se replacement=None,
+render() conserva il testo originale. La configurazione per label si
+fonde con un eventuale override di livello QI. Le azioni configurabili
+sono keep, redact, placeholder, generalize, perturb; AGE ha anche
+exact e la nuova action=band. L'output di una policy va letto insieme
+alla qualità del rilevamento: se un elemento sensibile non ha alcuno
+span finale, resta invariato qualunque sia la policy.
+
+PERSON. Ogni nome riconosciuto diventa un placeholder di ruolo. Esempi:
+[PATIENT_NAME], [CLINICIAN_NAME], [RELATIVE_NAME_1], [PET_NAME], oppure
+[PERSON] in caso di ruolo incerto. Il suffisso possessivo viene conservato
+quando appropriato. Lo stesso placeholder dentro un incontro indica che
+EntityRegistry ha collegato le menzioni; non è un'identità pseudonima
+stabile fra incontri. Usare [PATIENT_NAME] invece di [PATIENT] evita
+collisione con il tag speaker [patient] dell'input.
+
+AGE. Il default action=exact conserva l'età fino a 89 anni. Se un AGE
+riconosciuto è >=90, sostituisce la sola superficie numerica con 90+.
+Questo lascia la grammatica circostante per quanto possibile, ad esempio
+“a 93-year-old” -> “a 90+-year-old”. Non è una correzione grammaticale
+generale. Una persona di 47 anni resta 47, scelta clinicamente utile ma
+privacy-rischiosa insieme ad altri indizi. Se un AGE relativo a un familiare
+viene rilevato erroneamente come età del paziente, può essere modificato:
+il filtro family-onset tenta di impedirlo. La candidata action=band
+generalizza gli adulti a fasce. action=generalize nel codice usa invece
+age_band(), fasce pediatriche più strette e larghezze configurabili;
+questo era il comportamento dei vecchi artefatti standard.
+
+DOB. Per data di nascita riconosciuta il default elimina giorno/mese e
+conserva l'anno come “[DOB] 1985”, incluse forme scritte in parole quando
+year_in() trova un anno certo. Il solo anno dopo un cue di nascita può
+restare come YEAR/DOB secondo i match: la logica gestisce in modo speciale
+una superficie che è soltanto un anno. Per età >=90, la policy rimuove
+anche l'anno di nascita. Il controllo usa età riconosciuta o, in alcuni
+punti, 2026 meno anno di nascita: “reference_year” fisso non è una data
+di visita reale. Nella candidata age_bands l'anno di nascita degli adulti
+viene tolto per non rivelare l'età esatta attraverso la differenza con
+l'anno del trattamento. Sono scelte precise, non prove di conformità
+globale a norme di deidentificazione.
+
+DATE. Una data completa riconosciuta perde giorno e mese e mantiene
+l'anno, es. “15/04/2021” -> “[DATE] 2021”. Se non c'è anno decodificabile,
+resta [DATE]. YEAR isolato resta in chiaro. MONTH, WEEKDAY e HOLIDAY
+diventano rispettivamente [MONTH], [WEEKDAY], [HOLIDAY] quando rilevati;
+RELATIVE_DATE (“two weeks ago”, “last summer”) resta perché descrive
+sequenza e durata clinica. L'effetto congiunto va verificato sul testo:
+date complete e anni possono essere parse diversamente in casi limite.
+
+ID / CONTACT / ADDRESS. Default placeholder [ID], [CONTACT], [ADDRESS].
+Il codice non genera un hash reversibile o surrogate plausibile;
+elimina la forma originale dall'output testuale. “MRN: AB-12345” produce
+idealmente “MRN: [ID]”; il prefisso MRN fuori dallo span resta, utile
+alla leggibilità ma mostra comunque il tipo di dato rimosso. ID cifrati
+in parole sono trattati da regole specifiche.
+
+LOCATION. Con hierarchy=True, il paese riconosciuto nella mappa REGION_OF
+diventa [LOCATION: Europe] o un'altra macroregione; uno stato USA diventa
+[US_STATE], una città [CITY], altri casi [LOCATION]. La macroregione
+mantiene informazione sulla storia di viaggio che può essere clinica,
+ma conserva anche un frammento di informazione geografica. Una località
+assente dal gazetteer può comunque essere trovata da spaCy/OpenMed.
+
+ORGANIZATION. In base a org_type diventa [HEALTHCARE_FACILITY], [SCHOOL],
+[EMPLOYER] o [ORGANIZATION]. La classe di ente rimane, il nome specifico
+viene tolto. Il filtro di istituzioni deve evitare che “General Practice”
+come disciplina o “Urgent Care” generico venga trattato come un nome.
+
+OCCUPATION. Di default action=generalize: categoria della lista occupations
+come [OCCUPATION: transport] o [OCCUPATION: healthcare]; se nessuna
+categoria nota, [OCCUPATION]. Una professione specifica può rivelare
+identità, ma anche esposizioni o attività fisica clinicamente rilevanti.
+La categoria è un compromesso. All'aumentare del livello QI può diventare
+solo [OCCUPATION].
+
+NATIONALITY diventa [NATIONALITY] quando è davvero nazionalità; la
+lingua parlata e certi usi alimentari vengono esclusi. ETHNICITY resta
+in chiaro per policy iniziale per possibili implicazioni cliniche; il
+passaggio QI può sostituirla con [ETHNICITY] ai livelli alti. Occorre
+valutare questo compromesso con dati e conoscenza clinica, non supporre
+che “medicalmente rilevante” significhi sempre “da pubblicare”.
+
+LAB_VALUE. Default action=generalize su alcuni analiti: prende la
+categoria delimitata dalle soglie codificate in LABS e la scrive come
+intervallo tra parentesi quadre. Esempio inventato: “HbA1c 8.3%” ->
+“HbA1c [8-9]%”. Nome dell'analita e unità restano. Le categorie sono
+quelle nel codice, non una garanzia universale che ogni decisione
+clinica sia invariata. Tra gli analiti non coperti, i valori restano.
+Nel profilo standard l'azione perturb è diversa: prova a spostare il
+numero entro max_relative=0.03 e la medesima categoria clinica. Usa un
+segreto da config, MEDANON_SECRET o generato casualmente per run;
+costruisce un seed per incontro, analita e valore. Lo stesso valore nello
+stesso incontro dà risultato coerente. Se al numero di decimali scritto
+non c'è alcun valore distinto entro ±3% nella stessa categoria, lo
+conserva. Non perturba le estremità di alcuni intervalli di laboratorio.
+Il seed numerico generale di config da solo non protegge l'inversione;
+il segreto è stato introdotto proprio per questo.
+
+REDACT. Se una categoria viene configurata con action=redact, il valore
+viene cancellato come stringa vuota. Non è la scelta default per le
+principali categorie. La resa del testo può essere meno leggibile.
+
+PLACEHOLDER_FORMAT. Un format alternativo a “[{}]” cambia token come
+[PERSON] in <PERSON>, ma soltanto per replacement racchiusi da [...]
+senza altre parti. Non è un sistema generale di templating grammaticale.
+
+Non c'è una fase globale di correzione grammaticale prima o dopo. Il
+software conserva la struttura, non riscrive la nota per renderla più
+fluida. Un correttore esterno prima dell'anonimizzazione potrebbe alterare
+identificativi, date e offset; dopo l'anonimizzazione potrebbe cancellare
+placeholder o introdurre parole nuove. Qualunque scelta richiede una
+valutazione apposita, non è una proprietà già misurata di MedAnon.
+
+===============================================================================
+10. PASSAGGIO SUL DATASET E QUASI IDENTIFICATORI
+===============================================================================
+
+anonymize(record) opera su un solo incontro e chiama detect() + render()
+con livello QI zero. anonymize_dataset(records) è un percorso DIVERSO:
+1) rileva gli span in tutti gli incontri, oppure riceve detections;
+2) costruisce firme QI dichiarate per ogni record;
+3) conta quante volte compare ogni firma nel dataset;
+4) prova livelli di escalation 1..3 sui record che stanno in classi <k;
+5) renderizza ogni record con il livello assegnato;
+6) produce qi_verification con min_class_size e records_below_k.
+
+La firma attuale contiene età pubblicata (esatta o fascia), sesso
+inferito da pronomi/termini nella nota e nei primi 3000 caratteri del
+dialogo, categorie di occupazione ed etnia pubblicata. Non contiene
+diagnosi, codici ICD, anni, località già generalizzata, testo libero,
+laboratori o relazioni. Il sesso è una semplice euristica conteggio
+di parole he/his/male vs she/her/female, non una variabile verificata.
+
+La scala ESCALATION definita nel codice è:
+  livello 0: policy base;
+  livello 1: età con fascia più larga e occupazione nascosta;
+  livello 2: età ancora più grossolana, occupazione/etnia nascoste;
+  livello 3: età soppressa e occupazione/etnia nascoste.
+PERÒ, con action AGE=exact o AGE=band, _overrides() elimina l'override
+AGE a ogni livello. Quindi nella policy corrente l'algoritmo può
+nascondere occupazione/etnia ma non allargare l'età del paziente; è
+voluto, esplicitato anche da tests/test_policy.py. Se tre persone hanno
+età diverse e nessun altro QI, restano tre classi di taglia uno. La
+verifica riporta records_below_k=3 invece di dichiarare successo.
+
+Il nome “k_anonymity” nella config NON equivale a k-anonimato formale.
+È una generalizzazione euristica di un sottoinsieme di quasi identificatori
+nel dataset in esame. Cambia se si anonimizzano insieme 140 incontri,
+67 incontri, un sottoinsieme o un singolo record. Anche quando il check
+riporta min_class_size>=3, un codice ICD raro, un anno o una frase
+residua può rendere l'incontro unico. Il check non dimostra impossibilità
+di reidentificazione. Non confondere “incontro unico tra 67 righe” con
+“persona reale identificabile”.
+
+La scelta esatta dell'età dopo la policy del 17/10 ha reso più debole
+il vecchio risultato QI. Il README dice che, sui 140 dev, i record
+unici su (età,sesso) passano da 2 a 46 e i record sotto k=3 da 1 a 79;
+sono cifre documentate, da riottenere con un manifest dell'esecuzione
+corrente prima di inserirle nel report finale. Le vecchie righe
+outputs/results.json con 0 record sotto k sull'eval sono di un'altra
+configurazione, quella che generalizzava l'età.
+
+La candidata age_bands abbassa questa esposizione negli adulti: nei
+round 2–3 sintetici i record sotto k passano da 20/20 a 8/20 e da
+20/20 a 13/20. Può però ridurre precisione clinica a soglie di età
+intra-decade; quel costo non è misurato da queste annotazioni.
+Il confronto non prova che age_bands sia la policy finale preferibile.
+
+===============================================================================
+11. CLI, AUDIT, MANIFEST, RIPRODUCIBILITÀ E SICUREZZA DEI DATI
+===============================================================================
+
+Installazione descritta in README (Windows PowerShell, adattare il path):
+  D:\NEURAL_WAVE\.venv\Scripts\python.exe -m pip install -r requirements.txt
+  medanon prepare-models
+  medanon anonymize --offline -i data/eval_patient_doctor_encounters.jsonl \
+    -o outputs/finale/eval_patient_doctor_encounters.anonymized.jsonl
+  medanon validate --original data/eval_patient_doctor_encounters.jsonl \
+    --anonymized outputs/finale/eval_patient_doctor_encounters.anonymized.jsonl
+
+La sintassi con backslash finale è illustrativa per una shell POSIX; in
+PowerShell usare una riga singola o il suo separatore di continuazione.
+Per evitare errori, una sola riga per comando è la scelta più semplice.
+L'ambiente virtuale esiste in D:\NEURAL_WAVE\.venv; il Python globale 3.13
+del sistema non ha MedAnon installato e un tentativo di pytest lì fallisce
+in raccolta con ModuleNotFoundError. Questo è un fatto dell'ambiente
+attuale, non un bug provato del package installato correttamente.
+
+Comandi console:
+  anonymize: produce JSONL, audit e manifest;
+  validate: verifica numero/ordine/ID/chiavi/tipi, campi non testo,
+    newline e tag speaker; esce con codice 1 se fallisce;
+  evaluate: proxy privacy, concetti, ICD e integrità su file già generati;
+  bench: sintetico standard a vari stili, con opzione --errors che stampa
+    soltanto contenuto sintetico;
+  canary: inserisce identificativi inventati in contesto reale, poi misura
+    la loro copertura senza stampare testo originale;
+  prepare-models: passo una tantum di download/cache dei modelli;
+  demo: genera e stampa un singolo caso sintetico prima/dopo.
+
+Percorso memoria: quando k_anonymity è attivo, cli.py carica l'intero file
+in RAM per confrontare gli incontri. Con --workers>1 usa ProcessPoolExecutor
+per detect e riporta gli oggetti detection al padre; più processi possono
+replicare i modelli pesanti, anche se il manifest tenta di misurare RAM
+di processo e figli. Con --no-k-anonymity e un worker il codice legge,
+anonimizza e scrive una riga alla volta. Questi due percorsi non hanno
+la stessa semantica QI. Per tempi/RAM riportare worker e modalità.
+
+Audit. Ogni sostituzione/keep ha encounter_id, campo e coordinate
+start/end sul testo originale, label, action, replacement, risk,
+detectors, confidence, explanation. MEDICAL_CONTEXT per un candidato
+respinto dal guard mantiene candidate_label e reason_code. Il default
+non allega la superficie originale. Le parole della superficie vengono
+oscurate nelle spiegazioni tramite _redact(); un audit con
+--audit-include-text aggiunge d.original ed è sensibile. Anche l'audit
+normale è da controllare prima della pubblicazione: contiene ID di
+incontro, motivi e metadati, e l'oscuramento è euristico, non un teorema
+di non divulgazione. Il JSONL finale destinato a Bosch è l'output
+anonimizzato, non necessariamente il log dettagliato.
+
+Manifest. build_manifest() registra versione package, hash SHA-256 del
+codice in src/medanon e risorse, hash config effettiva, detector attivi,
+revisioni e hash dei pesi quando disponibili, device, versioni Python/
+spaCy/Presidio/torch/transformers, origine della chiave lab, CPU/GPU,
+durata, numero di record, SHA-256 di input/output/audit. È lo strumento
+per associare una cifra a un programma reale. Il codice hash non copre
+script, documentazione e alcune configurazioni esterne se non tramite
+config_sha256; il manifest va comunque conservato accanto al run.
+
+La privacy dei dati è un vincolo operativo. build_resources.py può fare
+download di lessici pubblici in fase di build; prepare-models può
+scaricare checkpoint. L'inferenza vera non usa API cloud. I file in data/
+e outputs/review/ restano locali; .gitignore deve essere rispettato e
+privacy_check_docs.py eseguito prima di pubblicare. Lo script dei documenti
+usa nomi-seed di alta precisione e quindi può non trovare TUTTE le fughe:
+un controllo umano finale resta necessario, specie su esempi di output.
+
+Il format JSONL va validato prima della consegna, anche se un benchmark
+di detection è alto. Un errore di schema, record mancanti o codice ICD
+alterato può compromettere la valutazione indipendentemente dalla qualità
+della NER. Il validator controlla struttura e metadati, ma non dimostra
+assenza di PHI nel testo.
+
+===============================================================================
+12. ESPERIMENTI E SCELTA DEI MODELLI
+===============================================================================
+
+12.1. Percorso storico
+La baseline iniziale era regole + spaCy/Presidio; un confronto ha
+aggiunto GLiNER, GLiNER2 e BERT in modalità full/cascade sul dialogo.
+La vecchia valutazione sintetica facile dava recall ~0,995 anche con
+soli regole+spaCy, quindi era poco discriminante. I canary e i casi
+avversariali hanno esposto nomi meno facili nei dialoghi minuscoli.
+GLiNER/GLiNER2 full introducevano più sostituzioni spurie, anche sui
+tag speaker prima del filtro strutturale. BERT uncased in cascata è
+stato scelto per guadagno di recall, costo e precisione nel setup
+misurato. Non equivale a “BERT è sempre meglio di GLiNER”: confronto,
+dataset, filtri e versione del codice circoscrivono l'affermazione.
+
+12.2. Esperimento controllato più recente
+scripts/model_experiments.py genera 40 incontri da
+adversarial.generate(bank="test"), con 720 identificativi gold e 560
+trappole cliniche, e seleziona 25 incontri reali dev senza gold. Esegue
+ogni configurazione in un processo separato per misure di memoria più
+comparabili. Sulle righe reali conta span aggiunti e controlla indizi
+di integrità (negazioni/numeri). I file con superfici da revisionare
+vanno solo in outputs/review/, quindi sono locali e sensibili. Non
+risulta completata un'annotazione umana cieca di quei 25 incontri.
+
+Valori presenti negli artefatti outputs/experiments/*.json, riferiti
+al codice e alla policy di quel confronto, non alla worktree odierna:
+
+  Configurazione              Recall   Precision  F1     Trappole  s/real  RAM MB
+  baseline (no OpenMed)       0,7861   0,9375     0,8552 0,9286    1,362   1589
+  + Healthcare-Brain          0,7944   0,9346     0,8589 0,9286    3,442   1983
+  + OpenMed full              0,8861   0,9438     0,9141 0,9286   17,215   2933
+  + OpenMed cascade           0,8236   0,9400     0,8780 0,9286    8,022   3036
+
+Il file ridotto n20 per Qwen3.5-2B cascade riporta recall 0,7806,
+precision 0,9371, F1 0,8517, ~57,254 s/incontro reale e ~3693 MB
+di RAM di picco. Questo confronto ridotto non va letto come una
+prova statistica di inferiorità assoluta: il campione e il costo
+sono diversi. L'incremento OpenMed fu soprattutto sulle occupazioni
+senza cue; sul campione reale di 25 incontri aggiunse solo 2 span.
+
+I valori sono recall/precision entity-level sul gold sintetico, con
+intervalli Wilson calcolati in scoring.py. Il test sintetico è stato
+ideato dopo l'esplorazione dei failure mode sullo stesso progetto:
+anche con banca “held-out” le classi difficili sono state scelte dal
+team; il vantaggio può essere più piccolo o diverso sui dati Bosch.
+
+MODEL_EXPERIMENTS.md concludeva che OpenMed dovesse restare opt-in.
+Un commit successivo ccc7bda lo ha reso default “maximum privacy”.
+Questa è una decisione di configurazione successiva al documento,
+non una contraddizione del codice. Il default è più lento del profilo
+standard su CPU. Il report round 2–3 aggiunge tempi e VRAM su una GPU
+di sviluppo, senza prova d'installazione sul dispositivo Bosch.
+
+12.3. LLM-first come ramo separato
+Il branch llm-first contiene src/llmanon e prove Qwen3.5-4B/9B,
+Qwen3-4B-Instruct e un audit di valutazione, ma è in un'altra worktree
+ed è fermo a a5d6a70 al momento di questa fotografia. Non usare i suoi
+file per descrivere il percorso di inferenza di round23-candidate. Se si decide
+di integrare idee dal ramo, richiedere confronto con stesso input,
+gold, scorer, hardware e policy; l'esistenza del branch da sola non
+dimostra un vantaggio.
+
+===============================================================================
+13. VALUTAZIONE: CHE COSA MISURA OGNI METRICA
+===============================================================================
+
+La distinzione più importante per un'altra AI è tra “è stato rilevato”,
+“è stato trasformato”, “la stringa non appare più”, “nessun dato privato
+è ricostruibile” e “l'utilità clinica è preservata”. Sono proprietà
+diverse. Nel progetto esistono più scorer proprio perché uno solo non
+è sufficiente. Nessuno replica per definizione lo scorer segreto Bosch.
+
+13.1. Integrità strutturale
+metrics.integrity() allinea per encounter_id e controlla presenza,
+chiavi, codici ICD intatti e campi non testo. metrics.validate_deliverable()
+è più severo: parse JSON per riga, numero e ordine di record, ID unici,
+ordine delle chiavi, tipo stringa, stesso numero di newline/tag speaker,
+immutabilità dei campi non testo. Un “ok” è condizione necessaria per
+la consegna, ma non misura né privacy né qualità medica. Una riga con
+tutto il dialogo originale e stesso schema passerebbe la struttura.
+
+13.2. Scorer sintetico storico
+evaluation/synthetic.py crea PHI e trappole con offset gold.
+synthetic.score() calcola:
+  recall_coverage: quota di entità gold i cui caratteri alfanumerici
+    sono tutti coperti da decisioni di sostituzione non-LAB_VALUE;
+  recall_string: quota di stringhe gold non ritrovate esattamente nello
+    stesso campo di output;
+  char_precision: quota di caratteri sostituiti che cadono in gold;
+  spurious_replacements: span sostituiti completamente fuori gold;
+  trap_preservation: trappole non toccate da sostituzioni.
+Riporta anche policy_compliant_recall_coverage e kept_by_policy per
+età/anni rilevati ma conservati per scelta. Il gold è noto perché il
+generatore stesso ha inserito le entità. È ideale per regressioni, ma
+template e vocabolari sono visibili al team e al codice di sviluppo:
+non è un test indipendente della distribuzione Bosch.
+
+13.3. Scorer avversariale con intervalli di confidenza
+evaluation/scoring.py valuta gli incontri di adversarial.py. “Recall”
+conta come successo un'entità se tutti i caratteri alfanumerici del
+gold sono coperti da decisioni che non siano keep e non siano lab.
+“Precision” conta una predizione come TP se sovrappone ALMENO un
+carattere gold; non esige label uguale o bordi esatti. Perciò è una
+precisione permissiva per span, utile nel confronto interno ma non
+equivalente a precisione NER esatta. “F1” è l'armonica di quei due
+valori. wilson() aggiunge intervalli 95% binomiali per proporzioni;
+su incontri generati da template, le osservazioni non sono pienamente
+indipendenti, quindi gli intervalli non catturano incertezza di dominio.
+
+“policy_compliant_recall” conta un'entità gold rimossa OPPURE rilevata
+ma pubblicata con POLICY_KEEP. Non è recall di privacy, e infatti il
+codice lo specifica. Se AGE=keep, raw recall per AGE resta zero anche
+quando il rilevatore lo identifica; policy-compliant può aumentare.
+“severity_weighted_residual_per_encounter” somma pesi per entità gold
+non rimosse (diretti peso 3, età/date/luoghi 2, professioni 1).
+“encounters_with_direct_identifier_left” conta incontri con almeno un
+gold di gravità 3 non coperto. La scelta dei pesi è interna, non Bosch.
+
+“trap_preservation” richiede la stringa clinica esatta nell'output
+per trappole normali; per laboratori accetta invariato o uno spostamento
+numerico <=3%. Di conseguenza gli intervalli clinici della policy
+default possono essere penalizzati anche se preservano la categoria
+diagnostica; occorre una misura separata della fedeltà alla categoria.
+Anche il vecchio “0,929” sui trap deriva in parte da falsi interventi
+su età di familiari, prima dei fix: non va trasportato al codice odierno.
+Il nuovo report round 2–3 separa span clinici trasformati da span non
+più identici, perché un intervallo lab intenzionale rompe l'identità
+testuale senza necessariamente perdere la categoria clinica.
+
+CAUTELA METODOLOGICA: la copertura degli offset del gold non verifica
+che ogni informazione sia assente dall'output. Una DOB “14/07/1985”
+può essere interamente sostituita da “[DOB] 1985”; lo scorer di span
+conta la decisione come rimozione, anche se l'anno originale sopravvive.
+Lo script nuovo scripts/score_gold.py aggiunge uno strict_token_removal
+che cerca token dell'entità gold rimasti nell'output. Questa è una
+proxy più severa, ma può dare falsi allarmi per token comuni ripetuti
+altrove. Riportare entrambe le letture quando la policy conserva anni.
+
+13.4. Canary injection
+evaluation/canary.py inserisce nomi, contatti, ID, luoghi ecc. sintetici
+in turni e paragrafi di veri incontri dev. La recall è “quanti degli
+identificativi inseriti sono stati coperti da sostituzioni”. Vantaggio:
+il contesto circostante ha la complessità del dato reale senza dover
+annotare tutto il dato reale. Limite: i canary sono progettati dal team,
+le posizioni di inserimento e i cue possono renderli più facili dei
+veri identificativi. Non misura i PHI originari non annotati.
+
+13.5. Proxy privacy su reali non annotati
+metrics.ReferenceDetector è Presidio vanilla indipendente dalle regole
+di MedAnon. leakage_audit() cerca entità nell'originale e conta quante
+superfici esatte non compaiono più nel campo anonimizzato; esclude
+date relative senza calendario e termini chiaramente medici secondo
+il lessico locale. Può contare falsi positivi di Presidio e perdere
+PHI che Presidio non rileva; inoltre una superficie sparita può essere
+ricostruibile da altri indizi. name_seed_leakage() prende solo nomi
+ad alta precisione dalla nota (titoli, “X is a N-year-old”) e cerca
+token residui, con filtro per eponimi. Una misura 0/62 non significa
+che tutti i nomi presenti nei 67 incontri siano stati rimossi.
+
+13.6. Proxy utility
+medical_concepts() usa i medesimi lessici di farmaci, eponimi e parole
+ICD che aiutano MedicalGuard; concept_recall() confronta set e conteggi
+dei concetti fra originale e output. È PARZIALMENTE CIRCOLARE: il sistema
+è progettato per non toccare proprio quelle parole, quindi una recall
+alta non dimostra che tutti i concetti clinici siano conservati.
+icd_term_retention() guarda le parole della descrizione ICD che
+apparivano nel testo e sono ancora presenti: è una proxy lessicale,
+non una lettura clinica della nota. Il conteggio delle parole di
+negazione controlla solo forme come no/not/denies, non semantica
+completa, scope della negazione o grammatica.
+
+icd_proxy_f1() è l'unico training locale di un predittore. Il flusso:
+  1. Nei 140 dev conta i codici ICD, sceglie quelli con >=2 occorrenze;
+     nel run storico risultano 38 label nel classificatore.
+  2. Codifica le note+dialoghi originali con TF-IDF di uni/bigrammi,
+     min_df=2 e sublinear_tf; il lessico viene stimato sul training.
+  3. Addestra OneVsRest(LogisticRegression(C=8, max_iter=2000,
+     class_weight=balanced)) sui codici ICD dev.
+  4. Applica al test eval originale e all'eval anonimizzato allineato
+     per encounter_id; usa soglia probabilità 0,35 e impone almeno
+     un codice previsto per incontro se altrimenti non ne trova.
+  5. Riporta micro-F1 e delta anonimizzato-originale. Facoltativamente
+     riaddestra su dev anonimizzato e ritesta su eval anonimizzato.
+Questo predittore è solo una sonda di utilità; non ha lo stesso training,
+modello, label space o gold nascosto di Bosch. F1 assoluto basso non
+significa che la pipeline di anonimizzazione sia mediocre; delta zero
+non garantisce che il modello ufficiale sia invariato. Con 140
+incontri, molti codici sono esclusi: la label space di 38 copre solo
+una parte della varietà ICD osservata.
+
+13.7. Tempi, memoria e VRAM
+manifest.PeakMemory campiona processi e figli durante il comando CLI;
+le tabelle di esperimento misurano CPU su un laptop, con carico e modelli
+specifici. “3 GB RAM” non è “3 GB VRAM”. Il nuovo report round 2–3
+riporta ~2,6 GB di VRAM di picco e ~0,68–0,70 secondi per incontro
+su RTX PRO 5000 con --device cuda; è una misura di sviluppo su GPU
+specifica, non una prova di installazione su una scheda fisica da 4 GB.
+--device auto può cambiare hardware usato tra ambienti e quindi va
+fissato nel manifest.
+
+===============================================================================
+14. RISULTATI VERIFICABILI E ATTRIBUZIONE ALLA GIUSTA VERSIONE
+===============================================================================
+
+14.1. outputs/results.json: run storico STANDARD, NON default odierno
+Il file ha timestamp 17/10/2026 05:34. Il suo manifest contiene
+policies.AGE.action=generalize e extra_detectors assenti. Dunque
+descrive regole+spaCy+dialogue BERT con fasce d'età e lab perturbati,
+non la worktree con OpenMed, età esatta e anni tenuti. Le grandezze
+riportate sotto sono utili come baseline storica.
+
+Su eval 67:
+  - integrità/deliverable_validation: ok, 67/67, nessun problema;
+  - 1242 decisioni con spiegazione (explained=1.0);
+  - 1,509 s/incontro nell'esperimento intero per la fase eval;
+  - QI dichiarati: min_class_size=3, records_below_k=0;
+  - reference Presidio: 426 elementi valutati, 87,09% assenti dopo;
+    fra questi PERSON 81,46%, DATE_TIME 96,91%, LOCATION 63,64%; la
+    validità delle etichette di riferimento non è stata verificata
+    con un gold umano;
+  - name seeds: 0 token superstiti su 62 semi individuati;
+  - concept_set_recall 0,9944 e concept_mention_recall 0,9938;
+  - parole ICD rilevanti: 246 considerate, retained=1,0;
+  - TF-IDF ICD micro-F1 0,3836 sia prima sia dopo, delta=0,0;
+    training e test su testo anonimizzato =0,3946 in quel run;
+  - negazioni per regex: 1696 prima e 1696 dopo;
+  - linkage demografico correct_unique: 0,5821 originale ->
+    0,0299 output; expected_reidentification 0,7128 -> 0,1013;
+  - laboratori, 17 target: exact matching correct_unique 0,7647
+    originale -> 0,1765 output; con tolleranza 3% l'output è 0,7059;
+    la perturbazione piccola non basta contro matching tollerante;
+  - unicità per set codici ICD: 0,9701 sia originale sia output;
+  - inversione lab: su 28 valori perturbati, recupero 0,4286 con
+    seed pubblico simulato, 0,2143 con chiave segreta nello script;
+  - ablation use_icd_context=False: 57/67 output identici al main
+    secondo il results.json, non 66/67 come dice un paragrafo
+    storico del README. Questo è un esempio concreto di doc drift;
+    verificare versione e metodo prima di citare il numero.
+
+Su dev 140, lo stesso file riporta 2574 decisioni, 1,438 s/incontro,
+QI minimo 1 e 1 record sotto k. Il risultato dei canary in
+outputs/results.json è n=2312, recall=1,0 alla voce ALL; se un
+documento riporta 99,96%, controllare artefatto/commit della cifra.
+La differenza potrebbe venire da run diversi e non va “armonizzata”
+per intuizione.
+
+L'artefatto synthetic dello stesso results.json riporta 3375 gold
+entità ACI, recall_coverage 0,9979, char_precision 0,9509,
+trap_preservation 0,9992; il discharge sintetico riporta 858
+entità, recall_coverage 0,9918, char_precision 0,9595,
+trap_preservation 1,0. Sono numeri alti su template noti e non
+prevedono da soli la performance fuori distribuzione.
+
+L'adversarial_test storico dello stesso run ha 40 incontri, 720
+entità gold: recall 566/720=0,7861 (CI Wilson 0,7547–0,8145),
+precisione permissiva 600/640=0,9375 (CI 0,9160–0,9538),
+trap_preservation 520/560=0,9286. Le trappole di anamnesi
+familiare erano un errore noto e hanno ricevuto interventi successivi.
+
+14.2. Esperimenti OpenMed separati
+I file outputs/experiments documentano il guadagno di OpenMed full
+0,7861 -> 0,8861 in recall sintetica avversariale a precisione
+0,9438 e trappole 0,9286, nel setup allora usato. Questo supporta
+l'inclusione di OpenMed nel default per quel set, ma non costituisce
+un run completo della policy attuale. Anche il costo ~17,2 s/incontro
+reale sui 25 di validazione è riferito a quel computer/processo.
+
+14.3. Stato corrente: ciò che NON è ancora un risultato finale
+Non vedo un outputs/results.json né un JSONL di submission con un
+manifest che dimostri di essere stato generato dal commit
+round23-candidate 07ef094, OpenMed default ed età esatta/anni.
+I vecchi output in outputs/submission/ sono snapshot di un'altra
+configurazione. I nuovi test di regressione provano comportamenti
+specifici. Il nuovo report dei round 2–3 contiene invece metriche
+gold su 40 incontri sintetici di SVILUPPO: vedi 14.4, senza
+attribuirle al file di submission. Il report menziona un valore
+“Bosch's 0.5918”, ma nel repository esaminato non è presente il
+feedback primario che ne dimostri componente, data e configurazione;
+non lo attribuire a una metrica ufficiale precisa senza tale prova.
+Se un altro agente esegue un nuovo benchmark dopo questa fotografia,
+aggiornare hash, config, timestamp, numerosità e scorer del run.
+
+14.4. Nuovo confronto sui round 2 e 3 sintetici di sviluppo
+reports/ROUND23_EVALUATION.md e round23_metrics.json sono stati
+aggiunti nel commit 07ef094. I file descrivono 20 incontri sintetici
+nel round 2 (269 entità privacy gold) e 20 nel round 3 (281), annotati
+dall'autore e NON adjudicati indipendentemente. Le porzioni validation
+dei round non sono disponibili e non sono state usate. B0 è il vecchio
+codice 096ff01 con default/CPU; B2 sono fix con la stessa policy
+età esatta; B2+age applica age_bands.yaml. Il report include hash di
+input e gold e config SHA. Il code hash del candidato 39755f6242d3
+coincide con l'hash calcolato sul commit attuale. B2 è stato eseguito
+su RTX PRO 5000 con CUDA; i tempi B0 e B2 NON sono un confronto CPU-
+CPU, mentre le metriche di qualità sono sugli stessi input.
+
+  METRICA                 R2 B0   R2 B2  R2 +age   R3 B0  R3 B2  R3 +age
+  raw recall              0,807   0,851   0,970    0,765  0,794   0,915
+  policy-compliant recall 0,941   0,985   0,985    0,900  0,929   0,929
+  precision permissiva    0,899   0,988   0,989    0,899  0,988   0,990
+  strict token removal    0,658   0,706   0,803    0,545  0,573   0,762
+  PERSON raw recall       0,885   1,000   1,000    0,933  1,000   1,000
+  record sotto k=3           20      20       8       20     20      13
+
+Con i fix, le trasformazioni completamente fuori gold passano da
+26 a 3 nel round 2 e da 27 a 3 nel round 3; i nomi parzialmente
+rimossi passano da 9/6 a 0/0. La policy age_bands alza raw recall
+perché molte età ora vengono trasformate; policy-compliant recall
+resta uguale, come previsto, perché età esatte erano già “compliant”
+alla vecchia policy interna. La strict token removal resta più bassa
+per anni conservati, token comuni e altre informazioni residuali.
+Il round 2 ha solo 4 span CLINICAL: non sostenere un risultato
+clinico generale da quel denominatore. Nel round 3 gli span CLINICAL
+sono 672: quelli erroneamente trasformati scendono da 17 a 1 con i
+fix; quelli non più identici scendono da 29 a 13 e comprendono
+generalizzazioni intenzionali dei laboratori. Ci sono ancora 4/8
+menzioni di professione parzialmente rimosse secondo la convenzione
+gold, un passaggio lab e un header all-caps problematici.
+
+Questo nuovo confronto corregge una parte dei punti aperti su età
+e falsi positivi, ma non stima generalizzazione sul Bosch nascosto.
+È sviluppo sintetico già esaminato per identificare i bug; usarlo
+come “test finale indipendente” sarebbe data leakage metodologico.
+
+===============================================================================
+15. ATTACCHI PRIVACY E LORO LIMITI
+===============================================================================
+
+evaluation/attacks.py offre cinque famiglie:
+
+1) linkage_attack. Dalle detection sull'originale ottiene età, sesso,
+   occupazione e luoghi come “background knowledge”; confronta ogni
+   target con i record originali e con gli output del medesimo corpus.
+   Il risultato contiene correct_unique_rate, wrong_unique_rate,
+   no_candidate_rate, target_in_candidates_rate, dimensione media dei
+   candidati ed expected_reidentification come media 1/|candidati|
+   quando il target è tra essi. Non usa un archivio ausiliario reale
+   o un vero ranking di identità. Gli originali sono disponibili nel
+   valutatore per costruire ground truth e conoscenza: questo va
+   dichiarato, non venduto come attaccante indipendente.
+
+2) lab_linkage_attack. Conosce coppie analita-valore dalla nota
+   originale e cerca record compatibili con tolleranza 0, 3 e 5%.
+   È una minaccia realistica solo in uno scenario con un archivio
+   esterno di risultati di laboratorio; qui è una simulazione.
+   I 17 target del run storico sono pochi e l'output default attuale
+   pubblica intervalli, mentre il parser dell'attacco cerca numeri:
+   su intervalli la metrica può sottostimare una diversa forma di
+   linkage per categoria clinica. Serve un attacco adeguato alla policy.
+
+3) qi_uniqueness. Misura quota di record unici per combinazioni
+   età+sesso, età+sesso+occupazione, codici ICD, età+sesso+ICD.
+   Unicità in 67 righe non equivale a nome o paziente identificato.
+   Inoltre il parser dell'età nell'output cerca [40-49] o [90+],
+   NON età esatte “47-year-old” che la policy attuale lascia:
+   la vecchia metrica può falsamente mostrare meno unicità di quella
+   realmente pubblicata. Anche gli anni conservati sono ignorati.
+
+4) perturbation_inversion_attack. Simula ricostruzione di valori lab
+   perturbati con seed pubblico contro seed segreto. È rilevante per
+   standard.yaml con action=perturb; non misura la robustezza degli
+   intervalli del default.
+
+5) residual_name_attack. Cerca nomi apparenti nell'output e verifica
+   se coincidono con nomi-seed estratti dalla nota originale. Limitato
+   ai seed e a un raccolto di parole dall'output, non prova che
+   qualsiasi PHI residua sia assente.
+
+Il limite più urgente degli attacchi correnti è la mancata sincronizzazione
+con AGE exact, DOB/year retained e lab intervals. Prima di proclamare
+“privacy migliore”, correggere le letture dell'output e confrontare
+versioni sullo stesso campione. Gli ICD conservati sono una condizione
+del task e possono rendere record rari, ma da soli non identificano
+automaticamente una persona reale. Un attaccante esterno scientificamente
+più forte avrebbe bisogno di profili candidati sintetici indipendenti,
+vero candidato e distrattori realistici, ranking Top1/Top5/MRR, un
+test aperto senza vero candidato e separazione fisica tra originale/
+gold e input dell'attaccante. Non è implementato nel branch corrente.
+
+Il bonus Bosch cita sophistication e quota di informazioni rimosse
+recuperate. La sola unicità di ICD o età non equivale a recupero di
+un identificativo rimosso; presentare gli attacchi per quello che
+sono, cioè stress test locali con un threat model esplicito.
+
+===============================================================================
+16. TEST, REGRESSIONI E STATO DELLE VERIFICHE
+===============================================================================
+
+I test sono pytest. Nel repository sono presenti test di unità per
+parser numeri, span e trasformazioni; test integrati della pipeline
+e della CLI; regressioni per bug trovati in review; test specifici
+di policy su età, DOB, anni, nomi e laboratori; più il nuovo file
+test_round23_regressions.py non ancora tracciato. La fixture di
+conftest.py crea un Anonymizer default a livello sessione: questo
+carica BERT/OpenMed e rende la suite più lenta rispetto a soli test
+di regex. Un successo dei test dice che quei casi sintetici e quelle
+invarianti passano sul computer corrente; non valida da solo i
+risultati su dati Bosch nascosti.
+
+Alcuni casi protetti in modo esplicito:
+  - date di nascita nelle forme ISO, slash, testuale, compact,
+    pronunciate nel dialogo, e boundary 89/90 anni;
+  - cifre pronunciate come telefono/ID, numeri lunghi e PIN a quattro
+    cifre che non devono passare come anno;
+  - omonimie tra nomi e parole comuni, cognomi eponimi,
+    soprannomi dei parenti e nomi di ambulatori;
+  - eponimi, derivati clinici, farmaci composti, unità di misura,
+    scale cliniche, termini di laboratorio, date vs pain score;
+  - ruoli distinti dei placeholder e preservazione dei tag speaker;
+  - audit che non include l'originale se non richiesto;
+  - limite relativo della perturbazione e stabilità della categoria;
+  - scorer che distingue recall raw da policy-compliant;
+  - candidata age_bands con rimozione dell'anno DOB per adulti.
+
+La suite dovrebbe essere ripetuta dopo che Claude ha finito di scrivere
+e prima della consegna, usando l'ambiente virtuale del progetto:
+  D:\NEURAL_WAVE\.venv\Scripts\python.exe -m pytest -q
+
+Nel corso di questa analisi un primo tentativo con il Python globale
+ha fallito in fase di raccolta: ModuleNotFoundError: medanon. Non è
+un fallimento di un test funzionale di MedAnon, ma un errore di ambiente
+(Python globale fuori venv). Con il Python dell'ambiente virtuale,
+la suite completa sul commit 07ef094 ha concluso con 152 test
+superati in 374,49 secondi e 98 warning da torch/transformers.
+
+Il controllo pre-pubblicazione raccomandato è
+  D:\NEURAL_WAVE\.venv\Scripts\python.exe scripts/privacy_check_docs.py
+Non sostituisce una revisione umana degli esempi e degli artefatti.
+
+===============================================================================
+17. PROBLEMI APERTI E RISCHI PER LA CHALLENGE
+===============================================================================
+
+La priorità qui riflette possibile impatto sui quattro criteri e sul
+tempo fino alla consegna, non una classificazione di bug tutti già
+dimostrati. Distinguere “provato dal codice”, “non misurato” e
+“ipotesi ragionevole” è essenziale.
+
+P0 — output finale e prove legate alla stessa versione. [PROVATO]
+Il branch attivo è ora round23-candidate 07ef094 e la submission
+locale presente è di uno stato storico. Manca un artefatto finale
+rigenerato con manifest che permetta di dire “questo eseguibile ha
+prodotto proprio il JSONL che invieremo”. Prima del freeze occorrono
+test, run --offline, validazione, hash e controllo privacy dei file.
+Consegna con output vecchio e README nuovo può portare a conclusioni
+errate anche se entrambi funzionano separatamente.
+
+P0 — policy exact age/years e misure privacy non aggiornate. [PROVATO]
+La nuova policy lascia più indizi cronologici/demografici; l'attacco
+esistente ignora età esatta e anni nella lettura dell'output. Il
+controllo QI stesso ammette gruppi <3. Una tabella storica 58,2%
+->3,0% non descrive il rischio attuale. Bisogna correggere metrica,
+usare lo stesso dataset e confrontare exact-age con age-bands. Se
+la privacy peggiora troppo, il candidato age_bands è già preparato,
+ma va validato sull'utilità clinica.
+
+P0 — annotazioni umane mancanti sui reali. [PROVATO NEL REPO]
+I numeri privacy più forti sono su gold sintetico e su proxy automatiche
+non verificate contro annotazioni gold del corpus reale. Le regole
+sono state modellate sui failure mode esplorati; il rischio di
+overfitting alle template e al corpus di sviluppo è concreto.
+Un piccolo controllo cieco locale su campione riservato chiarirebbe
+errori e falsi positivi molto più di un nuovo modello, ma va fatto
+senza pubblicare i testi. Se tempo insufficiente, descrivere
+onestamente il limite anziché spacciare il sintetico per gold real.
+
+P0 — documentazione e deliverable umani. [PROVATO/DOCUMENTO]
+README.md e REPORT.md hanno ancora campi Team: TODO. Le linee guida
+richiedono nomi, report max tre pagine, video max due minuti e repo
+pubblicato. Il sistema non genera automaticamente video né
+autorizza pubblicazione; il team deve completarli. La reportistica
+esistente è lunga e contiene numeri pre-policy: va riassunta con
+manifest e limiti corretti.
+
+P1 — scorer locale può misurare la cosa sbagliata. [PROVATO]
+La copertura degli offset classifica una DOB come rimossa anche se
+l'anno è copiato in replacement. La precisione adversarial accetta
+qualsiasi sovrapposizione gold, a prescindere dalla label. I trap
+di laboratorio basati su ±3% possono bocciare l'intervallo clinico
+del default. Il proxy dei concetti condivide lessico con il guard.
+I numeri non sono falsi come risultati del loro algoritmo, ma la
+frase “privacy 88,6% e utilità 92,9%” può essere fuorviante senza
+definire gli algoritmi. Serve triangolare con token residuali,
+categoria clinica e revisione di casi.
+
+P1 — trade-off OpenMed su CPU. [MISURATO IN PRECEDENZA]
+OpenMed aumenta recall sul sintetico avversariale, ma su 25 reali
+aggiunge solo due span e costa circa 12 volte BERT-only nel vecchio
+confronto. Nel default aumenta tempi di consegna e rischio operativo
+di download/cache. Il nuovo report sintetico round 2–3 indica
+~0,7 s/incontro e 2,6 GB VRAM su RTX PRO 5000; un GPU con 4 GB
+fisici e una nuova installazione non sono stati validati nel report.
+Prima del default definitivo, misurare tempi/memoria del run finale
+e confrontare standard e default sui casi chiave.
+
+P1 — “offline” dipende dalla preparazione dei pesi. [PROVATO]
+La pipeline può avviare un download alla prima esecuzione se i pesi
+non sono già in cache. In valutazione on-prem senza rete va eseguito
+prepare-models prima e poi un run --offline in ambiente pulito.
+Il solo fatto di importare medanon nel laptop dello sviluppatore non
+dimostra che un giudice possa installarlo senza rete o path assoluti.
+Il requirement en_core_web_lg punta a una wheel online; servirà un
+ambiente di installazione con accesso iniziale oppure pacchetti
+preparati, secondo le regole della submission.
+
+P1 — possibile identificazione indiretta tramite contenuti conservati.
+[INFERENZA CONCRETA]
+ICD, età, anno, sesso da pronomi, professione generalizzata e
+sequenza clinica possono creare combinazioni rare. Il task obbliga
+a conservare i codici ICD, quindi non tutto il rischio si può
+azzerare. La risposta tecnica è dichiarare il trade-off e
+misurarlo con threat model specifici, non promettere anonimato
+assoluto. Nel 67-record storico 97,01% degli incontri è unico
+per set ICD, ma non equivale a reidentificazione reale.
+
+P1 — limiti di lingua e dominio. [CODICE/INFERENZA]
+Le regex, il truecasing, i cue, il lessico di nomi e le categorie
+sono centrati sull'inglese e in parte su nomi/luoghi USA. Il codice
+usa classi Unicode latine estese, non copertura piena di tutte le
+scritture. Dialoghi non inglesi, traduzioni, note ospedaliere,
+trascrizioni ASR con errori diversi e nuovi formati possono essere
+fuori distribuzione. Il piccolo stile discharge sintetico è un
+test di robustezza, non prova generalità di produzione.
+
+P1 — false negative da filtri e guard. [CODICE]
+Per ridurre falsi positivi, un PERSON statistico richiede evidenza
+lessicale; un nome identico a un farmaco può essere protetto dal
+MedicalGuard se la sintassi non è abbastanza forte. I test storici
+segnalano “person named like a drug” come classe difficile. Se
+gli organizzatori enfatizzano la rimozione di PHI raro, una soglia
+troppo prudente può costare punti. Serve rivedere casi difficili
+con gold indipendente, non disattivare indiscriminatamente il guard.
+
+P2 — età dei familiari e cronologia. [FIX COMMITTATO, VALIDITÀ LIMITATA]
+Il vecchio set avversariale perdeva informazione sulle età di esordio
+familiare. Il commit 07ef094 estende FAMILY_ONSET_RE e il nuovo
+confronto round 2–3 riporta meno span clinici erroneamente cambiati
+nel suo gold sintetico di sviluppo. Il trap score storico di
+adversarial.generate(bank="test") non è stato rigenerato per
+il commit attuale. Generalizzare il miglioramento oltre quei 40
+incontri richiede un set indipendente.
+
+P2 — trasformazioni non equivalgono a grammatica. [CODICE]
+I placeholder inseriti dentro frasi possono generare accordi o
+tipografia imperfetti (“a 90+-year-old”, “at [CITY]”). Il PDF Bosch
+non cita una metrica grammaticale esplicita; un testo rovinato
+potrebbe però compromettere il predittore ICD o la valutazione
+umana. Aggiungere un grammar corrector adesso introduce rischi
+di alterazione clinica e di PHI; prima misurare output e utilità.
+
+P2 — rispetto della privacy nei diagnostici. [CODICE]
+Gli output in review e l'opzione --audit-include-text possono
+contenere originali. Anche alcuni script con --show stampano
+contesto. Non committare né pubblicare automaticamente questi
+file. Il fatto che .gitignore li escluda è una barriera utile ma
+non sostituisce la verifica dei contenuti del report e del video.
+
+P2 — stress test di attaccante più robusto. [NON IMPLEMENTATO]
+Un ranker con database ausiliario sintetico e distrattori realistici
+potrebbe trovare linkage residuo che recall PHI non vede. Con il
+tempo residuo la priorità è sistemare gli attacchi esistenti,
+misurare le policy e consegnare. Nessun LLM attaccante va inserito
+nell'inferenza finale senza evidenza misurata di beneficio.
+
+===============================================================================
+18. LAVORO PRIORITARIO E CRITERI DI COMPLETAMENTO
+===============================================================================
+
+ORDINE A — Congelare una versione coerente
+  1. Verificare che Claude abbia finito nuovi interventi, poi rivedere
+     branch, ultimo commit e diff. Il commit 07ef094 include i fix
+     round 2–3; un'eventuale modifica successiva richiede nuovi test.
+  2. Scegliere policy AGE: exact odierna o age_bands candidata;
+     annotare la motivazione privacy/utilità. Se rimane exact,
+     dichiarare esplicitamente records_below_k e rischio residuo.
+  3. Bloccare config effettiva, modelli e device; verificare
+     --offline. Registrare commit, git status e manifest.
+  4. Eseguire pytest completo dopo il freeze, poi almeno un test
+     end-to-end su JSONL sintetico e su eval locale senza stampare
+     testo clinico originale.
+
+ORDINE B — Misurare ciò che cambierà la decisione
+  1. Correggere attacks.py per leggere età esatta, anni/anno DOB e
+     intervalli lab; aggiungere test sintetici in cui il rischio
+     atteso è calcolabile a mano. Mantenere in report metriche
+     separate per unicità, linkage e fuga diretta di PHI.
+  2. Eseguire confronto appaiato exact vs age_bands sullo stesso
+     subset, stesso modello, stesso codice e stessi semi. Misurare
+     recall PHI raw, token superstiti, QI, concetti clinici, proxy
+     ICD e categorie lab preservate. Il parser dei punteggi non
+     deve scambiare “policy-compliant” per “privacy-safe”.
+  3. Se c'è tempo, completare una piccola annotazione cieca di
+     casi reali DEV e revisione dei falsi positivi; evitare l'eval
+     locale per tarare policy all'ultimo minuto se lo si vuole
+     usare come test indipendente.
+  4. Se si rigenera una suite completa costosa, conservarne output
+     aggregato, config/manifest e data del run. Non unire cifre di
+     runs diversi in una sola tabella senza indicare differenze.
+
+ORDINE C — Consegna
+  1. Produrre UN JSONL eval finale con la configurazione scelta.
+  2. Eseguire medanon validate, controllo SHA-256 e privacy check
+     su file da pubblicare. Non includere data/ originale, audit
+     con superfici, review files, esempi reali grezzi.
+  3. Aggiornare README e report tre pagine con nomi del team,
+     descrizione del default reale e cifre corrette della run
+     finale. Inserire limiti chiari su synthetic/proxy/Bosch.
+  4. Preparare video due minuti e link secondo linee guida;
+     verificare installazione semplice ed entrypoint in checkout
+     pulito; pubblicare entro l'orario organizzativo.
+
+Le modifiche di policy non dovrebbero essere automatiche in risposta
+alla singola metrica di un attaccante. Un “defender-attacker loop”
+scientificamente utile è: ipotesi su fuga specifica, modifica mirata,
+test appaiato su set held-out, controllo utilità ICD e casi clinici,
+decisione umana. Cambiare solo per battere uno script sintetico può
+trasferire il problema altrove o danneggiare la nota clinica.
+
+===============================================================================
+19. COME SPIEGARLO AI GIUDICI SENZA SOVRAVENDERE I RISULTATI
+===============================================================================
+
+Messaggio in circa un minuto:
+“Abbiamo costruito un anonimizzatore locale per note mediche e
+dialoghi spesso trascritti in minuscolo. Combina regole per date,
+numeri dettati e nomi, spaCy/Presidio e modelli NER locali. Prima
+di sostituire una stringa, controlla se è un termine clinico, un
+farmaco o un eponimo; collega le menzioni della stessa persona tra
+dialogo e nota e sostituisce il nome con un ruolo coerente. Le
+trasformazioni sono diverse per tipo di dato: identificativi diretti
+diventano placeholder, date perdono la precisione del giorno,
+occupazioni/luoghi/lab vengono generalizzati dove possibile.
+Abbiamo testato con dati sintetici annotati, canary inseriti in
+contesti reali e proxy di utilità ICD, oltre a test di linkage.
+I punteggi locali non sono le metriche segrete Bosch e il compromesso
+privacy/utilità della policy su età e anni è tuttora misurato.”
+
+Cose corrette da dire:
+  - nessun training ex novo dei modelli PHI: BERT/OpenMed preaddestrati;
+  - modelli usati durante inferenza locale, nessuna API cloud;
+  - ICD-10 del record usati come evidenza clinica e preservati;
+  - diversi profili per privacy e costo, con default specificato;
+  - audit e manifest permettono spiegazione e riproducibilità;
+  - i test locali hanno un gold sintetico, non umano su tutto il corpus;
+  - k=3 è euristica su QI scelti, non garanzia formale.
+
+Cose da NON dire senza una nuova prova:
+  - “Il sistema raggiunge 88,6% di privacy sui dati Bosch”: è recall
+    sintetica avversariale di un esperimento modello antecedente;
+  - “Reidentificazione solo 3% con la policy finale”: cifra di età
+    a fasce in un vecchio artefatto, parser attuale non legge età exact;
+  - “100% utility medica”: 100% parole ICD trattenute in una proxy;
+  - “Il sistema è pienamente HIPAA-compliant” o “non reidentificabile”:
+    questi risultati non sono stati dimostrati;
+  - “Abbiamo addestrato OpenMed su dati Bosch”: non risulta dal codice;
+  - “k-anonimato garantito”: il check dichiara esplicitamente
+    che non copre testo libero, diagnosi, date o laboratori.
+
+Tre domande probabili e risposte fedeli:
+  D: “Perché più rilevatori e non un solo LLM?”
+  R: “Regole e pattern intercettano numeri/dati strutturati e i casi
+      dettati; NER migliora nomi e occupazioni; i filtri clinici
+      evitano cancellazioni dannose. Il piccolo LLM testato costava
+      molto su CPU e non ha mostrato un incremento comparabile a
+      OpenMed nello stesso setup ridotto.”
+  D: “Come sapete di non perdere diagnosi?”
+  R: “Conserviamo i codici ICD richiesti; misuriamo parole della
+      descrizione, concetti lessicali, negazioni, trappole sintetiche
+      e delta di un classificatore ICD locale. Sono proxy; il test
+      ufficiale Bosch può misurare diversamente.”
+  D: “Sono davvero anonimi?”
+  R: “Rimuoviamo o generalizziamo molti identificativi diretti,
+      ma dettagli demografici e clinici preservati possono restare
+      collegabili. Mostriamo esattamente la policy e misure di
+      linkage con limiti espliciti; non promettiamo rischio zero.”
+
+===============================================================================
+20. PROMPT OPERATIVO PER L'AI CHE SUBENTRA
+===============================================================================
+
+Se una nuova AI riceve solo questo TXT, dovrebbe iniziare così:
+
+“Il progetto operativo è D:\NEURAL_WAVE\Anonymization_Bosch_NeuralWave.
+Prima di cambiare codice leggi git status, branch, commit e diff; Claude
+potrebbe aver fatto altre modifiche. Leggi config.py, configs/default.yaml,
+pipeline.py, rules.py, medical.py, entities.py, spans.py, transform.py,
+evaluation/scoring.py, metrics.py, attacks.py e il manifest dell'ULTIMO
+output. Non usare CODEBASE_EXPLAINED.md o outputs/results.json come
+prova della versione corrente senza controllare manifest/config.
+Non riportare mai testo clinico o identificativi dei JSONL nel
+report o in un servizio remoto. Usa dati inventati per esempi.
+Leggi anche reports/ROUND23_EVALUATION.md, tenendo separati i 40
+incontri sintetici di sviluppo da un test Bosch indipendente.
+Priorità: congelare e testare un profilo reale, misurare age exact
+contro age_bands con attacchi aggiornati e utility clinica, produrre
+un nuovo eval JSONL validato con manifest, aggiornare report/README
+e completare i deliverable del team. Ogni numero comunicato ai
+giudici deve avere file sorgente, timestamp, manifest e limiti.”
+
+Domande che l'AI dovrebbe risolvere con dati prima di proporre cambi:
+  1. Quale profilo effettivo produce il miglior compromesso su casi
+     finora non usati per tuning, includendo recall raw e utility?
+  2. Quanta unicità/collegabilità è dovuta a età esatta, anno DOB,
+     anno visita e ICD, separatamente e insieme?
+  3. I valori laboratorio intervallati preservano le categorie
+     richieste e quanto perdono in una valutazione clinica reale?
+  4. I due span extra che OpenMed aggiungeva su 25 reali erano
+     veri PHI o falsi positivi? Serve revisione umana cieca.
+  5. Il programma funziona davvero con pesi in cache, --offline,
+     installazione pulita e il vincolo GPU dichiarato?
+  6. Qual è il commit esatto e il manifest esatto del file consegnato?
+
+Questo è un documento di handoff, non una certificazione di privacy,
+non un risultato ufficiale Bosch e non una fotografia permanente di
+un repository in evoluzione.
+
+===============================================================================
+VERIFICA CONCLUSIVA DI QUESTA ANALISI
+===============================================================================
+
+Controllo del 17/10/2026, ~21:40 Europe/Rome:
+  - branch round23-candidate, HEAD 07ef094, code_hash
+    39755f6242d34451510d0a1dc47fb83cd78ad1f3a59a150f18e6e873ee7458f6;
+  - git status: solo questo TXT è untracked; codice e report round 2–3
+    risultano committati;
+  - pytest con D:\NEURAL_WAVE\.venv\Scripts\python.exe: 152 passed,
+    98 warnings, exit code 0, 374,49 secondi;
+  - scripts/privacy_check_docs.py: FAIL 0, WARN 2 in commenti/test
+    preesistenti, nessuna violazione nella documentazione controllata;
+  - nessun output di submission è stato rigenerato o modificato durante
+    questa analisi; nessun dato clinico originale è stato copiato qui.
+
+Il test verifica la worktree al momento dell'esecuzione, non certifica
+commit futuri. Dopo altre modifiche servono nuovi test e un manifest
+associato al file effettivamente consegnato.
+
+
+===============================================================================
+21. AGGIORNAMENTO ROUND 4-6 E REVISIONE AVVERSARIA (18 OTTOBRE 2026)
+===============================================================================
+
+21.1 Stato verificato e come leggere i numeri
+
+[GIT, al controllo di questo aggiornamento] Branch round4-dev, HEAD
+ceff20989138372806c2b47a417428c823398d96 (17/10/2026 23:47:37 +0200).
+MEDANON_GUIDA_COMPLETA_AGGIORNATA_PER_AI.txt è l'unico file non tracciato
+mostrato da git status. I commit successivi alla fotografia originaria sono:
+
+  18fdb0e  Misure corporee, numerosità familiare, ID strutturati e qualificatori
+           dell'occupazione, dopo i round sintetici 2-4.
+  dd32164  Correzioni sul DEV48 del round 6, nuove misure di policy e report.
+  ceff209  Filtri per eponimi composti e false organizzazioni minuscole;
+           analisi separata del linkage e profilo date sperimentale.
+
+Non usare più la frase «round23-candidate è il branch attivo» delle sezioni
+precedenti. Le cifre di 152 test e il code hash 39755f... sono storici, legati
+al commit 07ef094: NON sono una verifica della HEAD attuale. Anche i conteggi
+di test nel README sono anteriori. Questo aggiornamento ha esaminato sorgenti,
+diff e report già presenti, ma NON ha rieseguito una suite completa né un
+nuovo benchmark. Se Claude continua a lavorare, controllare nuovamente
+git status, git log -1 e l'hash/manifest dell'output prima di agire.
+
+La distinzione decisiva è tra: (1) codice predefinito, (2) profili opzionali,
+(3) esperimenti sintetici di sviluppo, (4) eventuale validazione davvero
+indipendente, (5) punteggio ufficiale Bosch. Nessuno dei risultati aggiunti
+nei report ROUND6_DEV48 e ADVERSARIAL_REVIEW appartiene ai livelli 4 o 5.
+
+21.2 Architettura e policy correnti: cosa è cambiato davvero
+
+[CODICE] L'architettura delle sezioni 5-9 resta sostanzialmente valida:
+input JSONL -> rilevatori regole/spaCy/Presidio/NER -> filtri clinici e
+risoluzione degli span -> trasformazioni -> output JSONL. Non compare un
+nuovo modello addestrato. configs/default.yaml è ANCORA il default con età
+esatta fino a 89 anni, DOB e date complete ridotte all'anno, modelli locali
+spaCy, dslim BERT NER e OpenMed. configs/age_bands.yaml è il candidato
+raccomandato dagli esperimenti: età pediatriche esatte, età adulte a fasce,
+anno di nascita adulto rimosso. Serve passarlo esplicitamente con --config;
+non dire ai giudici che è il default solo perché ha dato risultati migliori.
+
+[CODICE: src/medanon/quasi.py e pipeline.py, commit dd32164] Il rilevatore
+riconosce più formulazioni delle misure corporee: coppie altezza-peso, peso
+riportato di nuovo in un'altra unità e valore «on the scale». Per il nucleo
+familiare riconosce alcune frasi con «there are», descrizioni household,
+conteggi dei figli e fratelli/sorelle. La policy conserva i conteggi 0-2;
+generalizza quelli da 3 in su; cerca di preservare i conteggi che descrivono
+familiari malati nell'anamnesi ereditaria. La logica del peso esatto è stata
+ristretta: la sola parola pregnancy non blocca più la generalizzazione;
+rimangono eccezioni esplicite per dosi basate sul peso, dialisi/fluidi,
+monitoraggio dell'aumento ponderale gestazionale, malnutrizione e alcuni
+codici. Sono euristiche, non una comprensione clinica completa.
+
+[CODICE: medical.py e pipeline.py, commit dd32164/ceff209] Nuovi filtri
+evitano di cancellare analiti misti maiuscolo/minuscolo (per esempio un
+nome di esame inventato «AbC-IgZ»), unità incollate alla frase seguente,
+nomi di strumenti clinici con trattino ed eponimi composti. In testo con
+maiuscole significative, proposte NER di ORGANIZATION/LOCATION composte
+interamente da minuscole sono scartate. Questo riduce alcuni falsi positivi
+ma può perdere una vera organizzazione scritta volutamente in minuscolo:
+va trattato come compromesso osservabile, non come garanzia generale.
+
+[CODICE: configs/age_bands_strict_dates.yaml, commit ceff209] Esiste ora un
+TERZO profilo, sperimentale: fasce d'età come age_bands più rimozione anche
+dell'anno dalle date complete ([DATE] invece di [DATE] YYYY). Gli anni isolati
+della storia clinica e le date relative restano. Non è il default né la
+raccomandazione principale. La perdita dell'anno di un evento clinico può
+danneggiare la cronologia; non è stata misurata in modo convincente nei set
+usati qui. File: configs/age_bands_strict_dates.yaml.
+
+21.3 Round 6 DEV48: protocollo e risultati attribuibili
+
+[REPORT: reports/ROUND6_DEV48.md e reports/round6_dev48_metrics.json]
+48 incontri sintetici di sviluppo, 3.092 span gold con offset controllati.
+Baseline B3 = commit 18fdb0e; candidata B4 = commit dd32164. Le versioni
+sono state eseguite sugli STESSI input, sia con default sia con age_bands,
+su GPU. Il report dichiara picco di 2.619 MiB VRAM, circa 0,70 s/incontro
+e struttura JSON conservata in 48/48. Queste cifre descrivono quel setup,
+non un requisito universale di memoria o tempo. Nel report Round 5 e gli
+input/gold della validazione Round 6 risultano non aperti.
+
+                                           B3       B3+age     B4       B4+age
+  Recall PHI core, raw                     0,919    0,990      0,919    0,990
+  Recall conforme alla policy             1,000    1,000      1,000    1,000
+  Rimozione rigorosa token, proxy          0,715    0,840      0,714    0,840
+  Span clinici cambiati erroneamente      14       14         3        3
+  Record sotto k=3                         45/48    21/48      45/48    21/48
+  Identificativi diretti rimasti           0        0          0        0
+
+Gli span clinici nel denominatore sono 1.180. Il recall raw migliora con
+age_bands perché le età adulte esatte, mantenute dal default per scelta di
+policy, contano come informazione non rimossa. Il «recall conforme alla
+policy» pari a 1,000 significa rispetto della policy codificata; NON
+significa anonimato completo. Anche 21/48 record sotto k=3 con age_bands
+segnalano rischio residuo nella specifica euristica locale; k=3 non è una
+garanzia formale per il testo libero. «0 identificativi diretti rimasti»
+si riferisce solo ai pattern e al gold di questo set sintetico.
+
+ATTENZIONE AI DENOMINATORI DELLA PRECISIONE. Il report riporta precision
+0,990 -> 0,998 per B3+age -> B4+age se tutti gli span non clinici sono
+ammessi come gold. Lo scorer core, invece, esclude ANTHROPOMETRIC,
+FAMILY_SIZE e FAMILY_RELATION dal gold principale: trasformazioni corrette
+di quelle categorie possono apparire come falsi positivi, abbassando la
+precision core a circa 0,76-0,88. Non confrontare una precision con l'altra
+senza dichiarare il denominatore e non presentare 0,998 come «precisione
+Bosch». scripts/score_gold.py ora separa queste etichette nella misura
+policy_objectives_share_transformed, per tipo e rilevanza clinica.
+
+Il progresso sulla policy dei quasi-identificatori è misurato così:
+  - altezza demografica trasformata: 28/72 B3 -> 60/72 B4;
+  - peso demografico: 28/124 -> 120/124;
+  - BMI demografico: 56/62 -> 60/62;
+  - numerosità familiare: 0/96 -> 58/96; i 58 sono conteggi >=3.
+
+Il rischio più concreto è nella MEDICAL UTILITY delle misure etichettate
+«clinically sensitive, should stay exact» dal generatore: altezza
+10/40 -> 20/40 trasformata, peso 10/68 -> 40/68, BMI 20/34 -> 20/34.
+La trasformazione generalizza a intervalli (per esempio 5 cm/5 kg o classe
+BMI), non elimina completamente il valore, ma può comunque cancellare una
+precisione necessaria per una decisione clinica. Il report spiega che il
+flag di sensibilità del generatore non è ricostruibile in modo affidabile
+dal testo: un richiamo al dosaggio compare in tutti i 48 record e diagnosi
+simili portano flag opposti. Per questo B4 applica eccezioni cliniche
+esplicite invece di usare il flag gold. Non chiamare ogni mismatch un bug
+dimostrato del rilevatore, ma non ignorare il danno possibile. Serve una
+valutazione manuale mirata, basata su esempi sintetici o revisione
+autorizzata, prima di dichiarare la policy clinicamente sicura.
+
+Il report indica anche non regressione sui round sintetici 2-4; le
+specifiche cifre devono essere lette in round6_dev48_metrics.json. Il
+commit ceff209 successivo aggiunge filtri mirati, ma NON risulta in questi
+numeri B4: non attribuire automaticamente i risultati Round 6 alla HEAD
+ceff209 senza nuova esecuzione appaiata.
+
+21.4 Linkage avversario: nuovo script, protocollo e limiti
+
+[CODICE: scripts/linkage_check.py; REPORT: reports/ADVERSARIAL_REVIEW.md]
+Il nuovo script misura un attaccante a mondo chiuso su dati sintetici:
+per ogni target conosce età esatta, sesso e anno/i dell'incontro, poi cerca
+record compatibili guardando soltanto l'output anonimizzato. Legge età
+esatta «N-year-old», fascia «[a-b]-year-old», 90+, eventuale anno in
+[DOB] YYYY, anno in [DATE] YYYY e pronomi. Il successo «unique_correct»
+richiede che l'insieme dei candidati sia ESATTAMENTE il record target.
+Non è una stima del rischio nella popolazione reale né un attacco a un
+archivio esterno di pazienti.
+
+  Set sintetico       Default esatto   age_bands   age_bands + date senza anno
+  Round 6 DEV48           33/48           6/48               6/48
+  Round 4 DEV20           20/20           4/20               4/20
+
+La forte riduzione con age_bands è un segnale utile PER QUESTO ATTACCANTE
+e questi set. I link residui sono bambini, per i quali la policy mantiene
+l'età esatta. Rimuovere anche gli anni delle date non ha aggiunto beneficio
+di linkage in questi due set: quasi tutti gli incontri condividono l'anno.
+Ha aumentato una proxy di rimozione rigorosa dei token, ma potrebbe ridurre
+l'utilità cronologica. Il report ADVERSARIAL_REVIEW spiega anche perché un
+precedente esperimento di un compagno su 100 adulti, commit 096ff01 e soli
+rilevatori rules, NON equivale a testare age_bands.yaml: usava una vecchia
+opzione che lasciava l'anno di nascita, e una tabella ausiliaria con anno di
+registrazione variabile. Non sommare quei numeri a questa tabella.
+
+Il nuovo script NON aggiorna src/medanon/evaluation/attacks.py. Quindi il
+precedente problema rimane: l'attacco linkage in attacks.py legge soprattutto
+le fasce e può trascurare l'età esatta o l'anno DOB conservato; il suo
+attacco sui laboratori cerca numeri puntuali e non interpreta correttamente
+intervalli pubblicati. Le cifre di attacco storiche nel README/REPORT non
+vanno presentate come risultato della policy finale. Manca inoltre un
+ranker con distrattori e metriche Top-1/Top-5/MRR; manca un attacco di
+recupero del testo mascherato validato. Queste sono idee, NON funzionalità
+già implementate. Se il tempo è breve, riparare e testare i parser dei
+cinque attacchi esistenti ha più valore di aggiungere un BERT infilling
+senza protocollo: un solo [MASK] non rappresenta città o strutture con
+più parole, e il suo Top-5 non misura da solo la reidentificazione.
+
+21.5 Cosa manca prima di poter parlare di consegna
+
+Priorità, in ordine operativo:
+  1. Scegliere esplicitamente il profilo da consegnare: default esatto,
+     age_bands (raccomandato dal report di sviluppo), oppure strict_dates
+     sperimentale. Documentare la scelta e congelare commit/config.
+  2. Risolvere o quantificare il problema delle misure clinicamente
+     sensibili e ricontrollare eponimi/organizzazioni modificati in ceff209.
+     Evitare tuning sulla futura validazione indipendente.
+  3. Correggere attacks.py con test sintetici calcolabili a mano: età
+     esatte e a fasce, anno DOB, date, laboratori intervallati. Ripetere
+     gli attacchi sullo stesso output della policy scelta. Eventuale
+     ranker con distrattori: dichiarare costruzione dell'archivio, threat
+     model e dimensione del pool; non riportare solo Top-1 senza baseline.
+  4. Eseguire una valutazione cieca davvero separata soltanto dopo il
+     congelamento della policy; conservare input/gold protetti, output,
+     config, commit, hash, manifest e metriche aggregate. Non usare Round 6
+     DEV48 o Round 4 DEV20 come «held-out» dopo averli impiegati per tuning.
+  5. Rigenerare il JSONL finale dal commit scelto, validare struttura e
+     privacy, sincronizzare README/REPORT/video con la policy effettiva.
+     Controllare che nessun esempio reale grezzo o audit sensibile venga
+     incluso nei materiali pubblici.
+
+Per l'AI che subentra, prompt aggiornato: «Apri D:\NEURAL_WAVE\
+Anonymization_Bosch_NeuralWave, controlla branch/HEAD/status e config
+prima di fare affermazioni sul software. Leggi questa sezione 21,
+reports/ROUND6_DEV48.md, reports/ADVERSARIAL_REVIEW.md, i due commit
+dd32164 e ceff209 e i sorgenti quasi.py, pipeline.py, medical.py,
+scripts/score_gold.py, scripts/linkage_check.py e evaluation/attacks.py.
+I risultati Round 6 sono sintetici di sviluppo e precedono ceff209;
+nessuna cifra qui è il risultato ufficiale Bosch. Non aprire validation
+o holdout per ritoccare la policy; non pubblicare dati clinici originali.
+Collega ogni risultato al commit, config, set e protocollo esatti.»
+
+FINE AGGIORNAMENTO. Questo dossier resta un handoff tecnico, non una
+certificazione di anonimato né una fotografia automatica dei commit futuri.
+
+
+
+

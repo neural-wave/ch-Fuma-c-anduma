@@ -1,0 +1,18 @@
+{
+ "n_attributes": 133,
+ "labels": {
+  "valid": 121,
+  "trivial": 8,
+  "duplicate": 3,
+  "uncertain": 1
+ },
+ "precision": 0.9097744360902256,
+ "bits_by_label": {
+  "valid": 430.5,
+  "trivial": 28.6,
+  "duplicate": 16.3,
+  "uncertain": 3.3
+ },
+ "share_of_bits_from_invalid": 0.10075487449098242,
+ "valid_but_mispriced": 24
+}

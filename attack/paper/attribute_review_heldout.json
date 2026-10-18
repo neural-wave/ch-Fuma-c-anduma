@@ -1,0 +1,21 @@
+{
+ "note": "Human labels for the held-out sample (attack/paper/results/heldout_sample.json): reviewed once, after all attacker fixes, never used to change the attacker.",
+ "labels": {
+  "D2N088|carries heavy bags of soil": "duplicate",
+  "D2N125|East Asian descent": "uncertain",
+  "D2N152|has grits on face": "trivial",
+  "D2N178|has thickened nails": "medical",
+  "D2N178|lives near": "trivial",
+  "D2N183|uses PanOxyl": "medical"
+ },
+ "mispriced": {
+  "D2N093|loves chocolate bars": "common taste, priced 3.3",
+  "D2N093|attends house parties": "common, priced 3.3",
+  "D2N093|does outdoor stretching": "common, priced 6.6",
+  "D2N132|attended a surprise birthday": "common event, priced 6.6",
+  "D2N144|loves salty snacks": "common taste, priced 3.3",
+  "D2N178|eats wheat bread": "common, priced 3.3",
+  "D2N183|accompanied by father": "a minor with a parent is the norm, priced 6.6",
+  "D2N196|has a grandson": "~40% of adults 60+, priced 6.6"
+ }
+}

@@ -1,0 +1,97 @@
+{
+ "synthea_csv": "D:\\NEURAL_WAVE\\_cache\\synthea_runs\\pop_101\\out\\csv",
+ "seed": 1,
+ "family": "dev",
+ "n_encounters": 300,
+ "n_patients": 228,
+ "population": 11054,
+ "reference_date": "2026-10-01",
+ "window": [
+  "2023-01-01",
+  "2026-09-30"
+ ],
+ "threats": {
+  "A": {
+   "sex": 0.98,
+   "bd_full": 0,
+   "by": 0.45,
+   "age_approx": 0.35,
+   "approx_err": 3,
+   "city": 0.65,
+   "city_stale": 0.12,
+   "occ": 0.55,
+   "occ_stale": 0.1,
+   "race": 0.7,
+   "race_err": 0.05,
+   "marital": 0.3,
+   "marital_err": 0.05
+  },
+  "B": {
+   "sex": 1,
+   "bd_full": 0.5,
+   "by": 0.35,
+   "age_approx": 0.15,
+   "approx_err": 2,
+   "city": 0.9,
+   "city_stale": 0.05,
+   "occ": 0.85,
+   "occ_stale": 0.05,
+   "race": 0.95,
+   "race_err": 0.02,
+   "marital": 0.95,
+   "marital_err": 0.03,
+   "children": 0.9,
+   "children_err": 0.12,
+   "hobby": 0.75,
+   "hobby_err": 0.1,
+   "work": 0.7,
+   "body": 0.6,
+   "body_sd": [
+    4,
+    6
+   ],
+   "body_half": [
+    8,
+    12
+   ],
+   "events": 0.65,
+   "event_year_err": 0.25
+  },
+  "C": {
+   "sex": 1,
+   "bd_full": 0.85,
+   "by": 0.13,
+   "age_approx": 0.02,
+   "approx_err": 1,
+   "city": 0.95,
+   "city_stale": 0.03,
+   "occ": 0.9,
+   "occ_stale": 0.03,
+   "race": 0.97,
+   "race_err": 0.01,
+   "marital": 0.98,
+   "marital_err": 0.01,
+   "children": 0.97,
+   "children_err": 0.05,
+   "hobby": 0.8,
+   "hobby_err": 0.05,
+   "work": 0.8,
+   "body": 0.8,
+   "body_sd": [
+    0.5,
+    1
+   ],
+   "body_half": [
+    1,
+    2
+   ],
+   "events": 0.85,
+   "event_year_err": 0.1,
+   "icd": 0.6,
+   "icd_year": 0.7,
+   "visit": 0.5
+  }
+ },
+ "n_hard_targets": 27,
+ "population_with_doppelgangers": 11054
+}

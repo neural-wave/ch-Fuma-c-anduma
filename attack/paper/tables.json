@@ -1,0 +1,1542 @@
+{
+ "llm_attack": {
+  "default": {
+   "meta": {
+    "model": "qwen3.5:35b",
+    "extract_prompt": "extract-v4",
+    "recover_prompt": "recover-v4",
+    "elapsed_s": 303.4,
+    "llm": {
+     "llm_calls": 69,
+     "cache_hits": 134,
+     "retries": 2
+    }
+   },
+   "anonymized": {
+    "n_records": 67,
+    "n_failed": 0,
+    "mean_risk": 0.03408028970165343,
+    "mean_bits": 13.189753070934586,
+    "median_bits": 12.07693124858329,
+    "p90_bits": 19.76739700399506,
+    "pct_likely_unique": 1.492537313432836,
+    "hallucination_rate": 0.03598971722365039,
+    "mean_masking_density": 0.8174464398194359
+   },
+   "original": {
+    "n_records": 67,
+    "n_failed": 0,
+    "mean_risk": 0.07032907456311664,
+    "mean_bits": 15.353483179551818,
+    "median_bits": 14.729608942897519,
+    "p90_bits": 25.60308068861975,
+    "pct_likely_unique": 5.970149253731344,
+    "hallucination_rate": 0.05
+   },
+   "privacy_gain": 0.5154167758731396,
+   "bits_removed": 2.163730108617232,
+   "warnings": [],
+   "median_risk_anon": 1.2896556218635444e-05,
+   "max_risk_anon": 0.8381399719411236,
+   "records_risk_ge_1e-3": 10,
+   "records_lambda_lt_100": 6,
+   "recovery": {
+    "overall": {
+     "n_guesses": 274,
+     "n_scorable": 108,
+     "n_correct": 9,
+     "recovery_rate": 0.08333333333333333
+    },
+    "excluding_names": {
+     "n_guesses": 199,
+     "n_scorable": 40,
+     "n_correct": 8,
+     "recovery_rate": 0.2
+    },
+    "overall_ci95": [
+     0.0445,
+     0.1508
+    ],
+    "by_type": {
+     "name": {
+      "n_guesses": 75,
+      "n_scorable": 68,
+      "n_correct": 1,
+      "recovery_rate": 0.014705882352941176
+     },
+     "age": {
+      "n_guesses": 10,
+      "n_scorable": 1,
+      "n_correct": 0,
+      "recovery_rate": 0.0
+     },
+     "state_or_region": {
+      "n_guesses": 29,
+      "n_scorable": 4,
+      "n_correct": 1,
+      "recovery_rate": 0.25
+     },
+     "city": {
+      "n_guesses": 25,
+      "n_scorable": 12,
+      "n_correct": 0,
+      "recovery_rate": 0.0
+     },
+     "year": {
+      "n_guesses": 54,
+      "n_scorable": 0,
+      "n_correct": 0,
+      "recovery_rate": null
+     },
+     "employer_or_facility": {
+      "n_guesses": 36,
+      "n_scorable": 16,
+      "n_correct": 4,
+      "recovery_rate": 0.25
+     },
+     "occupation": {
+      "n_guesses": 45,
+      "n_scorable": 7,
+      "n_correct": 3,
+      "recovery_rate": 0.42857142857142855
+     }
+    },
+    "by_truth_kind": {
+     "identifier": {
+      "n_scorable": 91,
+      "n_correct": 6,
+      "rate": 0.06593406593406594,
+      "ci95": [
+       0.0306,
+       0.1365
+      ],
+      "examples": [
+       {
+        "encounter_id": "D2N001",
+        "placeholder": "[US_STATE]",
+        "type": "state_or_region",
+        "guess": "Washington",
+        "confidence": "high"
+       },
+       {
+        "encounter_id": "D2N025",
+        "placeholder": "[ORGANIZATION]",
+        "type": "employer_or_facility",
+        "guess": "Medicare",
+        "confidence": "medium"
+       },
+       {
+        "encounter_id": "D2N032",
+        "placeholder": "[ORGANIZATION]",
+        "type": "employer_or_facility",
+        "guess": "Weight Watchers",
+        "confidence": "medium"
+       },
+       {
+        "encounter_id": "D2N036",
+        "placeholder": "[OCCUPATION]",
+        "type": "occupation",
+        "guess": "landscaper",
+        "confidence": "high"
+       },
+       {
+        "encounter_id": "D2N041",
+        "placeholder": "[OCCUPATION]",
+        "type": "occupation",
+        "guess": "cashier",
+        "confidence": "medium"
+       },
+       {
+        "encounter_id": "D2N056",
+        "placeholder": "[OCCUPATION]",
+        "type": "occupation",
+        "guess": "farmer",
+        "confidence": "high"
+       }
+      ]
+     },
+     "overredacted_content": {
+      "n_scorable": 17,
+      "n_correct": 3,
+      "rate": 0.17647058823529413,
+      "ci95": [
+       0.0619,
+       0.4103
+      ],
+      "examples": [
+       {
+        "encounter_id": "D2N035",
+        "placeholder": "[ORGANIZATION]",
+        "type": "employer_or_facility",
+        "guess": "lab",
+        "confidence": "high"
+       },
+       {
+        "encounter_id": "D2N044",
+        "placeholder": "[ORGANIZATION]",
+        "type": "employer_or_facility",
+        "guess": "Lachman",
+        "confidence": "high"
+       },
+       {
+        "encounter_id": "D2N044",
+        "placeholder": "[PERSON]",
+        "type": "name",
+        "guess": "<name redacted>",
+        "confidence": "high"
+       }
+      ]
+     },
+     "identifier_excluding_names": {
+      "n_scorable": 26,
+      "n_correct": 6,
+      "rate": 0.23076923076923078,
+      "ci95": [
+       0.1103,
+       0.4205
+      ]
+     }
+    }
+   },
+   "mean_bits_by_category_anon": {
+    "age": 5.167629757763316,
+    "other_facts": 4.165184695332411,
+    "occupation": 1.5156854654083958,
+    "family_structure": 1.1260495218427709,
+    "sex": 1.0,
+    "absolute_date": 0.1805479873804259,
+    "state_or_region": 0.034655643207274066
+   },
+   "mean_bits_by_category_orig": {
+    "age": 5.208194784199413,
+    "other_facts": 4.429065737158206,
+    "occupation": 1.627169966263749,
+    "absolute_date": 1.5044657342221415,
+    "family_structure": 1.1260495218427709,
+    "sex": 1.0,
+    "state_or_region": 0.2484095107653833,
+    "employer_or_facility": 0.19832406536640967,
+    "ethnicity": 0.011803859733752364
+   },
+   "sensitivity": {
+    "full": {
+     "anonymized": {
+      "mean_bits": 13.189753070934588,
+      "median_bits": 12.07693124858329,
+      "mean_risk": 0.03408028970165343,
+      "pct_likely_unique": 1.492537313432836
+     },
+     "original": {
+      "mean_bits": 15.353483179551818,
+      "median_bits": 14.729608942897519,
+      "mean_risk": 0.07032907456311664,
+      "pct_likely_unique": 5.970149253731344
+     }
+    },
+    "without_llm_rarity_buckets": {
+     "anonymized": {
+      "mean_bits": 11.057769368245683,
+      "median_bits": 10.389521478891316,
+      "mean_risk": 0.01270223652012455,
+      "pct_likely_unique": 1.492537313432836
+     },
+     "original": {
+      "mean_bits": 12.9240133788133,
+      "median_bits": 12.26334437281417,
+      "mean_risk": 0.019406031055446762,
+      "pct_likely_unique": 1.492537313432836
+     }
+    },
+    "core_quasi_identifiers_only": {
+     "anonymized": {
+      "mean_bits": 9.02456837560218,
+      "median_bits": 7.556903645661424,
+      "mean_risk": 0.004752436641102326,
+      "pct_likely_unique": 0.0
+     },
+     "original": {
+      "mean_bits": 10.924417442393617,
+      "median_bits": 9.11489909878231,
+      "mean_risk": 0.008188403197908155,
+      "pct_likely_unique": 0.0
+     }
+    }
+   },
+   "p_source_counts_anon": {
+    "census": 54,
+    "bls": 11,
+    "table": 64,
+    "bucket": 48,
+    "constant": 87
+   }
+  },
+  "age_bands": {
+   "meta": {
+    "model": "qwen3.5:35b",
+    "extract_prompt": "extract-v4",
+    "recover_prompt": "recover-v4",
+    "elapsed_s": 239.0,
+    "llm": {
+     "llm_calls": 54,
+     "cache_hits": 149,
+     "retries": 2
+    }
+   },
+   "anonymized": {
+    "n_records": 67,
+    "n_failed": 0,
+    "mean_risk": 0.004237214048903762,
+    "mean_bits": 10.78817612128848,
+    "median_bits": 10.551469759610795,
+    "p90_bits": 18.792376706222466,
+    "pct_likely_unique": 0.0,
+    "hallucination_rate": 0.04591836734693878,
+    "mean_masking_density": 0.8166824141409155
+   },
+   "original": {
+    "n_records": 67,
+    "n_failed": 0,
+    "mean_risk": 0.06276678717904018,
+    "mean_bits": 15.512344991304428,
+    "median_bits": 14.729608942897519,
+    "p90_bits": 25.2200506160907,
+    "pct_likely_unique": 5.970149253731344,
+    "hallucination_rate": 0.05
+   },
+   "privacy_gain": 0.9324927363763698,
+   "bits_removed": 4.724168870015948,
+   "warnings": [],
+   "median_risk_anon": 4.479856370683891e-06,
+   "max_risk_anon": 0.14037364456399196,
+   "records_risk_ge_1e-3": 8,
+   "records_lambda_lt_100": 5,
+   "recovery": {
+    "overall": {
+     "n_guesses": 282,
+     "n_scorable": 118,
+     "n_correct": 11,
+     "recovery_rate": 0.09322033898305085
+    },
+    "excluding_names": {
+     "n_guesses": 206,
+     "n_scorable": 49,
+     "n_correct": 9,
+     "recovery_rate": 0.1836734693877551
+    },
+    "overall_ci95": [
+     0.0529,
+     0.1592
+    ],
+    "by_type": {
+     "name": {
+      "n_guesses": 76,
+      "n_scorable": 69,
+      "n_correct": 2,
+      "recovery_rate": 0.028985507246376812
+     },
+     "age": {
+      "n_guesses": 29,
+      "n_scorable": 1,
+      "n_correct": 0,
+      "recovery_rate": 0.0
+     },
+     "state_or_region": {
+      "n_guesses": 27,
+      "n_scorable": 5,
+      "n_correct": 1,
+      "recovery_rate": 0.2
+     },
+     "city": {
+      "n_guesses": 22,
+      "n_scorable": 11,
+      "n_correct": 0,
+      "recovery_rate": 0.0
+     },
+     "year": {
+      "n_guesses": 53,
+      "n_scorable": 6,
+      "n_correct": 0,
+      "recovery_rate": 0.0
+     },
+     "employer_or_facility": {
+      "n_guesses": 48,
+      "n_scorable": 20,
+      "n_correct": 5,
+      "recovery_rate": 0.25
+     },
+     "occupation": {
+      "n_guesses": 27,
+      "n_scorable": 6,
+      "n_correct": 3,
+      "recovery_rate": 0.5
+     }
+    },
+    "by_truth_kind": {
+     "identifier": {
+      "n_scorable": 98,
+      "n_correct": 7,
+      "rate": 0.07142857142857142,
+      "ci95": [
+       0.035,
+       0.1402
+      ],
+      "examples": [
+       {
+        "encounter_id": "D2N001",
+        "placeholder": "[US_STATE]",
+        "type": "state_or_region",
+        "guess": "Washington",
+        "confidence": "high"
+       },
+       {
+        "encounter_id": "D2N007",
+        "placeholder": "[PATIENT_NAME]",
+        "type": "name",
+        "guess": "<name redacted>",
+        "confidence": "low"
+       },
+       {
+        "encounter_id": "D2N025",
+        "placeholder": "[ORGANIZATION]",
+        "type": "employer_or_facility",
+        "guess": "Medicare",
+        "confidence": "medium"
+       },
+       {
+        "encounter_id": "D2N032",
+        "placeholder": "[ORGANIZATION]",
+        "type": "employer_or_facility",
+        "guess": "Weight Watchers",
+        "confidence": "medium"
+       },
+       {
+        "encounter_id": "D2N036",
+        "placeholder": "[OCCUPATION]",
+        "type": "occupation",
+        "guess": "landscaper",
+        "confidence": "high"
+       },
+       {
+        "encounter_id": "D2N041",
+        "placeholder": "[OCCUPATION]",
+        "type": "occupation",
+        "guess": "cashier",
+        "confidence": "medium"
+       },
+       {
+        "encounter_id": "D2N056",
+        "placeholder": "[OCCUPATION]",
+        "type": "occupation",
+        "guess": "farmer",
+        "confidence": "high"
+       }
+      ]
+     },
+     "overredacted_content": {
+      "n_scorable": 20,
+      "n_correct": 4,
+      "rate": 0.2,
+      "ci95": [
+       0.0807,
+       0.416
+      ],
+      "examples": [
+       {
+        "encounter_id": "D2N035",
+        "placeholder": "[ORGANIZATION]",
+        "type": "employer_or_facility",
+        "guess": "lab",
+        "confidence": "high"
+       },
+       {
+        "encounter_id": "D2N044",
+        "placeholder": "[ORGANIZATION]",
+        "type": "employer_or_facility",
+        "guess": "Lachman",
+        "confidence": "high"
+       },
+       {
+        "encounter_id": "D2N044",
+        "placeholder": "[PERSON]",
+        "type": "name",
+        "guess": "<name redacted>",
+        "confidence": "high"
+       },
+       {
+        "encounter_id": "D2N065",
+        "placeholder": "[LOCATION]",
+        "type": "employer_or_facility",
+        "guess": "air cast",
+        "confidence": "high"
+       }
+      ]
+     },
+     "identifier_excluding_names": {
+      "n_scorable": 32,
+      "n_correct": 6,
+      "rate": 0.1875,
+      "ci95": [
+       0.0889,
+       0.3531
+      ]
+     }
+    }
+   },
+   "mean_bits_by_category_anon": {
+    "other_facts": 4.300386806161993,
+    "age": 2.6432363321747325,
+    "occupation": 1.4537188141796873,
+    "family_structure": 1.175630538184373,
+    "sex": 1.0,
+    "absolute_date": 0.1805479873804259,
+    "state_or_region": 0.034655643207274066
+   },
+   "mean_bits_by_category_orig": {
+    "age": 5.208194784199413,
+    "other_facts": 4.60031318379792,
+    "occupation": 1.5652033150350406,
+    "absolute_date": 1.5044657342221415,
+    "family_structure": 1.175630538184373,
+    "sex": 1.0,
+    "state_or_region": 0.2484095107653833,
+    "employer_or_facility": 0.19832406536640967,
+    "ethnicity": 0.011803859733752364
+   },
+   "sensitivity": {
+    "full": {
+     "anonymized": {
+      "mean_bits": 10.78817612128848,
+      "median_bits": 10.551469759610795,
+      "mean_risk": 0.004237214048903762,
+      "pct_likely_unique": 0.0
+     },
+     "original": {
+      "mean_bits": 15.512344991304426,
+      "median_bits": 14.729608942897519,
+      "mean_risk": 0.06276678717904016,
+      "pct_likely_unique": 5.970149253731344
+     }
+    },
+    "without_llm_rarity_buckets": {
+     "anonymized": {
+      "mean_bits": 8.457868353233167,
+      "median_bits": 7.748771199984413,
+      "mean_risk": 0.0021135660978166175,
+      "pct_likely_unique": 0.0
+     },
+     "original": {
+      "mean_bits": 12.884551125199497,
+      "median_bits": 12.07693124858329,
+      "mean_risk": 0.020077513683961372,
+      "pct_likely_unique": 1.492537313432836
+     }
+    },
+    "core_quasi_identifiers_only": {
+     "anonymized": {
+      "mean_bits": 6.487789315126492,
+      "median_bits": 4.792971003894948,
+      "mean_risk": 0.0002592708663543574,
+      "pct_likely_unique": 0.0
+     },
+     "original": {
+      "mean_bits": 10.912031807506512,
+      "median_bits": 8.426843105097051,
+      "mean_risk": 0.006466569001684318,
+      "pct_likely_unique": 0.0
+     }
+    }
+   },
+   "p_source_counts_anon": {
+    "census": 54,
+    "bls": 13,
+    "table": 62,
+    "bucket": 51,
+    "constant": 85
+   }
+  },
+  "age_bands_strict_dates": {
+   "meta": {
+    "model": "qwen3.5:35b",
+    "extract_prompt": "extract-v4",
+    "recover_prompt": "recover-v4",
+    "elapsed_s": 81.0,
+    "llm": {
+     "llm_calls": 11,
+     "cache_hits": 191,
+     "retries": 1
+    }
+   },
+   "anonymized": {
+    "n_records": 67,
+    "n_failed": 0,
+    "mean_risk": 0.004496602889838749,
+    "mean_bits": 10.923145556291235,
+    "median_bits": 10.551469759610795,
+    "p90_bits": 18.38725932016782,
+    "pct_likely_unique": 0.0,
+    "hallucination_rate": 0.04415584415584416,
+    "mean_masking_density": 0.8174119826053415
+   },
+   "original": {
+    "n_records": 67,
+    "n_failed": 0,
+    "mean_risk": 0.07174022260235487,
+    "mean_bits": 15.613537793384287,
+    "median_bits": 14.729608942897519,
+    "p90_bits": 25.717143634096193,
+    "pct_likely_unique": 5.970149253731344,
+    "hallucination_rate": 0.05
+   },
+   "privacy_gain": 0.937321035163736,
+   "bits_removed": 4.690392237093052,
+   "warnings": [],
+   "median_risk_anon": 4.479856370683891e-06,
+   "max_risk_anon": 0.14037364456399196,
+   "records_risk_ge_1e-3": 8,
+   "records_lambda_lt_100": 5,
+   "recovery": {
+    "overall": {
+     "n_guesses": 280,
+     "n_scorable": 127,
+     "n_correct": 11,
+     "recovery_rate": 0.08661417322834646
+    },
+    "excluding_names": {
+     "n_guesses": 202,
+     "n_scorable": 56,
+     "n_correct": 9,
+     "recovery_rate": 0.16071428571428573
+    },
+    "overall_ci95": [
+     0.0491,
+     0.1485
+    ],
+    "by_type": {
+     "name": {
+      "n_guesses": 78,
+      "n_scorable": 71,
+      "n_correct": 2,
+      "recovery_rate": 0.028169014084507043
+     },
+     "age": {
+      "n_guesses": 29,
+      "n_scorable": 1,
+      "n_correct": 0,
+      "recovery_rate": 0.0
+     },
+     "state_or_region": {
+      "n_guesses": 28,
+      "n_scorable": 5,
+      "n_correct": 1,
+      "recovery_rate": 0.2
+     },
+     "city": {
+      "n_guesses": 22,
+      "n_scorable": 11,
+      "n_correct": 0,
+      "recovery_rate": 0.0
+     },
+     "year": {
+      "n_guesses": 58,
+      "n_scorable": 15,
+      "n_correct": 0,
+      "recovery_rate": 0.0
+     },
+     "employer_or_facility": {
+      "n_guesses": 38,
+      "n_scorable": 18,
+      "n_correct": 5,
+      "recovery_rate": 0.2777777777777778
+     },
+     "occupation": {
+      "n_guesses": 27,
+      "n_scorable": 6,
+      "n_correct": 3,
+      "recovery_rate": 0.5
+     }
+    },
+    "by_truth_kind": {
+     "identifier": {
+      "n_scorable": 107,
+      "n_correct": 7,
+      "rate": 0.06542056074766354,
+      "ci95": [
+       0.032,
+       0.1289
+      ],
+      "examples": [
+       {
+        "encounter_id": "D2N001",
+        "placeholder": "[US_STATE]",
+        "type": "state_or_region",
+        "guess": "Washington",
+        "confidence": "high"
+       },
+       {
+        "encounter_id": "D2N007",
+        "placeholder": "[PATIENT_NAME]",
+        "type": "name",
+        "guess": "<name redacted>",
+        "confidence": "low"
+       },
+       {
+        "encounter_id": "D2N025",
+        "placeholder": "[ORGANIZATION]",
+        "type": "employer_or_facility",
+        "guess": "Medicare",
+        "confidence": "medium"
+       },
+       {
+        "encounter_id": "D2N032",
+        "placeholder": "[ORGANIZATION]",
+        "type": "employer_or_facility",
+        "guess": "Weight Watchers",
+        "confidence": "medium"
+       },
+       {
+        "encounter_id": "D2N036",
+        "placeholder": "[OCCUPATION]",
+        "type": "occupation",
+        "guess": "landscaper",
+        "confidence": "high"
+       },
+       {
+        "encounter_id": "D2N041",
+        "placeholder": "[OCCUPATION]",
+        "type": "occupation",
+        "guess": "cashier",
+        "confidence": "medium"
+       },
+       {
+        "encounter_id": "D2N056",
+        "placeholder": "[OCCUPATION]",
+        "type": "occupation",
+        "guess": "farmer",
+        "confidence": "high"
+       }
+      ]
+     },
+     "overredacted_content": {
+      "n_scorable": 20,
+      "n_correct": 4,
+      "rate": 0.2,
+      "ci95": [
+       0.0807,
+       0.416
+      ],
+      "examples": [
+       {
+        "encounter_id": "D2N035",
+        "placeholder": "[ORGANIZATION]",
+        "type": "employer_or_facility",
+        "guess": "lab",
+        "confidence": "high"
+       },
+       {
+        "encounter_id": "D2N044",
+        "placeholder": "[ORGANIZATION]",
+        "type": "employer_or_facility",
+        "guess": "Lachman",
+        "confidence": "high"
+       },
+       {
+        "encounter_id": "D2N044",
+        "placeholder": "[PERSON]",
+        "type": "name",
+        "guess": "<name redacted>",
+        "confidence": "high"
+       },
+       {
+        "encounter_id": "D2N065",
+        "placeholder": "[LOCATION]",
+        "type": "employer_or_facility",
+        "guess": "air cast",
+        "confidence": "high"
+       }
+      ]
+     },
+     "identifier_excluding_names": {
+      "n_scorable": 41,
+      "n_correct": 6,
+      "rate": 0.14634146341463414,
+      "ci95": [
+       0.0688,
+       0.2844
+      ]
+     }
+    }
+   },
+   "mean_bits_by_category_anon": {
+    "other_facts": 4.396774711303238,
+    "age": 2.6432363321747325,
+    "occupation": 1.4537188141796873,
+    "family_structure": 1.1607051650500446,
+    "sex": 1.0,
+    "absolute_date": 0.23405489037626406,
+    "state_or_region": 0.034655643207274066
+   },
+   "mean_bits_by_category_orig": {
+    "age": 5.208194784199413,
+    "other_facts": 4.71643135901211,
+    "occupation": 1.5652033150350406,
+    "absolute_date": 1.5044657342221415,
+    "family_structure": 1.1607051650500446,
+    "sex": 1.0,
+    "state_or_region": 0.2484095107653833,
+    "employer_or_facility": 0.19832406536640967,
+    "ethnicity": 0.011803859733752364
+   },
+   "sensitivity": {
+    "full": {
+     "anonymized": {
+      "mean_bits": 10.923145556291235,
+      "median_bits": 10.551469759610795,
+      "mean_risk": 0.00449660288983875,
+      "pct_likely_unique": 0.0
+     },
+     "original": {
+      "mean_bits": 15.613537793384287,
+      "median_bits": 14.729608942897519,
+      "mean_risk": 0.07174022260235487,
+      "pct_likely_unique": 5.970149253731344
+     }
+    },
+    "without_llm_rarity_buckets": {
+     "anonymized": {
+      "mean_bits": 8.543256771894319,
+      "median_bits": 7.965784284662087,
+      "mean_risk": 0.0021186976778971895,
+      "pct_likely_unique": 0.0
+     },
+     "original": {
+      "mean_bits": 12.936162910937757,
+      "median_bits": 12.07693124858329,
+      "mean_risk": 0.02766204364156402,
+      "pct_likely_unique": 1.492537313432836
+     }
+    },
+    "core_quasi_identifiers_only": {
+     "anonymized": {
+      "mean_bits": 6.526370844988002,
+      "median_bits": 4.792971003894948,
+      "mean_risk": 0.00025914636324790493,
+      "pct_likely_unique": 0.0
+     },
+     "original": {
+      "mean_bits": 10.897106434372184,
+      "median_bits": 8.426843105097051,
+      "mean_risk": 0.006464748893269061,
+      "pct_likely_unique": 0.0
+     }
+    }
+   },
+   "p_source_counts_anon": {
+    "census": 54,
+    "bls": 13,
+    "table": 64,
+    "bucket": 51,
+    "constant": 81
+   }
+  }
+ },
+ "audit": {
+  "default": {
+   "n_records": 67,
+   "replacement_blocks_by_category": {
+    "identifier": 265,
+    "name_like": 131,
+    "date_time": 112,
+    "clinical_term": 7,
+    "other": 3
+   },
+   "records_with_overredaction": "6/67",
+   "exact_adult_age_visible": "50/67",
+   "bare_age_answer_after_age_question": "0/67",
+   "birth_year_4digit_visible": "8/67",
+   "birth_year_2digit_visible": "1/67",
+   "mean_age_bits_max": 4.96490760569799
+  },
+  "age_bands": {
+   "n_records": 67,
+   "replacement_blocks_by_category": {
+    "identifier": 265,
+    "name_like": 131,
+    "date_time": 112,
+    "clinical_term": 7,
+    "other": 3
+   },
+   "records_with_overredaction": "6/67",
+   "exact_adult_age_visible": "0/67",
+   "bare_age_answer_after_age_question": "0/67",
+   "birth_year_4digit_visible": "1/67",
+   "birth_year_2digit_visible": "0/67",
+   "mean_age_bits_max": 2.543707911757092
+  },
+  "age_bands_strict_dates": {
+   "n_records": 67,
+   "replacement_blocks_by_category": {
+    "identifier": 265,
+    "name_like": 131,
+    "date_time": 111,
+    "clinical_term": 7,
+    "other": 3
+   },
+   "records_with_overredaction": "6/67",
+   "exact_adult_age_visible": "0/67",
+   "bare_age_answer_after_age_question": "0/67",
+   "birth_year_4digit_visible": "1/67",
+   "birth_year_2digit_visible": "0/67",
+   "mean_age_bits_max": 2.543707911757092
+  }
+ },
+ "medanon_runs": {
+  "default": {
+   "code_sha256": "4ff7199001ecc5de",
+   "config_sha256": "c6a496ed98431697",
+   "records": 67,
+   "seconds_per_record": 2.472,
+   "workers": 4,
+   "model_load_seconds": 6.0
+  },
+  "age_bands": {
+   "code_sha256": "4ff7199001ecc5de",
+   "config_sha256": "f148e8907b270c6f",
+   "records": 67,
+   "seconds_per_record": 2.436,
+   "workers": 4,
+   "model_load_seconds": 6.0
+  },
+  "age_bands_strict_dates": {
+   "code_sha256": "4ff7199001ecc5de",
+   "config_sha256": "96607347745bcc66",
+   "records": 67,
+   "seconds_per_record": 2.375,
+   "workers": 4,
+   "model_load_seconds": 5.9
+  }
+ },
+ "per_record_bits": {
+  "D2N001": {
+   "default": 27.35,
+   "age_bands": 21.26,
+   "age_bands_strict_dates": 21.26
+  },
+  "D2N002": {
+   "default": 8.82,
+   "age_bands": 5.62,
+   "age_bands_strict_dates": 5.62
+  },
+  "D2N003": {
+   "default": 9.04,
+   "age_bands": 5.84,
+   "age_bands_strict_dates": 5.84
+  },
+  "D2N004": {
+   "default": 7.24,
+   "age_bands": 7.27,
+   "age_bands_strict_dates": 7.27
+  },
+  "D2N005": {
+   "default": 7.35,
+   "age_bands": 4.02,
+   "age_bands_strict_dates": 4.02
+  },
+  "D2N006": {
+   "default": 15.73,
+   "age_bands": 12.4,
+   "age_bands_strict_dates": 12.4
+  },
+  "D2N007": {
+   "default": 10.19,
+   "age_bands": 6.91,
+   "age_bands_strict_dates": 6.91
+  },
+  "D2N008": {
+   "default": 13.97,
+   "age_bands": 14.72,
+   "age_bands_strict_dates": 14.72
+  },
+  "D2N009": {
+   "default": 7.24,
+   "age_bands": 3.95,
+   "age_bands_strict_dates": 3.95
+  },
+  "D2N010": {
+   "default": 21.04,
+   "age_bands": 11.11,
+   "age_bands_strict_dates": 11.11
+  },
+  "D2N011": {
+   "default": 7.31,
+   "age_bands": 5.43,
+   "age_bands_strict_dates": 5.43
+  },
+  "D2N012": {
+   "default": 16.62,
+   "age_bands": 13.33,
+   "age_bands_strict_dates": 13.33
+  },
+  "D2N013": {
+   "default": 7.24,
+   "age_bands": 10.6,
+   "age_bands_strict_dates": 10.6
+  },
+  "D2N014": {
+   "default": 12.08,
+   "age_bands": 8.79,
+   "age_bands_strict_dates": 8.79
+  },
+  "D2N015": {
+   "default": 13.71,
+   "age_bands": 10.4,
+   "age_bands_strict_dates": 10.4
+  },
+  "D2N016": {
+   "default": 13.88,
+   "age_bands": 11.33,
+   "age_bands_strict_dates": 11.33
+  },
+  "D2N017": {
+   "default": 7.98,
+   "age_bands": 10.66,
+   "age_bands_strict_dates": 10.66
+  },
+  "D2N018": {
+   "default": 7.26,
+   "age_bands": 3.91,
+   "age_bands_strict_dates": 3.91
+  },
+  "D2N019": {
+   "default": 10.65,
+   "age_bands": 7.34,
+   "age_bands_strict_dates": 7.34
+  },
+  "D2N020": {
+   "default": 7.98,
+   "age_bands": 4.69,
+   "age_bands_strict_dates": 4.69
+  },
+  "D2N021": {
+   "default": 13.91,
+   "age_bands": 10.55,
+   "age_bands_strict_dates": 10.55
+  },
+  "D2N022": {
+   "default": 27.63,
+   "age_bands": 23.76,
+   "age_bands_strict_dates": 24.28
+  },
+  "D2N023": {
+   "default": 7.24,
+   "age_bands": 3.95,
+   "age_bands_strict_dates": 3.95
+  },
+  "D2N024": {
+   "default": 10.58,
+   "age_bands": 3.91,
+   "age_bands_strict_dates": 7.23
+  },
+  "D2N025": {
+   "default": 8.86,
+   "age_bands": 5.79,
+   "age_bands_strict_dates": 9.38
+  },
+  "D2N026": {
+   "default": 6.95,
+   "age_bands": 6.95,
+   "age_bands_strict_dates": 6.95
+  },
+  "D2N027": {
+   "default": 15.15,
+   "age_bands": 11.95,
+   "age_bands_strict_dates": 15.89
+  },
+  "D2N028": {
+   "default": 8.09,
+   "age_bands": 6.08,
+   "age_bands_strict_dates": 4.76
+  },
+  "D2N029": {
+   "default": 29.78,
+   "age_bands": 25.49,
+   "age_bands_strict_dates": 25.49
+  },
+  "D2N030": {
+   "default": 18.38,
+   "age_bands": 19.38,
+   "age_bands_strict_dates": 18.38
+  },
+  "D2N031": {
+   "default": 14.67,
+   "age_bands": 14.36,
+   "age_bands_strict_dates": 14.36
+  },
+  "D2N032": {
+   "default": 16.0,
+   "age_bands": 12.71,
+   "age_bands_strict_dates": 12.71
+  },
+  "D2N033": {
+   "default": 8.38,
+   "age_bands": 8.38,
+   "age_bands_strict_dates": 8.38
+  },
+  "D2N034": {
+   "default": 11.81,
+   "age_bands": 8.36,
+   "age_bands_strict_dates": 8.36
+  },
+  "D2N035": {
+   "default": 8.78,
+   "age_bands": 8.78,
+   "age_bands_strict_dates": 8.78
+  },
+  "D2N036": {
+   "default": 15.38,
+   "age_bands": 12.09,
+   "age_bands_strict_dates": 12.09
+  },
+  "D2N037": {
+   "default": 18.92,
+   "age_bands": 15.56,
+   "age_bands_strict_dates": 15.56
+  },
+  "D2N038": {
+   "default": 11.37,
+   "age_bands": 8.16,
+   "age_bands_strict_dates": 8.16
+  },
+  "D2N039": {
+   "default": 10.12,
+   "age_bands": 10.12,
+   "age_bands_strict_dates": 10.12
+  },
+  "D2N040": {
+   "default": 16.71,
+   "age_bands": 13.42,
+   "age_bands_strict_dates": 13.42
+  },
+  "D2N041": {
+   "default": 12.44,
+   "age_bands": 12.44,
+   "age_bands_strict_dates": 12.44
+  },
+  "D2N042": {
+   "default": 11.91,
+   "age_bands": 8.55,
+   "age_bands_strict_dates": 8.55
+  },
+  "D2N043": {
+   "default": 25.54,
+   "age_bands": 22.2,
+   "age_bands_strict_dates": 22.2
+  },
+  "D2N044": {
+   "default": 12.53,
+   "age_bands": 12.53,
+   "age_bands_strict_dates": 12.53
+  },
+  "D2N045": {
+   "default": 3.0,
+   "age_bands": 3.0,
+   "age_bands_strict_dates": 3.0
+  },
+  "D2N046": {
+   "default": 7.97,
+   "age_bands": 7.97,
+   "age_bands_strict_dates": 7.97
+  },
+  "D2N047": {
+   "default": 4.32,
+   "age_bands": 4.32,
+   "age_bands_strict_dates": 4.32
+  },
+  "D2N048": {
+   "default": 15.59,
+   "age_bands": 8.63,
+   "age_bands_strict_dates": 8.63
+  },
+  "D2N049": {
+   "default": 4.32,
+   "age_bands": 4.32,
+   "age_bands_strict_dates": 4.32
+  },
+  "D2N050": {
+   "default": 15.68,
+   "age_bands": 12.68,
+   "age_bands_strict_dates": 12.68
+  },
+  "D2N051": {
+   "default": 15.17,
+   "age_bands": 11.53,
+   "age_bands_strict_dates": 11.53
+  },
+  "D2N052": {
+   "default": 13.8,
+   "age_bands": 10.52,
+   "age_bands_strict_dates": 10.52
+  },
+  "D2N053": {
+   "default": 10.97,
+   "age_bands": 10.97,
+   "age_bands_strict_dates": 10.97
+  },
+  "D2N054": {
+   "default": 14.73,
+   "age_bands": 11.42,
+   "age_bands_strict_dates": 11.42
+  },
+  "D2N055": {
+   "default": 18.4,
+   "age_bands": 18.4,
+   "age_bands_strict_dates": 18.4
+  },
+  "D2N056": {
+   "default": 24.25,
+   "age_bands": 24.25,
+   "age_bands_strict_dates": 24.25
+  },
+  "D2N057": {
+   "default": 26.59,
+   "age_bands": 22.32,
+   "age_bands_strict_dates": 22.32
+  },
+  "D2N058": {
+   "default": 16.49,
+   "age_bands": 12.18,
+   "age_bands_strict_dates": 12.18
+  },
+  "D2N059": {
+   "default": 11.7,
+   "age_bands": 11.7,
+   "age_bands_strict_dates": 11.7
+  },
+  "D2N060": {
+   "default": 17.12,
+   "age_bands": 13.84,
+   "age_bands_strict_dates": 13.84
+  },
+  "D2N061": {
+   "default": 17.6,
+   "age_bands": 14.24,
+   "age_bands_strict_dates": 14.24
+  },
+  "D2N062": {
+   "default": 11.2,
+   "age_bands": 7.75,
+   "age_bands_strict_dates": 7.75
+  },
+  "D2N063": {
+   "default": 9.33,
+   "age_bands": 6.02,
+   "age_bands_strict_dates": 6.02
+  },
+  "D2N064": {
+   "default": 11.98,
+   "age_bands": 8.61,
+   "age_bands_strict_dates": 8.61
+  },
+  "D2N065": {
+   "default": 16.71,
+   "age_bands": 13.42,
+   "age_bands_strict_dates": 13.42
+  },
+  "D2N066": {
+   "default": 9.87,
+   "age_bands": 6.53,
+   "age_bands_strict_dates": 6.53
+  },
+  "D2N067": {
+   "default": 13.11,
+   "age_bands": 13.11,
+   "age_bands_strict_dates": 13.11
+  }
+ },
+ "mask_review": {
+  "default": {
+   "n_records": 67,
+   "placeholder_blocks": {
+    "correct_or_identifier": 445,
+    "clinical_fp": 52,
+    "filler_fp": 17,
+    "other_fp": 4
+   },
+   "records_with": {
+    "clinical_fp": "25/67",
+    "filler_fp": "12/67",
+    "other_fp": "4/67"
+   },
+   "clinical_fp_blocks_by_kind": {
+    "exam": 14,
+    "anatomy": 10,
+    "drug": 7,
+    "diagnosis": 5,
+    "study": 3,
+    "care": 3,
+    "staging": 3,
+    "supply": 2,
+    "device": 2,
+    "test": 2,
+    "procedure": 1
+   },
+   "clinical_fp_terms": [
+    "anatomy: flexor digitorum profundus",
+    "anatomy: flexor digitorum superficialis",
+    "anatomy: right coronary artery (stent)",
+    "care: occupational therapy",
+    "care: pre-operative examination",
+    "device: Aircast",
+    "diagnosis: Cushing's",
+    "diagnosis: Tourette's",
+    "diagnosis: farmer's lung",
+    "diagnosis: hepatitis C",
+    "drug: Buspar",
+    "drug: Camila (norethindrone)",
+    "drug: Taxol",
+    "exam: Achilles reflex",
+    "exam: afebrile",
+    "exam: coarse rhonchi",
+    "exam: integumentary system",
+    "exam: lungs",
+    "exam: neurovascular status",
+    "exam: normoactive bowel sounds",
+    "exam: pursed-lip breathing",
+    "exam: supple neck",
+    "procedure: shave biopsy",
+    "staging: Breslow thickness",
+    "staging: Clark level",
+    "study: MR arthrogram",
+    "study: autoimmune labs",
+    "study: labs",
+    "supply: band-aid",
+    "test: Lachman"
+   ],
+   "labels_not_found_in_this_output": []
+  },
+  "age_bands": {
+   "n_records": 67,
+   "placeholder_blocks": {
+    "correct_or_identifier": 445,
+    "clinical_fp": 52,
+    "filler_fp": 17,
+    "other_fp": 4
+   },
+   "records_with": {
+    "clinical_fp": "25/67",
+    "filler_fp": "12/67",
+    "other_fp": "4/67"
+   },
+   "clinical_fp_blocks_by_kind": {
+    "exam": 14,
+    "anatomy": 10,
+    "drug": 7,
+    "diagnosis": 5,
+    "study": 3,
+    "care": 3,
+    "staging": 3,
+    "supply": 2,
+    "device": 2,
+    "test": 2,
+    "procedure": 1
+   },
+   "clinical_fp_terms": [
+    "anatomy: flexor digitorum profundus",
+    "anatomy: flexor digitorum superficialis",
+    "anatomy: right coronary artery (stent)",
+    "care: occupational therapy",
+    "care: pre-operative examination",
+    "device: Aircast",
+    "diagnosis: Cushing's",
+    "diagnosis: Tourette's",
+    "diagnosis: farmer's lung",
+    "diagnosis: hepatitis C",
+    "drug: Buspar",
+    "drug: Camila (norethindrone)",
+    "drug: Taxol",
+    "exam: Achilles reflex",
+    "exam: afebrile",
+    "exam: coarse rhonchi",
+    "exam: integumentary system",
+    "exam: lungs",
+    "exam: neurovascular status",
+    "exam: normoactive bowel sounds",
+    "exam: pursed-lip breathing",
+    "exam: supple neck",
+    "procedure: shave biopsy",
+    "staging: Breslow thickness",
+    "staging: Clark level",
+    "study: MR arthrogram",
+    "study: autoimmune labs",
+    "study: labs",
+    "supply: band-aid",
+    "test: Lachman"
+   ],
+   "labels_not_found_in_this_output": []
+  },
+  "age_bands_strict_dates": {
+   "n_records": 67,
+   "placeholder_blocks": {
+    "correct_or_identifier": 444,
+    "clinical_fp": 52,
+    "filler_fp": 17,
+    "other_fp": 4
+   },
+   "records_with": {
+    "clinical_fp": "25/67",
+    "filler_fp": "12/67",
+    "other_fp": "4/67"
+   },
+   "clinical_fp_blocks_by_kind": {
+    "exam": 14,
+    "anatomy": 10,
+    "drug": 7,
+    "diagnosis": 5,
+    "study": 3,
+    "care": 3,
+    "staging": 3,
+    "supply": 2,
+    "device": 2,
+    "test": 2,
+    "procedure": 1
+   },
+   "clinical_fp_terms": [
+    "anatomy: flexor digitorum profundus",
+    "anatomy: flexor digitorum superficialis",
+    "anatomy: right coronary artery (stent)",
+    "care: occupational therapy",
+    "care: pre-operative examination",
+    "device: Aircast",
+    "diagnosis: Cushing's",
+    "diagnosis: Tourette's",
+    "diagnosis: farmer's lung",
+    "diagnosis: hepatitis C",
+    "drug: Buspar",
+    "drug: Camila (norethindrone)",
+    "drug: Taxol",
+    "exam: Achilles reflex",
+    "exam: afebrile",
+    "exam: coarse rhonchi",
+    "exam: integumentary system",
+    "exam: lungs",
+    "exam: neurovascular status",
+    "exam: normoactive bowel sounds",
+    "exam: pursed-lip breathing",
+    "exam: supple neck",
+    "procedure: shave biopsy",
+    "staging: Breslow thickness",
+    "staging: Clark level",
+    "study: MR arthrogram",
+    "study: autoimmune labs",
+    "study: labs",
+    "supply: band-aid",
+    "test: Lachman"
+   ],
+   "labels_not_found_in_this_output": []
+  }
+ },
+ "attribute_review": {
+  "round1": {
+   "n_attributes": 152,
+   "labels": {
+    "valid": 120,
+    "trivial": 9,
+    "icd_floor": 1,
+    "medical": 15,
+    "duplicate": 6,
+    "uncertain": 1
+   },
+   "precision": 0.7894736842105263,
+   "bits_by_label": {
+    "valid": 506.5,
+    "trivial": 35.6,
+    "icd_floor": 6.6,
+    "medical": 93.5,
+    "duplicate": 21.1,
+    "uncertain": 3.3
+   },
+   "share_of_bits_from_invalid": 0.24028370203560256,
+   "valid_but_mispriced": 26,
+   "precision_ci95": [
+    0.7179,
+    0.8467
+   ]
+  },
+  "round1_after_fixes": {
+   "n_attributes": 133,
+   "labels": {
+    "valid": 121,
+    "trivial": 8,
+    "duplicate": 3,
+    "uncertain": 1
+   },
+   "precision": 0.9097744360902256,
+   "bits_by_label": {
+    "valid": 430.5,
+    "trivial": 28.6,
+    "duplicate": 16.3,
+    "uncertain": 3.3
+   },
+   "share_of_bits_from_invalid": 0.10075487449098242,
+   "valid_but_mispriced": 24,
+   "precision_ci95": [
+    0.8489,
+    0.9476
+   ]
+  },
+  "heldout": {
+   "n_attributes": 32,
+   "labels": {
+    "valid": 26,
+    "duplicate": 1,
+    "uncertain": 1,
+    "trivial": 2,
+    "medical": 2
+   },
+   "precision": 0.8125,
+   "bits_by_label": {
+    "valid": 101.5,
+    "duplicate": 6.6,
+    "uncertain": 4.1,
+    "trivial": 19.9,
+    "medical": 13.3
+   },
+   "share_of_bits_from_invalid": 0.3022125424100337,
+   "valid_but_mispriced": 8,
+   "precision_ci95": [
+    0.6469,
+    0.9111
+   ]
+  }
+ },
+ "heldout": {
+  "meta": {
+   "elapsed_s": 41.2,
+   "llm": {
+    "llm_calls": 15,
+    "cache_hits": 30,
+    "retries": 0
+   }
+  },
+  "anonymized": {
+   "n_records": 15,
+   "n_failed": 0,
+   "mean_risk": 0.03399628180382067,
+   "mean_bits": 13.62680300199559,
+   "median_bits": 11.595524939688731,
+   "pct_likely_unique": 0.0
+  },
+  "original": {
+   "mean_risk": 0.07319022818150184,
+   "mean_bits": 18.428481532425895,
+   "median_bits": 19.692240094177265
+  },
+  "privacy_gain": 0.5355079134401042,
+  "bits_removed": 4.801678530430305,
+  "recovery": {
+   "n_guesses": 50,
+   "n_scorable": 26,
+   "n_correct": 1,
+   "recovery_rate": 0.038461538461538464
+  }
+ }
+}

@@ -1,0 +1,3140 @@
+{
+ "protocol": "scripts/score_gold.py; core privacy = all gold labels except CLINICAL, ANTHROPOMETRIC, FAMILY_SIZE, FAMILY_RELATION; policy objectives = share of those spans transformed; strict_token_removal is a proxy, not the Bosch metric",
+ "dev48_input_sha256_prefix": "see manifests",
+ "results": {
+  "r6:B3": {
+   "records": 48,
+   "gold_entities": 1190,
+   "recall": {
+    "value": 0.9193,
+    "k": 1094,
+    "n": 1190,
+    "ci95": [
+     0.9025,
+     0.9335
+    ]
+   },
+   "policy_compliant_recall": {
+    "value": 1.0,
+    "k": 1190,
+    "n": 1190,
+    "ci95": [
+     0.9968,
+     1.0
+    ]
+   },
+   "precision": {
+    "value": 0.877,
+    "k": 1184,
+    "n": 1350,
+    "ci95": [
+     0.8584,
+     0.8935
+    ]
+   },
+   "f1": 0.8977,
+   "recall_by": {
+    "field:dialogue": {
+     "value": 0.9268,
+     "k": 608,
+     "n": 656,
+     "ci95": [
+      0.9043,
+      0.9444
+     ]
+    },
+    "field:note": {
+     "value": 0.9101,
+     "k": 486,
+     "n": 534,
+     "ci95": [
+      0.8828,
+      0.9315
+     ]
+    },
+    "hard:False": {
+     "value": 0.9193,
+     "k": 1094,
+     "n": 1190,
+     "ci95": [
+      0.9025,
+      0.9335
+     ]
+    },
+    "label:ADDRESS": {
+     "value": 1.0,
+     "k": 96,
+     "n": 96,
+     "ci95": [
+      0.9615,
+      1.0
+     ]
+    },
+    "label:AGE": {
+     "value": 0.0,
+     "k": 0,
+     "n": 96,
+     "ci95": [
+      0.0,
+      0.0385
+     ]
+    },
+    "label:CONTACT": {
+     "value": 1.0,
+     "k": 144,
+     "n": 144,
+     "ci95": [
+      0.974,
+      1.0
+     ]
+    },
+    "label:DATE": {
+     "value": 1.0,
+     "k": 48,
+     "n": 48,
+     "ci95": [
+      0.9259,
+      1.0
+     ]
+    },
+    "label:DOB": {
+     "value": 1.0,
+     "k": 96,
+     "n": 96,
+     "ci95": [
+      0.9615,
+      1.0
+     ]
+    },
+    "label:ID": {
+     "value": 1.0,
+     "k": 212,
+     "n": 212,
+     "ci95": [
+      0.9822,
+      1.0
+     ]
+    },
+    "label:OCCUPATION": {
+     "value": 1.0,
+     "k": 96,
+     "n": 96,
+     "ci95": [
+      0.9615,
+      1.0
+     ]
+    },
+    "label:ORGANIZATION": {
+     "value": 1.0,
+     "k": 192,
+     "n": 192,
+     "ci95": [
+      0.9804,
+      1.0
+     ]
+    },
+    "label:PERSON": {
+     "value": 1.0,
+     "k": 210,
+     "n": 210,
+     "ci95": [
+      0.982,
+      1.0
+     ]
+    }
+   },
+   "strict_token_removal": {
+    "ALL": 0.7151,
+    "ADDRESS": 0.969,
+    "AGE": 0.0,
+    "CONTACT": 0.986,
+    "DATE": 0.021,
+    "DOB": 0.0,
+    "ID": 0.849,
+    "OCCUPATION": 0.885,
+    "ORGANIZATION": 0.729,
+    "PERSON": 1.0
+   },
+   "encounters_with_direct_identifier_left": {
+    "value": 0.0,
+    "k": 0,
+    "n": 48,
+    "ci95": [
+     0.0,
+     0.0741
+    ]
+   },
+   "trap_preservation_all": {
+    "value": 0.961,
+    "k": 1134,
+    "n": 1180,
+    "ci95": [
+     0.9484,
+     0.9706
+    ]
+   },
+   "structure_ok": 48,
+   "errors": {
+    "missed": {
+     "AGE": 96
+    },
+    "partially_removed": {},
+    "clinical_traps_damaged": {
+     "laboratory_or_procedure_result": 9,
+     "relevant_context": 1,
+     "physical_exam": 2,
+     "eponym_or_clinical_instrument": 1,
+     "care_plan": 1
+    },
+    "transformations_outside_gold": {
+     "ANTHROPOMETRIC": 152,
+     "ORGANIZATION": 11,
+     "PERSON": 3
+    }
+   },
+   "policy_objectives_share_transformed": {
+    "ANTHROPOMETRIC/BMI/clinically_sensitive": "20/34",
+    "ANTHROPOMETRIC/BMI/demographic": "56/62",
+    "ANTHROPOMETRIC/height/clinically_sensitive": "10/40",
+    "ANTHROPOMETRIC/height/demographic": "28/72",
+    "ANTHROPOMETRIC/weight/clinically_sensitive": "10/68",
+    "ANTHROPOMETRIC/weight/demographic": "28/124",
+    "FAMILY_RELATION/-/clinically_sensitive": "0/14",
+    "FAMILY_RELATION/-/support": "0/112",
+    "FAMILY_SIZE/-/-": "0/96"
+   }
+  },
+  "r6:B3+age": {
+   "records": 48,
+   "gold_entities": 1190,
+   "recall": {
+    "value": 0.9899,
+    "k": 1178,
+    "n": 1190,
+    "ci95": [
+     0.9825,
+     0.9942
+    ]
+   },
+   "policy_compliant_recall": {
+    "value": 1.0,
+    "k": 1190,
+    "n": 1190,
+    "ci95": [
+     0.9968,
+     1.0
+    ]
+   },
+   "precision": {
+    "value": 0.8842,
+    "k": 1268,
+    "n": 1434,
+    "ci95": [
+     0.8666,
+     0.8998
+    ]
+   },
+   "f1": 0.9341,
+   "recall_by": {
+    "field:dialogue": {
+     "value": 0.9909,
+     "k": 650,
+     "n": 656,
+     "ci95": [
+      0.9802,
+      0.9958
+     ]
+    },
+    "field:note": {
+     "value": 0.9888,
+     "k": 528,
+     "n": 534,
+     "ci95": [
+      0.9757,
+      0.9948
+     ]
+    },
+    "hard:False": {
+     "value": 0.9899,
+     "k": 1178,
+     "n": 1190,
+     "ci95": [
+      0.9825,
+      0.9942
+     ]
+    },
+    "label:ADDRESS": {
+     "value": 1.0,
+     "k": 96,
+     "n": 96,
+     "ci95": [
+      0.9615,
+      1.0
+     ]
+    },
+    "label:AGE": {
+     "value": 0.875,
+     "k": 84,
+     "n": 96,
+     "ci95": [
+      0.7941,
+      0.927
+     ]
+    },
+    "label:CONTACT": {
+     "value": 1.0,
+     "k": 144,
+     "n": 144,
+     "ci95": [
+      0.974,
+      1.0
+     ]
+    },
+    "label:DATE": {
+     "value": 1.0,
+     "k": 48,
+     "n": 48,
+     "ci95": [
+      0.9259,
+      1.0
+     ]
+    },
+    "label:DOB": {
+     "value": 1.0,
+     "k": 96,
+     "n": 96,
+     "ci95": [
+      0.9615,
+      1.0
+     ]
+    },
+    "label:ID": {
+     "value": 1.0,
+     "k": 212,
+     "n": 212,
+     "ci95": [
+      0.9822,
+      1.0
+     ]
+    },
+    "label:OCCUPATION": {
+     "value": 1.0,
+     "k": 96,
+     "n": 96,
+     "ci95": [
+      0.9615,
+      1.0
+     ]
+    },
+    "label:ORGANIZATION": {
+     "value": 1.0,
+     "k": 192,
+     "n": 192,
+     "ci95": [
+      0.9804,
+      1.0
+     ]
+    },
+    "label:PERSON": {
+     "value": 1.0,
+     "k": 210,
+     "n": 210,
+     "ci95": [
+      0.982,
+      1.0
+     ]
+    }
+   },
+   "strict_token_removal": {
+    "ALL": 0.8403,
+    "ADDRESS": 0.99,
+    "AGE": 0.677,
+    "CONTACT": 0.986,
+    "DATE": 0.021,
+    "DOB": 0.854,
+    "ID": 0.849,
+    "OCCUPATION": 0.885,
+    "ORGANIZATION": 0.729,
+    "PERSON": 1.0
+   },
+   "encounters_with_direct_identifier_left": {
+    "value": 0.0,
+    "k": 0,
+    "n": 48,
+    "ci95": [
+     0.0,
+     0.0741
+    ]
+   },
+   "trap_preservation_all": {
+    "value": 0.961,
+    "k": 1134,
+    "n": 1180,
+    "ci95": [
+     0.9484,
+     0.9706
+    ]
+   },
+   "structure_ok": 48,
+   "errors": {
+    "missed": {
+     "AGE": 12
+    },
+    "partially_removed": {},
+    "clinical_traps_damaged": {
+     "laboratory_or_procedure_result": 9,
+     "relevant_context": 1,
+     "physical_exam": 2,
+     "eponym_or_clinical_instrument": 1,
+     "care_plan": 1
+    },
+    "transformations_outside_gold": {
+     "ANTHROPOMETRIC": 152,
+     "ORGANIZATION": 11,
+     "PERSON": 3
+    }
+   },
+   "policy_objectives_share_transformed": {
+    "ANTHROPOMETRIC/BMI/clinically_sensitive": "20/34",
+    "ANTHROPOMETRIC/BMI/demographic": "56/62",
+    "ANTHROPOMETRIC/height/clinically_sensitive": "10/40",
+    "ANTHROPOMETRIC/height/demographic": "28/72",
+    "ANTHROPOMETRIC/weight/clinically_sensitive": "10/68",
+    "ANTHROPOMETRIC/weight/demographic": "28/124",
+    "FAMILY_RELATION/-/clinically_sensitive": "0/14",
+    "FAMILY_RELATION/-/support": "0/112",
+    "FAMILY_SIZE/-/-": "0/96"
+   }
+  },
+  "r6:B4": {
+   "records": 48,
+   "gold_entities": 1190,
+   "recall": {
+    "value": 0.9193,
+    "k": 1094,
+    "n": 1190,
+    "ci95": [
+     0.9025,
+     0.9335
+    ]
+   },
+   "policy_compliant_recall": {
+    "value": 1.0,
+    "k": 1190,
+    "n": 1190,
+    "ci95": [
+     0.9968,
+     1.0
+    ]
+   },
+   "precision": {
+    "value": 0.7565,
+    "k": 1184,
+    "n": 1565,
+    "ci95": [
+     0.7347,
+     0.7772
+    ]
+   },
+   "f1": 0.83,
+   "recall_by": {
+    "field:dialogue": {
+     "value": 0.9268,
+     "k": 608,
+     "n": 656,
+     "ci95": [
+      0.9043,
+      0.9444
+     ]
+    },
+    "field:note": {
+     "value": 0.9101,
+     "k": 486,
+     "n": 534,
+     "ci95": [
+      0.8828,
+      0.9315
+     ]
+    },
+    "hard:False": {
+     "value": 0.9193,
+     "k": 1094,
+     "n": 1190,
+     "ci95": [
+      0.9025,
+      0.9335
+     ]
+    },
+    "label:ADDRESS": {
+     "value": 1.0,
+     "k": 96,
+     "n": 96,
+     "ci95": [
+      0.9615,
+      1.0
+     ]
+    },
+    "label:AGE": {
+     "value": 0.0,
+     "k": 0,
+     "n": 96,
+     "ci95": [
+      0.0,
+      0.0385
+     ]
+    },
+    "label:CONTACT": {
+     "value": 1.0,
+     "k": 144,
+     "n": 144,
+     "ci95": [
+      0.974,
+      1.0
+     ]
+    },
+    "label:DATE": {
+     "value": 1.0,
+     "k": 48,
+     "n": 48,
+     "ci95": [
+      0.9259,
+      1.0
+     ]
+    },
+    "label:DOB": {
+     "value": 1.0,
+     "k": 96,
+     "n": 96,
+     "ci95": [
+      0.9615,
+      1.0
+     ]
+    },
+    "label:ID": {
+     "value": 1.0,
+     "k": 212,
+     "n": 212,
+     "ci95": [
+      0.9822,
+      1.0
+     ]
+    },
+    "label:OCCUPATION": {
+     "value": 1.0,
+     "k": 96,
+     "n": 96,
+     "ci95": [
+      0.9615,
+      1.0
+     ]
+    },
+    "label:ORGANIZATION": {
+     "value": 1.0,
+     "k": 192,
+     "n": 192,
+     "ci95": [
+      0.9804,
+      1.0
+     ]
+    },
+    "label:PERSON": {
+     "value": 1.0,
+     "k": 210,
+     "n": 210,
+     "ci95": [
+      0.982,
+      1.0
+     ]
+    }
+   },
+   "strict_token_removal": {
+    "ALL": 0.7143,
+    "ADDRESS": 0.958,
+    "AGE": 0.0,
+    "CONTACT": 0.986,
+    "DATE": 0.021,
+    "DOB": 0.0,
+    "ID": 0.849,
+    "OCCUPATION": 0.885,
+    "ORGANIZATION": 0.729,
+    "PERSON": 1.0
+   },
+   "encounters_with_direct_identifier_left": {
+    "value": 0.0,
+    "k": 0,
+    "n": 48,
+    "ci95": [
+     0.0,
+     0.0741
+    ]
+   },
+   "trap_preservation_all": {
+    "value": 0.9686,
+    "k": 1143,
+    "n": 1180,
+    "ci95": [
+     0.9571,
+     0.9772
+    ]
+   },
+   "structure_ok": 48,
+   "errors": {
+    "missed": {
+     "AGE": 96
+    },
+    "partially_removed": {},
+    "clinical_traps_damaged": {
+     "physical_exam": 2,
+     "care_plan": 1
+    },
+    "transformations_outside_gold": {
+     "FAMILY_SIZE": 58,
+     "ANTHROPOMETRIC": 320,
+     "PERSON": 2,
+     "ORGANIZATION": 1
+    }
+   },
+   "policy_objectives_share_transformed": {
+    "ANTHROPOMETRIC/BMI/clinically_sensitive": "20/34",
+    "ANTHROPOMETRIC/BMI/demographic": "60/62",
+    "ANTHROPOMETRIC/height/clinically_sensitive": "20/40",
+    "ANTHROPOMETRIC/height/demographic": "60/72",
+    "ANTHROPOMETRIC/weight/clinically_sensitive": "40/68",
+    "ANTHROPOMETRIC/weight/demographic": "120/124",
+    "FAMILY_RELATION/-/clinically_sensitive": "0/14",
+    "FAMILY_RELATION/-/support": "0/112",
+    "FAMILY_SIZE/-/-": "58/96"
+   }
+  },
+  "r6:B4+age": {
+   "records": 48,
+   "gold_entities": 1190,
+   "recall": {
+    "value": 0.9899,
+    "k": 1178,
+    "n": 1190,
+    "ci95": [
+     0.9825,
+     0.9942
+    ]
+   },
+   "policy_compliant_recall": {
+    "value": 1.0,
+    "k": 1190,
+    "n": 1190,
+    "ci95": [
+     0.9968,
+     1.0
+    ]
+   },
+   "precision": {
+    "value": 0.769,
+    "k": 1268,
+    "n": 1649,
+    "ci95": [
+     0.748,
+     0.7887
+    ]
+   },
+   "f1": 0.8656,
+   "recall_by": {
+    "field:dialogue": {
+     "value": 0.9909,
+     "k": 650,
+     "n": 656,
+     "ci95": [
+      0.9802,
+      0.9958
+     ]
+    },
+    "field:note": {
+     "value": 0.9888,
+     "k": 528,
+     "n": 534,
+     "ci95": [
+      0.9757,
+      0.9948
+     ]
+    },
+    "hard:False": {
+     "value": 0.9899,
+     "k": 1178,
+     "n": 1190,
+     "ci95": [
+      0.9825,
+      0.9942
+     ]
+    },
+    "label:ADDRESS": {
+     "value": 1.0,
+     "k": 96,
+     "n": 96,
+     "ci95": [
+      0.9615,
+      1.0
+     ]
+    },
+    "label:AGE": {
+     "value": 0.875,
+     "k": 84,
+     "n": 96,
+     "ci95": [
+      0.7941,
+      0.927
+     ]
+    },
+    "label:CONTACT": {
+     "value": 1.0,
+     "k": 144,
+     "n": 144,
+     "ci95": [
+      0.974,
+      1.0
+     ]
+    },
+    "label:DATE": {
+     "value": 1.0,
+     "k": 48,
+     "n": 48,
+     "ci95": [
+      0.9259,
+      1.0
+     ]
+    },
+    "label:DOB": {
+     "value": 1.0,
+     "k": 96,
+     "n": 96,
+     "ci95": [
+      0.9615,
+      1.0
+     ]
+    },
+    "label:ID": {
+     "value": 1.0,
+     "k": 212,
+     "n": 212,
+     "ci95": [
+      0.9822,
+      1.0
+     ]
+    },
+    "label:OCCUPATION": {
+     "value": 1.0,
+     "k": 96,
+     "n": 96,
+     "ci95": [
+      0.9615,
+      1.0
+     ]
+    },
+    "label:ORGANIZATION": {
+     "value": 1.0,
+     "k": 192,
+     "n": 192,
+     "ci95": [
+      0.9804,
+      1.0
+     ]
+    },
+    "label:PERSON": {
+     "value": 1.0,
+     "k": 210,
+     "n": 210,
+     "ci95": [
+      0.982,
+      1.0
+     ]
+    }
+   },
+   "strict_token_removal": {
+    "ALL": 0.8403,
+    "ADDRESS": 0.979,
+    "AGE": 0.688,
+    "CONTACT": 0.986,
+    "DATE": 0.021,
+    "DOB": 0.854,
+    "ID": 0.849,
+    "OCCUPATION": 0.885,
+    "ORGANIZATION": 0.729,
+    "PERSON": 1.0
+   },
+   "encounters_with_direct_identifier_left": {
+    "value": 0.0,
+    "k": 0,
+    "n": 48,
+    "ci95": [
+     0.0,
+     0.0741
+    ]
+   },
+   "trap_preservation_all": {
+    "value": 0.9686,
+    "k": 1143,
+    "n": 1180,
+    "ci95": [
+     0.9571,
+     0.9772
+    ]
+   },
+   "structure_ok": 48,
+   "errors": {
+    "missed": {
+     "AGE": 12
+    },
+    "partially_removed": {},
+    "clinical_traps_damaged": {
+     "physical_exam": 2,
+     "care_plan": 1
+    },
+    "transformations_outside_gold": {
+     "FAMILY_SIZE": 58,
+     "ANTHROPOMETRIC": 320,
+     "PERSON": 2,
+     "ORGANIZATION": 1
+    }
+   },
+   "policy_objectives_share_transformed": {
+    "ANTHROPOMETRIC/BMI/clinically_sensitive": "20/34",
+    "ANTHROPOMETRIC/BMI/demographic": "60/62",
+    "ANTHROPOMETRIC/height/clinically_sensitive": "20/40",
+    "ANTHROPOMETRIC/height/demographic": "60/72",
+    "ANTHROPOMETRIC/weight/clinically_sensitive": "40/68",
+    "ANTHROPOMETRIC/weight/demographic": "120/124",
+    "FAMILY_RELATION/-/clinically_sensitive": "0/14",
+    "FAMILY_RELATION/-/support": "0/112",
+    "FAMILY_SIZE/-/-": "58/96"
+   }
+  },
+  "r2:B3": {
+   "records": 20,
+   "gold_entities": 269,
+   "recall": {
+    "value": 0.8513,
+    "k": 229,
+    "n": 269,
+    "ci95": [
+     0.8038,
+     0.8889
+    ]
+   },
+   "policy_compliant_recall": {
+    "value": 0.9851,
+    "k": 265,
+    "n": 269,
+    "ci95": [
+     0.9624,
+     0.9942
+    ]
+   },
+   "precision": {
+    "value": 0.9875,
+    "k": 237,
+    "n": 240,
+    "ci95": [
+     0.9639,
+     0.9957
+    ]
+   },
+   "f1": 0.9144,
+   "recall_by": {
+    "field:dialogue": {
+     "value": 0.8485,
+     "k": 112,
+     "n": 132,
+     "ci95": [
+      0.7775,
+      0.8997
+     ]
+    },
+    "field:note": {
+     "value": 0.854,
+     "k": 117,
+     "n": 137,
+     "ci95": [
+      0.7852,
+      0.9035
+     ]
+    },
+    "hard:False": {
+     "value": 0.8513,
+     "k": 229,
+     "n": 269,
+     "ci95": [
+      0.8038,
+      0.8889
+     ]
+    },
+    "label:ADDRESS": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:AGE": {
+     "value": 0.1,
+     "k": 4,
+     "n": 40,
+     "ci95": [
+      0.0396,
+      0.2305
+     ]
+    },
+    "label:CONTACT": {
+     "value": 1.0,
+     "k": 26,
+     "n": 26,
+     "ci95": [
+      0.8713,
+      1.0
+     ]
+    },
+    "label:DATE": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:DOB": {
+     "value": 1.0,
+     "k": 14,
+     "n": 14,
+     "ci95": [
+      0.7847,
+      1.0
+     ]
+    },
+    "label:ID": {
+     "value": 1.0,
+     "k": 7,
+     "n": 7,
+     "ci95": [
+      0.6457,
+      1.0
+     ]
+    },
+    "label:LOCATION": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:OCCUPATION": {
+     "value": 0.9,
+     "k": 36,
+     "n": 40,
+     "ci95": [
+      0.7695,
+      0.9604
+     ]
+    },
+    "label:ORGANIZATION": {
+     "value": 1.0,
+     "k": 40,
+     "n": 40,
+     "ci95": [
+      0.9124,
+      1.0
+     ]
+    },
+    "label:PERSON": {
+     "value": 1.0,
+     "k": 78,
+     "n": 78,
+     "ci95": [
+      0.9531,
+      1.0
+     ]
+    }
+   },
+   "strict_token_removal": {
+    "ALL": 0.7063,
+    "ADDRESS": 1.0,
+    "AGE": 0.05,
+    "CONTACT": 1.0,
+    "DATE": 0.0,
+    "DOB": 0.143,
+    "ID": 0.857,
+    "LOCATION": 1.0,
+    "OCCUPATION": 0.775,
+    "ORGANIZATION": 0.725,
+    "PERSON": 1.0
+   },
+   "encounters_with_direct_identifier_left": {
+    "value": 0.0,
+    "k": 0,
+    "n": 20,
+    "ci95": [
+     0.0,
+     0.1611
+    ]
+   },
+   "trap_preservation_all": {
+    "value": 1.0,
+    "k": 4,
+    "n": 4,
+    "ci95": [
+     0.5101,
+     1.0
+    ]
+   },
+   "structure_ok": 20,
+   "errors": {
+    "missed": {
+     "AGE": 36
+    },
+    "partially_removed": {
+     "OCCUPATION": 4
+    },
+    "clinical_traps_damaged": {},
+    "transformations_outside_gold": {
+     "PERSON": 2,
+     "OCCUPATION": 1
+    }
+   },
+   "policy_objectives_share_transformed": {}
+  },
+  "r2:B3+age": {
+   "records": 20,
+   "gold_entities": 269,
+   "recall": {
+    "value": 0.9703,
+    "k": 261,
+    "n": 269,
+    "ci95": [
+     0.9424,
+     0.9849
+    ]
+   },
+   "policy_compliant_recall": {
+    "value": 0.9851,
+    "k": 265,
+    "n": 269,
+    "ci95": [
+     0.9624,
+     0.9942
+    ]
+   },
+   "precision": {
+    "value": 0.989,
+    "k": 269,
+    "n": 272,
+    "ci95": [
+     0.9681,
+     0.9962
+    ]
+   },
+   "f1": 0.9795,
+   "recall_by": {
+    "field:dialogue": {
+     "value": 0.9697,
+     "k": 128,
+     "n": 132,
+     "ci95": [
+      0.9247,
+      0.9882
+     ]
+    },
+    "field:note": {
+     "value": 0.9708,
+     "k": 133,
+     "n": 137,
+     "ci95": [
+      0.9273,
+      0.9886
+     ]
+    },
+    "hard:False": {
+     "value": 0.9703,
+     "k": 261,
+     "n": 269,
+     "ci95": [
+      0.9424,
+      0.9849
+     ]
+    },
+    "label:ADDRESS": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:AGE": {
+     "value": 0.9,
+     "k": 36,
+     "n": 40,
+     "ci95": [
+      0.7695,
+      0.9604
+     ]
+    },
+    "label:CONTACT": {
+     "value": 1.0,
+     "k": 26,
+     "n": 26,
+     "ci95": [
+      0.8713,
+      1.0
+     ]
+    },
+    "label:DATE": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:DOB": {
+     "value": 1.0,
+     "k": 14,
+     "n": 14,
+     "ci95": [
+      0.7847,
+      1.0
+     ]
+    },
+    "label:ID": {
+     "value": 1.0,
+     "k": 7,
+     "n": 7,
+     "ci95": [
+      0.6457,
+      1.0
+     ]
+    },
+    "label:LOCATION": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:OCCUPATION": {
+     "value": 0.9,
+     "k": 36,
+     "n": 40,
+     "ci95": [
+      0.7695,
+      0.9604
+     ]
+    },
+    "label:ORGANIZATION": {
+     "value": 1.0,
+     "k": 40,
+     "n": 40,
+     "ci95": [
+      0.9124,
+      1.0
+     ]
+    },
+    "label:PERSON": {
+     "value": 1.0,
+     "k": 78,
+     "n": 78,
+     "ci95": [
+      0.9531,
+      1.0
+     ]
+    }
+   },
+   "strict_token_removal": {
+    "ALL": 0.803,
+    "ADDRESS": 1.0,
+    "AGE": 0.6,
+    "CONTACT": 1.0,
+    "DATE": 0.0,
+    "DOB": 0.429,
+    "ID": 0.857,
+    "LOCATION": 1.0,
+    "OCCUPATION": 0.775,
+    "ORGANIZATION": 0.725,
+    "PERSON": 1.0
+   },
+   "encounters_with_direct_identifier_left": {
+    "value": 0.0,
+    "k": 0,
+    "n": 20,
+    "ci95": [
+     0.0,
+     0.1611
+    ]
+   },
+   "trap_preservation_all": {
+    "value": 1.0,
+    "k": 4,
+    "n": 4,
+    "ci95": [
+     0.5101,
+     1.0
+    ]
+   },
+   "structure_ok": 20,
+   "errors": {
+    "missed": {
+     "AGE": 4
+    },
+    "partially_removed": {
+     "OCCUPATION": 4
+    },
+    "clinical_traps_damaged": {},
+    "transformations_outside_gold": {
+     "PERSON": 2,
+     "OCCUPATION": 1
+    }
+   },
+   "policy_objectives_share_transformed": {}
+  },
+  "r2:B4": {
+   "records": 20,
+   "gold_entities": 269,
+   "recall": {
+    "value": 0.8513,
+    "k": 229,
+    "n": 269,
+    "ci95": [
+     0.8038,
+     0.8889
+    ]
+   },
+   "policy_compliant_recall": {
+    "value": 0.9851,
+    "k": 265,
+    "n": 269,
+    "ci95": [
+     0.9624,
+     0.9942
+    ]
+   },
+   "precision": {
+    "value": 0.9875,
+    "k": 237,
+    "n": 240,
+    "ci95": [
+     0.9639,
+     0.9957
+    ]
+   },
+   "f1": 0.9144,
+   "recall_by": {
+    "field:dialogue": {
+     "value": 0.8485,
+     "k": 112,
+     "n": 132,
+     "ci95": [
+      0.7775,
+      0.8997
+     ]
+    },
+    "field:note": {
+     "value": 0.854,
+     "k": 117,
+     "n": 137,
+     "ci95": [
+      0.7852,
+      0.9035
+     ]
+    },
+    "hard:False": {
+     "value": 0.8513,
+     "k": 229,
+     "n": 269,
+     "ci95": [
+      0.8038,
+      0.8889
+     ]
+    },
+    "label:ADDRESS": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:AGE": {
+     "value": 0.1,
+     "k": 4,
+     "n": 40,
+     "ci95": [
+      0.0396,
+      0.2305
+     ]
+    },
+    "label:CONTACT": {
+     "value": 1.0,
+     "k": 26,
+     "n": 26,
+     "ci95": [
+      0.8713,
+      1.0
+     ]
+    },
+    "label:DATE": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:DOB": {
+     "value": 1.0,
+     "k": 14,
+     "n": 14,
+     "ci95": [
+      0.7847,
+      1.0
+     ]
+    },
+    "label:ID": {
+     "value": 1.0,
+     "k": 7,
+     "n": 7,
+     "ci95": [
+      0.6457,
+      1.0
+     ]
+    },
+    "label:LOCATION": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:OCCUPATION": {
+     "value": 0.9,
+     "k": 36,
+     "n": 40,
+     "ci95": [
+      0.7695,
+      0.9604
+     ]
+    },
+    "label:ORGANIZATION": {
+     "value": 1.0,
+     "k": 40,
+     "n": 40,
+     "ci95": [
+      0.9124,
+      1.0
+     ]
+    },
+    "label:PERSON": {
+     "value": 1.0,
+     "k": 78,
+     "n": 78,
+     "ci95": [
+      0.9531,
+      1.0
+     ]
+    }
+   },
+   "strict_token_removal": {
+    "ALL": 0.7063,
+    "ADDRESS": 1.0,
+    "AGE": 0.05,
+    "CONTACT": 1.0,
+    "DATE": 0.0,
+    "DOB": 0.143,
+    "ID": 0.857,
+    "LOCATION": 1.0,
+    "OCCUPATION": 0.775,
+    "ORGANIZATION": 0.725,
+    "PERSON": 1.0
+   },
+   "encounters_with_direct_identifier_left": {
+    "value": 0.0,
+    "k": 0,
+    "n": 20,
+    "ci95": [
+     0.0,
+     0.1611
+    ]
+   },
+   "trap_preservation_all": {
+    "value": 1.0,
+    "k": 4,
+    "n": 4,
+    "ci95": [
+     0.5101,
+     1.0
+    ]
+   },
+   "structure_ok": 20,
+   "errors": {
+    "missed": {
+     "AGE": 36
+    },
+    "partially_removed": {
+     "OCCUPATION": 4
+    },
+    "clinical_traps_damaged": {},
+    "transformations_outside_gold": {
+     "PERSON": 2,
+     "OCCUPATION": 1
+    }
+   },
+   "policy_objectives_share_transformed": {}
+  },
+  "r2:B4+age": {
+   "records": 20,
+   "gold_entities": 269,
+   "recall": {
+    "value": 0.9703,
+    "k": 261,
+    "n": 269,
+    "ci95": [
+     0.9424,
+     0.9849
+    ]
+   },
+   "policy_compliant_recall": {
+    "value": 0.9851,
+    "k": 265,
+    "n": 269,
+    "ci95": [
+     0.9624,
+     0.9942
+    ]
+   },
+   "precision": {
+    "value": 0.989,
+    "k": 269,
+    "n": 272,
+    "ci95": [
+     0.9681,
+     0.9962
+    ]
+   },
+   "f1": 0.9795,
+   "recall_by": {
+    "field:dialogue": {
+     "value": 0.9697,
+     "k": 128,
+     "n": 132,
+     "ci95": [
+      0.9247,
+      0.9882
+     ]
+    },
+    "field:note": {
+     "value": 0.9708,
+     "k": 133,
+     "n": 137,
+     "ci95": [
+      0.9273,
+      0.9886
+     ]
+    },
+    "hard:False": {
+     "value": 0.9703,
+     "k": 261,
+     "n": 269,
+     "ci95": [
+      0.9424,
+      0.9849
+     ]
+    },
+    "label:ADDRESS": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:AGE": {
+     "value": 0.9,
+     "k": 36,
+     "n": 40,
+     "ci95": [
+      0.7695,
+      0.9604
+     ]
+    },
+    "label:CONTACT": {
+     "value": 1.0,
+     "k": 26,
+     "n": 26,
+     "ci95": [
+      0.8713,
+      1.0
+     ]
+    },
+    "label:DATE": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:DOB": {
+     "value": 1.0,
+     "k": 14,
+     "n": 14,
+     "ci95": [
+      0.7847,
+      1.0
+     ]
+    },
+    "label:ID": {
+     "value": 1.0,
+     "k": 7,
+     "n": 7,
+     "ci95": [
+      0.6457,
+      1.0
+     ]
+    },
+    "label:LOCATION": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:OCCUPATION": {
+     "value": 0.9,
+     "k": 36,
+     "n": 40,
+     "ci95": [
+      0.7695,
+      0.9604
+     ]
+    },
+    "label:ORGANIZATION": {
+     "value": 1.0,
+     "k": 40,
+     "n": 40,
+     "ci95": [
+      0.9124,
+      1.0
+     ]
+    },
+    "label:PERSON": {
+     "value": 1.0,
+     "k": 78,
+     "n": 78,
+     "ci95": [
+      0.9531,
+      1.0
+     ]
+    }
+   },
+   "strict_token_removal": {
+    "ALL": 0.803,
+    "ADDRESS": 1.0,
+    "AGE": 0.6,
+    "CONTACT": 1.0,
+    "DATE": 0.0,
+    "DOB": 0.429,
+    "ID": 0.857,
+    "LOCATION": 1.0,
+    "OCCUPATION": 0.775,
+    "ORGANIZATION": 0.725,
+    "PERSON": 1.0
+   },
+   "encounters_with_direct_identifier_left": {
+    "value": 0.0,
+    "k": 0,
+    "n": 20,
+    "ci95": [
+     0.0,
+     0.1611
+    ]
+   },
+   "trap_preservation_all": {
+    "value": 1.0,
+    "k": 4,
+    "n": 4,
+    "ci95": [
+     0.5101,
+     1.0
+    ]
+   },
+   "structure_ok": 20,
+   "errors": {
+    "missed": {
+     "AGE": 4
+    },
+    "partially_removed": {
+     "OCCUPATION": 4
+    },
+    "clinical_traps_damaged": {},
+    "transformations_outside_gold": {
+     "PERSON": 2,
+     "OCCUPATION": 1
+    }
+   },
+   "policy_objectives_share_transformed": {}
+  },
+  "r3:B3": {
+   "records": 20,
+   "gold_entities": 281,
+   "recall": {
+    "value": 0.7936,
+    "k": 223,
+    "n": 281,
+    "ci95": [
+     0.7425,
+     0.8368
+    ]
+   },
+   "policy_compliant_recall": {
+    "value": 0.9288,
+    "k": 261,
+    "n": 281,
+    "ci95": [
+     0.8926,
+     0.9535
+    ]
+   },
+   "precision": {
+    "value": 0.9883,
+    "k": 253,
+    "n": 256,
+    "ci95": [
+     0.9661,
+     0.996
+    ]
+   },
+   "f1": 0.8803,
+   "recall_by": {
+    "field:dialogue": {
+     "value": 0.8098,
+     "k": 132,
+     "n": 163,
+     "ci95": [
+      0.7427,
+      0.8627
+     ]
+    },
+    "field:note": {
+     "value": 0.7712,
+     "k": 91,
+     "n": 118,
+     "ci95": [
+      0.6876,
+      0.8377
+     ]
+    },
+    "hard:False": {
+     "value": 0.7936,
+     "k": 223,
+     "n": 281,
+     "ci95": [
+      0.7425,
+      0.8368
+     ]
+    },
+    "label:ADDRESS": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:AGE": {
+     "value": 0.025,
+     "k": 1,
+     "n": 40,
+     "ci95": [
+      0.0044,
+      0.1288
+     ]
+    },
+    "label:CONTACT": {
+     "value": 1.0,
+     "k": 18,
+     "n": 18,
+     "ci95": [
+      0.8241,
+      1.0
+     ]
+    },
+    "label:DATE": {
+     "value": 1.0,
+     "k": 10,
+     "n": 10,
+     "ci95": [
+      0.7225,
+      1.0
+     ]
+    },
+    "label:DOB": {
+     "value": 1.0,
+     "k": 26,
+     "n": 26,
+     "ci95": [
+      0.8713,
+      1.0
+     ]
+    },
+    "label:ID": {
+     "value": 0.0,
+     "k": 0,
+     "n": 11,
+     "ci95": [
+      0.0,
+      0.2588
+     ]
+    },
+    "label:LOCATION": {
+     "value": 1.0,
+     "k": 10,
+     "n": 10,
+     "ci95": [
+      0.7225,
+      1.0
+     ]
+    },
+    "label:OCCUPATION": {
+     "value": 0.8,
+     "k": 32,
+     "n": 40,
+     "ci95": [
+      0.6524,
+      0.895
+     ]
+    },
+    "label:ORGANIZATION": {
+     "value": 1.0,
+     "k": 29,
+     "n": 29,
+     "ci95": [
+      0.883,
+      1.0
+     ]
+    },
+    "label:PERSON": {
+     "value": 1.0,
+     "k": 89,
+     "n": 89,
+     "ci95": [
+      0.9586,
+      1.0
+     ]
+    }
+   },
+   "strict_token_removal": {
+    "ALL": 0.573,
+    "ADDRESS": 0.875,
+    "AGE": 0.0,
+    "CONTACT": 0.667,
+    "DATE": 0.0,
+    "DOB": 0.077,
+    "ID": 0.0,
+    "LOCATION": 1.0,
+    "OCCUPATION": 0.6,
+    "ORGANIZATION": 0.586,
+    "PERSON": 1.0
+   },
+   "encounters_with_direct_identifier_left": {
+    "value": 0.35,
+    "k": 7,
+    "n": 20,
+    "ci95": [
+     0.1812,
+     0.5671
+    ]
+   },
+   "trap_preservation_all": {
+    "value": 0.9807,
+    "k": 659,
+    "n": 672,
+    "ci95": [
+     0.9672,
+     0.9887
+    ]
+   },
+   "structure_ok": 20,
+   "errors": {
+    "missed": {
+     "AGE": 39
+    },
+    "partially_removed": {
+     "OCCUPATION": 8,
+     "ID": 11
+    },
+    "clinical_traps_damaged": {
+     "laboratory_or_procedure_result": 1
+    },
+    "transformations_outside_gold": {
+     "ORGANIZATION": 2,
+     "OCCUPATION": 1
+    }
+   },
+   "policy_objectives_share_transformed": {}
+  },
+  "r3:B3+age": {
+   "records": 20,
+   "gold_entities": 281,
+   "recall": {
+    "value": 0.9146,
+    "k": 257,
+    "n": 281,
+    "ci95": [
+     0.8761,
+     0.9419
+    ]
+   },
+   "policy_compliant_recall": {
+    "value": 0.9288,
+    "k": 261,
+    "n": 281,
+    "ci95": [
+     0.8926,
+     0.9535
+    ]
+   },
+   "precision": {
+    "value": 0.9897,
+    "k": 287,
+    "n": 290,
+    "ci95": [
+     0.97,
+     0.9965
+    ]
+   },
+   "f1": 0.9506,
+   "recall_by": {
+    "field:dialogue": {
+     "value": 0.9141,
+     "k": 149,
+     "n": 163,
+     "ci95": [
+      0.861,
+      0.9481
+     ]
+    },
+    "field:note": {
+     "value": 0.9153,
+     "k": 108,
+     "n": 118,
+     "ci95": [
+      0.851,
+      0.9533
+     ]
+    },
+    "hard:False": {
+     "value": 0.9146,
+     "k": 257,
+     "n": 281,
+     "ci95": [
+      0.8761,
+      0.9419
+     ]
+    },
+    "label:ADDRESS": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:AGE": {
+     "value": 0.875,
+     "k": 35,
+     "n": 40,
+     "ci95": [
+      0.7389,
+      0.9454
+     ]
+    },
+    "label:CONTACT": {
+     "value": 1.0,
+     "k": 18,
+     "n": 18,
+     "ci95": [
+      0.8241,
+      1.0
+     ]
+    },
+    "label:DATE": {
+     "value": 1.0,
+     "k": 10,
+     "n": 10,
+     "ci95": [
+      0.7225,
+      1.0
+     ]
+    },
+    "label:DOB": {
+     "value": 1.0,
+     "k": 26,
+     "n": 26,
+     "ci95": [
+      0.8713,
+      1.0
+     ]
+    },
+    "label:ID": {
+     "value": 0.0,
+     "k": 0,
+     "n": 11,
+     "ci95": [
+      0.0,
+      0.2588
+     ]
+    },
+    "label:LOCATION": {
+     "value": 1.0,
+     "k": 10,
+     "n": 10,
+     "ci95": [
+      0.7225,
+      1.0
+     ]
+    },
+    "label:OCCUPATION": {
+     "value": 0.8,
+     "k": 32,
+     "n": 40,
+     "ci95": [
+      0.6524,
+      0.895
+     ]
+    },
+    "label:ORGANIZATION": {
+     "value": 1.0,
+     "k": 29,
+     "n": 29,
+     "ci95": [
+      0.883,
+      1.0
+     ]
+    },
+    "label:PERSON": {
+     "value": 1.0,
+     "k": 89,
+     "n": 89,
+     "ci95": [
+      0.9586,
+      1.0
+     ]
+    }
+   },
+   "strict_token_removal": {
+    "ALL": 0.7616,
+    "ADDRESS": 1.0,
+    "AGE": 0.75,
+    "CONTACT": 0.667,
+    "DATE": 0.0,
+    "DOB": 0.923,
+    "ID": 0.0,
+    "LOCATION": 1.0,
+    "OCCUPATION": 0.6,
+    "ORGANIZATION": 0.586,
+    "PERSON": 1.0
+   },
+   "encounters_with_direct_identifier_left": {
+    "value": 0.35,
+    "k": 7,
+    "n": 20,
+    "ci95": [
+     0.1812,
+     0.5671
+    ]
+   },
+   "trap_preservation_all": {
+    "value": 0.9807,
+    "k": 659,
+    "n": 672,
+    "ci95": [
+     0.9672,
+     0.9887
+    ]
+   },
+   "structure_ok": 20,
+   "errors": {
+    "missed": {
+     "AGE": 5
+    },
+    "partially_removed": {
+     "OCCUPATION": 8,
+     "ID": 11
+    },
+    "clinical_traps_damaged": {
+     "laboratory_or_procedure_result": 1
+    },
+    "transformations_outside_gold": {
+     "ORGANIZATION": 2,
+     "OCCUPATION": 1
+    }
+   },
+   "policy_objectives_share_transformed": {}
+  },
+  "r3:B4": {
+   "records": 20,
+   "gold_entities": 281,
+   "recall": {
+    "value": 0.7936,
+    "k": 223,
+    "n": 281,
+    "ci95": [
+     0.7425,
+     0.8368
+    ]
+   },
+   "policy_compliant_recall": {
+    "value": 0.9288,
+    "k": 261,
+    "n": 281,
+    "ci95": [
+     0.8926,
+     0.9535
+    ]
+   },
+   "precision": {
+    "value": 0.9961,
+    "k": 253,
+    "n": 254,
+    "ci95": [
+     0.978,
+     0.9993
+    ]
+   },
+   "f1": 0.8834,
+   "recall_by": {
+    "field:dialogue": {
+     "value": 0.8098,
+     "k": 132,
+     "n": 163,
+     "ci95": [
+      0.7427,
+      0.8627
+     ]
+    },
+    "field:note": {
+     "value": 0.7712,
+     "k": 91,
+     "n": 118,
+     "ci95": [
+      0.6876,
+      0.8377
+     ]
+    },
+    "hard:False": {
+     "value": 0.7936,
+     "k": 223,
+     "n": 281,
+     "ci95": [
+      0.7425,
+      0.8368
+     ]
+    },
+    "label:ADDRESS": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:AGE": {
+     "value": 0.025,
+     "k": 1,
+     "n": 40,
+     "ci95": [
+      0.0044,
+      0.1288
+     ]
+    },
+    "label:CONTACT": {
+     "value": 1.0,
+     "k": 18,
+     "n": 18,
+     "ci95": [
+      0.8241,
+      1.0
+     ]
+    },
+    "label:DATE": {
+     "value": 1.0,
+     "k": 10,
+     "n": 10,
+     "ci95": [
+      0.7225,
+      1.0
+     ]
+    },
+    "label:DOB": {
+     "value": 1.0,
+     "k": 26,
+     "n": 26,
+     "ci95": [
+      0.8713,
+      1.0
+     ]
+    },
+    "label:ID": {
+     "value": 0.0,
+     "k": 0,
+     "n": 11,
+     "ci95": [
+      0.0,
+      0.2588
+     ]
+    },
+    "label:LOCATION": {
+     "value": 1.0,
+     "k": 10,
+     "n": 10,
+     "ci95": [
+      0.7225,
+      1.0
+     ]
+    },
+    "label:OCCUPATION": {
+     "value": 0.8,
+     "k": 32,
+     "n": 40,
+     "ci95": [
+      0.6524,
+      0.895
+     ]
+    },
+    "label:ORGANIZATION": {
+     "value": 1.0,
+     "k": 29,
+     "n": 29,
+     "ci95": [
+      0.883,
+      1.0
+     ]
+    },
+    "label:PERSON": {
+     "value": 1.0,
+     "k": 89,
+     "n": 89,
+     "ci95": [
+      0.9586,
+      1.0
+     ]
+    }
+   },
+   "strict_token_removal": {
+    "ALL": 0.573,
+    "ADDRESS": 0.875,
+    "AGE": 0.0,
+    "CONTACT": 0.667,
+    "DATE": 0.0,
+    "DOB": 0.077,
+    "ID": 0.0,
+    "LOCATION": 1.0,
+    "OCCUPATION": 0.6,
+    "ORGANIZATION": 0.586,
+    "PERSON": 1.0
+   },
+   "encounters_with_direct_identifier_left": {
+    "value": 0.35,
+    "k": 7,
+    "n": 20,
+    "ci95": [
+     0.1812,
+     0.5671
+    ]
+   },
+   "trap_preservation_all": {
+    "value": 0.9821,
+    "k": 660,
+    "n": 672,
+    "ci95": [
+     0.969,
+     0.9898
+    ]
+   },
+   "structure_ok": 20,
+   "errors": {
+    "missed": {
+     "AGE": 39
+    },
+    "partially_removed": {
+     "OCCUPATION": 8,
+     "ID": 11
+    },
+    "clinical_traps_damaged": {},
+    "transformations_outside_gold": {
+     "OCCUPATION": 1
+    }
+   },
+   "policy_objectives_share_transformed": {}
+  },
+  "r3:B4+age": {
+   "records": 20,
+   "gold_entities": 281,
+   "recall": {
+    "value": 0.9146,
+    "k": 257,
+    "n": 281,
+    "ci95": [
+     0.8761,
+     0.9419
+    ]
+   },
+   "policy_compliant_recall": {
+    "value": 0.9288,
+    "k": 261,
+    "n": 281,
+    "ci95": [
+     0.8926,
+     0.9535
+    ]
+   },
+   "precision": {
+    "value": 0.9965,
+    "k": 287,
+    "n": 288,
+    "ci95": [
+     0.9806,
+     0.9994
+    ]
+   },
+   "f1": 0.9538,
+   "recall_by": {
+    "field:dialogue": {
+     "value": 0.9141,
+     "k": 149,
+     "n": 163,
+     "ci95": [
+      0.861,
+      0.9481
+     ]
+    },
+    "field:note": {
+     "value": 0.9153,
+     "k": 108,
+     "n": 118,
+     "ci95": [
+      0.851,
+      0.9533
+     ]
+    },
+    "hard:False": {
+     "value": 0.9146,
+     "k": 257,
+     "n": 281,
+     "ci95": [
+      0.8761,
+      0.9419
+     ]
+    },
+    "label:ADDRESS": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:AGE": {
+     "value": 0.875,
+     "k": 35,
+     "n": 40,
+     "ci95": [
+      0.7389,
+      0.9454
+     ]
+    },
+    "label:CONTACT": {
+     "value": 1.0,
+     "k": 18,
+     "n": 18,
+     "ci95": [
+      0.8241,
+      1.0
+     ]
+    },
+    "label:DATE": {
+     "value": 1.0,
+     "k": 10,
+     "n": 10,
+     "ci95": [
+      0.7225,
+      1.0
+     ]
+    },
+    "label:DOB": {
+     "value": 1.0,
+     "k": 26,
+     "n": 26,
+     "ci95": [
+      0.8713,
+      1.0
+     ]
+    },
+    "label:ID": {
+     "value": 0.0,
+     "k": 0,
+     "n": 11,
+     "ci95": [
+      0.0,
+      0.2588
+     ]
+    },
+    "label:LOCATION": {
+     "value": 1.0,
+     "k": 10,
+     "n": 10,
+     "ci95": [
+      0.7225,
+      1.0
+     ]
+    },
+    "label:OCCUPATION": {
+     "value": 0.8,
+     "k": 32,
+     "n": 40,
+     "ci95": [
+      0.6524,
+      0.895
+     ]
+    },
+    "label:ORGANIZATION": {
+     "value": 1.0,
+     "k": 29,
+     "n": 29,
+     "ci95": [
+      0.883,
+      1.0
+     ]
+    },
+    "label:PERSON": {
+     "value": 1.0,
+     "k": 89,
+     "n": 89,
+     "ci95": [
+      0.9586,
+      1.0
+     ]
+    }
+   },
+   "strict_token_removal": {
+    "ALL": 0.7616,
+    "ADDRESS": 1.0,
+    "AGE": 0.75,
+    "CONTACT": 0.667,
+    "DATE": 0.0,
+    "DOB": 0.923,
+    "ID": 0.0,
+    "LOCATION": 1.0,
+    "OCCUPATION": 0.6,
+    "ORGANIZATION": 0.586,
+    "PERSON": 1.0
+   },
+   "encounters_with_direct_identifier_left": {
+    "value": 0.35,
+    "k": 7,
+    "n": 20,
+    "ci95": [
+     0.1812,
+     0.5671
+    ]
+   },
+   "trap_preservation_all": {
+    "value": 0.9821,
+    "k": 660,
+    "n": 672,
+    "ci95": [
+     0.969,
+     0.9898
+    ]
+   },
+   "structure_ok": 20,
+   "errors": {
+    "missed": {
+     "AGE": 5
+    },
+    "partially_removed": {
+     "OCCUPATION": 8,
+     "ID": 11
+    },
+    "clinical_traps_damaged": {},
+    "transformations_outside_gold": {
+     "OCCUPATION": 1
+    }
+   },
+   "policy_objectives_share_transformed": {}
+  },
+  "r4:B3": {
+   "records": 20,
+   "gold_entities": 239,
+   "recall": {
+    "value": 0.8285,
+    "k": 198,
+    "n": 239,
+    "ci95": [
+     0.7756,
+     0.871
+    ]
+   },
+   "policy_compliant_recall": {
+    "value": 0.9791,
+    "k": 234,
+    "n": 239,
+    "ci95": [
+     0.952,
+     0.991
+    ]
+   },
+   "precision": {
+    "value": 0.991,
+    "k": 220,
+    "n": 222,
+    "ci95": [
+     0.9678,
+     0.9975
+    ]
+   },
+   "f1": 0.9025,
+   "recall_by": {
+    "field:dialogue": {
+     "value": 0.8658,
+     "k": 129,
+     "n": 149,
+     "ci95": [
+      0.8018,
+      0.9114
+     ]
+    },
+    "field:note": {
+     "value": 0.7667,
+     "k": 69,
+     "n": 90,
+     "ci95": [
+      0.6695,
+      0.842
+     ]
+    },
+    "hard:False": {
+     "value": 0.8285,
+     "k": 198,
+     "n": 239,
+     "ci95": [
+      0.7756,
+      0.871
+     ]
+    },
+    "label:ADDRESS": {
+     "value": 1.0,
+     "k": 13,
+     "n": 13,
+     "ci95": [
+      0.7719,
+      1.0
+     ]
+    },
+    "label:AGE": {
+     "value": 0.0526,
+     "k": 2,
+     "n": 38,
+     "ci95": [
+      0.0146,
+      0.1729
+     ]
+    },
+    "label:CONTACT": {
+     "value": 1.0,
+     "k": 18,
+     "n": 18,
+     "ci95": [
+      0.8241,
+      1.0
+     ]
+    },
+    "label:DATE": {
+     "value": 1.0,
+     "k": 10,
+     "n": 10,
+     "ci95": [
+      0.7225,
+      1.0
+     ]
+    },
+    "label:DOB": {
+     "value": 1.0,
+     "k": 14,
+     "n": 14,
+     "ci95": [
+      0.7847,
+      1.0
+     ]
+    },
+    "label:ID": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:OCCUPATION": {
+     "value": 0.8148,
+     "k": 22,
+     "n": 27,
+     "ci95": [
+      0.633,
+      0.9182
+     ]
+    },
+    "label:ORGANIZATION": {
+     "value": 1.0,
+     "k": 24,
+     "n": 24,
+     "ci95": [
+      0.862,
+      1.0
+     ]
+    },
+    "label:PERSON": {
+     "value": 1.0,
+     "k": 87,
+     "n": 87,
+     "ci95": [
+      0.9577,
+      1.0
+     ]
+    }
+   },
+   "strict_token_removal": {
+    "ALL": 0.5858,
+    "ADDRESS": 0.923,
+    "AGE": 0.053,
+    "CONTACT": 0.556,
+    "DATE": 0.0,
+    "DOB": 0.0,
+    "ID": 1.0,
+    "OCCUPATION": 0.37,
+    "ORGANIZATION": 0.458,
+    "PERSON": 1.0
+   },
+   "encounters_with_direct_identifier_left": {
+    "value": 0.0,
+    "k": 0,
+    "n": 20,
+    "ci95": [
+     0.0,
+     0.1611
+    ]
+   },
+   "trap_preservation_all": {
+    "value": 0.9286,
+    "k": 260,
+    "n": 280,
+    "ci95": [
+     0.8923,
+     0.9533
+    ]
+   },
+   "structure_ok": 20,
+   "errors": {
+    "missed": {
+     "AGE": 36
+    },
+    "partially_removed": {
+     "OCCUPATION": 5
+    },
+    "clinical_traps_damaged": {
+     "clinical": 2
+    },
+    "transformations_outside_gold": {
+     "ANTHROPOMETRIC": 2
+    }
+   },
+   "policy_objectives_share_transformed": {}
+  },
+  "r4:B3+age": {
+   "records": 20,
+   "gold_entities": 239,
+   "recall": {
+    "value": 0.9791,
+    "k": 234,
+    "n": 239,
+    "ci95": [
+     0.952,
+     0.991
+    ]
+   },
+   "policy_compliant_recall": {
+    "value": 0.9791,
+    "k": 234,
+    "n": 239,
+    "ci95": [
+     0.952,
+     0.991
+    ]
+   },
+   "precision": {
+    "value": 0.9922,
+    "k": 256,
+    "n": 258,
+    "ci95": [
+     0.9722,
+     0.9979
+    ]
+   },
+   "f1": 0.9856,
+   "recall_by": {
+    "field:dialogue": {
+     "value": 0.9799,
+     "k": 146,
+     "n": 149,
+     "ci95": [
+      0.9425,
+      0.9931
+     ]
+    },
+    "field:note": {
+     "value": 0.9778,
+     "k": 88,
+     "n": 90,
+     "ci95": [
+      0.9226,
+      0.9939
+     ]
+    },
+    "hard:False": {
+     "value": 0.9791,
+     "k": 234,
+     "n": 239,
+     "ci95": [
+      0.952,
+      0.991
+     ]
+    },
+    "label:ADDRESS": {
+     "value": 1.0,
+     "k": 13,
+     "n": 13,
+     "ci95": [
+      0.7719,
+      1.0
+     ]
+    },
+    "label:AGE": {
+     "value": 1.0,
+     "k": 38,
+     "n": 38,
+     "ci95": [
+      0.9082,
+      1.0
+     ]
+    },
+    "label:CONTACT": {
+     "value": 1.0,
+     "k": 18,
+     "n": 18,
+     "ci95": [
+      0.8241,
+      1.0
+     ]
+    },
+    "label:DATE": {
+     "value": 1.0,
+     "k": 10,
+     "n": 10,
+     "ci95": [
+      0.7225,
+      1.0
+     ]
+    },
+    "label:DOB": {
+     "value": 1.0,
+     "k": 14,
+     "n": 14,
+     "ci95": [
+      0.7847,
+      1.0
+     ]
+    },
+    "label:ID": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:OCCUPATION": {
+     "value": 0.8148,
+     "k": 22,
+     "n": 27,
+     "ci95": [
+      0.633,
+      0.9182
+     ]
+    },
+    "label:ORGANIZATION": {
+     "value": 1.0,
+     "k": 24,
+     "n": 24,
+     "ci95": [
+      0.862,
+      1.0
+     ]
+    },
+    "label:PERSON": {
+     "value": 1.0,
+     "k": 87,
+     "n": 87,
+     "ci95": [
+      0.9577,
+      1.0
+     ]
+    }
+   },
+   "strict_token_removal": {
+    "ALL": 0.7322,
+    "ADDRESS": 0.923,
+    "AGE": 0.789,
+    "CONTACT": 0.556,
+    "DATE": 0.0,
+    "DOB": 0.5,
+    "ID": 1.0,
+    "OCCUPATION": 0.37,
+    "ORGANIZATION": 0.458,
+    "PERSON": 1.0
+   },
+   "encounters_with_direct_identifier_left": {
+    "value": 0.0,
+    "k": 0,
+    "n": 20,
+    "ci95": [
+     0.0,
+     0.1611
+    ]
+   },
+   "trap_preservation_all": {
+    "value": 0.9286,
+    "k": 260,
+    "n": 280,
+    "ci95": [
+     0.8923,
+     0.9533
+    ]
+   },
+   "structure_ok": 20,
+   "errors": {
+    "missed": {},
+    "partially_removed": {
+     "OCCUPATION": 5
+    },
+    "clinical_traps_damaged": {
+     "clinical": 2
+    },
+    "transformations_outside_gold": {
+     "ANTHROPOMETRIC": 2
+    }
+   },
+   "policy_objectives_share_transformed": {}
+  },
+  "r4:B4": {
+   "records": 20,
+   "gold_entities": 239,
+   "recall": {
+    "value": 0.8285,
+    "k": 198,
+    "n": 239,
+    "ci95": [
+     0.7756,
+     0.871
+    ]
+   },
+   "policy_compliant_recall": {
+    "value": 0.9791,
+    "k": 234,
+    "n": 239,
+    "ci95": [
+     0.952,
+     0.991
+    ]
+   },
+   "precision": {
+    "value": 0.991,
+    "k": 220,
+    "n": 222,
+    "ci95": [
+     0.9678,
+     0.9975
+    ]
+   },
+   "f1": 0.9025,
+   "recall_by": {
+    "field:dialogue": {
+     "value": 0.8658,
+     "k": 129,
+     "n": 149,
+     "ci95": [
+      0.8018,
+      0.9114
+     ]
+    },
+    "field:note": {
+     "value": 0.7667,
+     "k": 69,
+     "n": 90,
+     "ci95": [
+      0.6695,
+      0.842
+     ]
+    },
+    "hard:False": {
+     "value": 0.8285,
+     "k": 198,
+     "n": 239,
+     "ci95": [
+      0.7756,
+      0.871
+     ]
+    },
+    "label:ADDRESS": {
+     "value": 1.0,
+     "k": 13,
+     "n": 13,
+     "ci95": [
+      0.7719,
+      1.0
+     ]
+    },
+    "label:AGE": {
+     "value": 0.0526,
+     "k": 2,
+     "n": 38,
+     "ci95": [
+      0.0146,
+      0.1729
+     ]
+    },
+    "label:CONTACT": {
+     "value": 1.0,
+     "k": 18,
+     "n": 18,
+     "ci95": [
+      0.8241,
+      1.0
+     ]
+    },
+    "label:DATE": {
+     "value": 1.0,
+     "k": 10,
+     "n": 10,
+     "ci95": [
+      0.7225,
+      1.0
+     ]
+    },
+    "label:DOB": {
+     "value": 1.0,
+     "k": 14,
+     "n": 14,
+     "ci95": [
+      0.7847,
+      1.0
+     ]
+    },
+    "label:ID": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:OCCUPATION": {
+     "value": 0.8148,
+     "k": 22,
+     "n": 27,
+     "ci95": [
+      0.633,
+      0.9182
+     ]
+    },
+    "label:ORGANIZATION": {
+     "value": 1.0,
+     "k": 24,
+     "n": 24,
+     "ci95": [
+      0.862,
+      1.0
+     ]
+    },
+    "label:PERSON": {
+     "value": 1.0,
+     "k": 87,
+     "n": 87,
+     "ci95": [
+      0.9577,
+      1.0
+     ]
+    }
+   },
+   "strict_token_removal": {
+    "ALL": 0.5858,
+    "ADDRESS": 0.923,
+    "AGE": 0.053,
+    "CONTACT": 0.556,
+    "DATE": 0.0,
+    "DOB": 0.0,
+    "ID": 1.0,
+    "OCCUPATION": 0.37,
+    "ORGANIZATION": 0.458,
+    "PERSON": 1.0
+   },
+   "encounters_with_direct_identifier_left": {
+    "value": 0.0,
+    "k": 0,
+    "n": 20,
+    "ci95": [
+     0.0,
+     0.1611
+    ]
+   },
+   "trap_preservation_all": {
+    "value": 0.9286,
+    "k": 260,
+    "n": 280,
+    "ci95": [
+     0.8923,
+     0.9533
+    ]
+   },
+   "structure_ok": 20,
+   "errors": {
+    "missed": {
+     "AGE": 36
+    },
+    "partially_removed": {
+     "OCCUPATION": 5
+    },
+    "clinical_traps_damaged": {
+     "clinical": 2
+    },
+    "transformations_outside_gold": {
+     "ANTHROPOMETRIC": 2
+    }
+   },
+   "policy_objectives_share_transformed": {}
+  },
+  "r4:B4+age": {
+   "records": 20,
+   "gold_entities": 239,
+   "recall": {
+    "value": 0.9791,
+    "k": 234,
+    "n": 239,
+    "ci95": [
+     0.952,
+     0.991
+    ]
+   },
+   "policy_compliant_recall": {
+    "value": 0.9791,
+    "k": 234,
+    "n": 239,
+    "ci95": [
+     0.952,
+     0.991
+    ]
+   },
+   "precision": {
+    "value": 0.9922,
+    "k": 256,
+    "n": 258,
+    "ci95": [
+     0.9722,
+     0.9979
+    ]
+   },
+   "f1": 0.9856,
+   "recall_by": {
+    "field:dialogue": {
+     "value": 0.9799,
+     "k": 146,
+     "n": 149,
+     "ci95": [
+      0.9425,
+      0.9931
+     ]
+    },
+    "field:note": {
+     "value": 0.9778,
+     "k": 88,
+     "n": 90,
+     "ci95": [
+      0.9226,
+      0.9939
+     ]
+    },
+    "hard:False": {
+     "value": 0.9791,
+     "k": 234,
+     "n": 239,
+     "ci95": [
+      0.952,
+      0.991
+     ]
+    },
+    "label:ADDRESS": {
+     "value": 1.0,
+     "k": 13,
+     "n": 13,
+     "ci95": [
+      0.7719,
+      1.0
+     ]
+    },
+    "label:AGE": {
+     "value": 1.0,
+     "k": 38,
+     "n": 38,
+     "ci95": [
+      0.9082,
+      1.0
+     ]
+    },
+    "label:CONTACT": {
+     "value": 1.0,
+     "k": 18,
+     "n": 18,
+     "ci95": [
+      0.8241,
+      1.0
+     ]
+    },
+    "label:DATE": {
+     "value": 1.0,
+     "k": 10,
+     "n": 10,
+     "ci95": [
+      0.7225,
+      1.0
+     ]
+    },
+    "label:DOB": {
+     "value": 1.0,
+     "k": 14,
+     "n": 14,
+     "ci95": [
+      0.7847,
+      1.0
+     ]
+    },
+    "label:ID": {
+     "value": 1.0,
+     "k": 8,
+     "n": 8,
+     "ci95": [
+      0.6756,
+      1.0
+     ]
+    },
+    "label:OCCUPATION": {
+     "value": 0.8148,
+     "k": 22,
+     "n": 27,
+     "ci95": [
+      0.633,
+      0.9182
+     ]
+    },
+    "label:ORGANIZATION": {
+     "value": 1.0,
+     "k": 24,
+     "n": 24,
+     "ci95": [
+      0.862,
+      1.0
+     ]
+    },
+    "label:PERSON": {
+     "value": 1.0,
+     "k": 87,
+     "n": 87,
+     "ci95": [
+      0.9577,
+      1.0
+     ]
+    }
+   },
+   "strict_token_removal": {
+    "ALL": 0.7322,
+    "ADDRESS": 0.923,
+    "AGE": 0.789,
+    "CONTACT": 0.556,
+    "DATE": 0.0,
+    "DOB": 0.5,
+    "ID": 1.0,
+    "OCCUPATION": 0.37,
+    "ORGANIZATION": 0.458,
+    "PERSON": 1.0
+   },
+   "encounters_with_direct_identifier_left": {
+    "value": 0.0,
+    "k": 0,
+    "n": 20,
+    "ci95": [
+     0.0,
+     0.1611
+    ]
+   },
+   "trap_preservation_all": {
+    "value": 0.9286,
+    "k": 260,
+    "n": 280,
+    "ci95": [
+     0.8923,
+     0.9533
+    ]
+   },
+   "structure_ok": 20,
+   "errors": {
+    "missed": {},
+    "partially_removed": {
+     "OCCUPATION": 5
+    },
+    "clinical_traps_damaged": {
+     "clinical": 2
+    },
+    "transformations_outside_gold": {
+     "ANTHROPOMETRIC": 2
+    }
+   },
+   "policy_objectives_share_transformed": {}
+  }
+ }
+}
